@@ -1,0 +1,50 @@
+{
+  "de (German)": {
+    "clean": 97.4,
+    "adv": 49.6
+  },
+  "vi (Vietnamese)": {
+    "clean": 96.8,
+    "adv": 49.0
+  },
+  "ru (Russian)": {
+    "clean": 96.6,
+    "adv": 48.8
+  },
+  "en (English)": {
+    "clean": 96.4,
+    "adv": 48.6
+  },
+  "es (Spanish)": {
+    "clean": 96.4,
+    "adv": 49.8
+  },
+  "zh (Chinese)": {
+    "clean": 96.4,
+    "adv": 49.4
+  },
+  "tr (Turkish)": {
+    "clean": 96.4,
+    "adv": 52.0
+  },
+  "hi (Hindi)": {
+    "clean": 96.0,
+    "adv": 50.8
+  },
+  "fr (French)": {
+    "clean": 95.6,
+    "adv": 49.8
+  },
+  "ja (Japanese)": {
+    "clean": 95.6,
+    "adv": 49.2
+  },
+  "ar (Arabic)": {
+    "clean": 94.0,
+    "adv": 49.2
+  },
+  "ko (Korean)": {
+    "clean": 88.6,
+    "adv": 49.8
+  }
+}

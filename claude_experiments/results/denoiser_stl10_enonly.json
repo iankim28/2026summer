@@ -1,0 +1,31 @@
+{
+  "dataset": "stl10",
+  "total": 500,
+  "clean_nodenoise": 96.0,
+  "clean_denoise": 91.4,
+  "by_eps": {
+    "2": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 81.8,
+      "denoised_adaptive": 2.2
+    },
+    "4": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 78.2,
+      "denoised_adaptive": 1.0
+    },
+    "8": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 73.8,
+      "denoised_adaptive": 0.6
+    },
+    "16": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 61.0,
+      "denoised_adaptive": 0.2
+    }
+  },
+  "train_langs": [
+    "en"
+  ]
+}

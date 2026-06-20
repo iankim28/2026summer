@@ -1,0 +1,61 @@
+{
+  "n": 200,
+  "shared": {
+    "per_lang": {
+      "en": {
+        "clean": 0.955,
+        "attacked_acc": 0.4,
+        "asr": 0.595
+      },
+      "zh": {
+        "clean": 0.955,
+        "attacked_acc": 0.525,
+        "asr": 0.47
+      },
+      "ko": {
+        "clean": 0.87,
+        "attacked_acc": 0.465,
+        "asr": 0.535
+      },
+      "ja": {
+        "clean": 0.955,
+        "attacked_acc": 0.465,
+        "asr": 0.535
+      }
+    },
+    "agree_clean": 0.89,
+    "agree_attacked": 0.715,
+    "ensemble_clean": 0.955,
+    "ensemble_attacked": 0.475,
+    "detector_auc": 0.587775
+  },
+  "separate": {
+    "per_lang": {
+      "en": {
+        "clean": 0.98,
+        "attacked_acc": 0.31,
+        "asr": 0.69
+      },
+      "zh": {
+        "clean": 0.96,
+        "attacked_acc": 0.61,
+        "asr": 0.37
+      },
+      "ko": {
+        "clean": 0.96,
+        "attacked_acc": 0.385,
+        "asr": 0.605
+      },
+      "ja": {
+        "clean": 0.98,
+        "attacked_acc": 0.93,
+        "asr": 0.05
+      }
+    },
+    "agree_clean": 0.945,
+    "agree_attacked": 0.265,
+    "ensemble_clean": 0.975,
+    "ensemble_attacked": 0.56,
+    "detector_auc": 0.83885
+  }
+}

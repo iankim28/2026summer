@@ -1,0 +1,74 @@
+{
+  "en": {
+    "script": "Latin",
+    "acc_english_concept": 1.0,
+    "acc_own_label": 1.0,
+    "mean_cos": 0.2237142026424408
+  },
+  "es": {
+    "script": "Latin",
+    "acc_english_concept": 0.40000003576278687,
+    "acc_own_label": 0.9333333969116211,
+    "mean_cos": 0.11326070129871368
+  },
+  "fr": {
+    "script": "Latin",
+    "acc_english_concept": 0.6000000238418579,
+    "acc_own_label": 1.0,
+    "mean_cos": 0.12345179915428162
+  },
+  "de": {
+    "script": "Latin",
+    "acc_english_concept": 0.6666666865348816,
+    "acc_own_label": 1.0,
+    "mean_cos": 0.12866592407226562
+  },
+  "ru": {
+    "script": "Cyrillic",
+    "acc_english_concept": 0.1666666716337204,
+    "acc_own_label": 0.9000000357627869,
+    "mean_cos": 0.09941086918115616
+  },
+  "ko": {
+    "script": "CJK",
+    "acc_english_concept": 0.20000001788139343,
+    "acc_own_label": 0.13333334028720856,
+    "mean_cos": 0.1100732833147049
+  },
+  "ja": {
+    "script": "CJK",
+    "acc_english_concept": 0.13333334028720856,
+    "acc_own_label": 0.30000001192092896,
+    "mean_cos": 0.12110650539398193
+  },
+  "zh": {
+    "script": "CJK",
+    "acc_english_concept": 0.23333334922790527,
+    "acc_own_label": 0.30000001192092896,
+    "mean_cos": 0.12901753187179565
+  },
+  "hi": {
+    "script": "Devanagari",
+    "acc_english_concept": 0.06666667014360428,
+    "acc_own_label": 0.13333334028720856,
+    "mean_cos": 0.09891370683908463
+  },
+  "ko-roman": {
+    "script": "Latin(roman)",
+    "acc_english_concept": 0.23333334922790527,
+    "acc_own_label": null,
+    "mean_cos": 0.10494294762611389
+  },
+  "ja-roman": {
+    "script": "Latin(roman)",
+    "acc_english_concept": 0.20000001788139343,
+    "acc_own_label": null,
+    "mean_cos": 0.09856930375099182
+  },
+  "zh-roman": {
+    "script": "Latin(roman)",
+    "acc_english_concept": 0.23333334922790527,
+    "acc_own_label": null,
+    "mean_cos": 0.10901819169521332
+  }
+}
