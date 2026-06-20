@@ -1,0 +1,14 @@
+# PyTorch with CUDA 13.0 — required for RTX 50-series (sm_120).
+# Install separately before other packages:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+
+open_clip_torch
+transformers
+datasets
+ftfy
+sentencepiece
+matplotlib
+pandas
+pillow
+jupyter
+ipykernel
