@@ -392,3 +392,106 @@ makes both sides language-specific simultaneously, so the two losses cooperate.
 3. **Discuss with mentor**: the 50% threshold is now crossed at moderate ε. The
    next question is whether the defence is practical — does it hold at ε=8, and what
    is the computational cost of the dual encoder at inference time?
+
+---
+
+## 2026-06-19 (night) — Typographic attack confusion matrices (separate per-language CLIPs)
+
+**Notebook:** `notebooks/typographic_attack_confusion.ipynb`
+**Results:** `notebooks/results/confusion_results.json`, `typographic_heatmaps.png`, `confusion_matrices.png`
+**Dataset:** STL-10 test split, 200 random images (seed 0)
+**Attack:** typographic — write the adversarial target class name onto the image (no
+gradients). Four attack languages (EN, ZH, KO, JA) × four independent classifiers.
+
+### Setup
+
+Four **independently pretrained** per-language CLIP models (not a shared encoder):
+
+| lang | model |
+|---|---|
+| en | OpenAI ViT-B/32 (`open_clip`) |
+| zh | `OFA-Sys/chinese-clip-vit-base-patch16` |
+| ko | `Bingsu/clip-vit-base-patch32-ko` |
+| ja | `line-corporation/clip-japanese-base` (CLYP, trust_remote_code) |
+
+Each image gets a random adversarial target class (≠ true class). For each attack
+language, the target class name is rendered in that language at the bottom of the
+image. Metrics: **accuracy** (pred == true), **ASR** (pred == written target class).
+
+### Clean baseline (unattacked)
+
+| model | clean accuracy |
+|---|---|
+| en | 98.5% |
+| zh | 97.0% |
+| ko | 98.5% |
+| ja | **14.0%** |
+
+EN/ZH/KO are healthy. **JA clean accuracy is broken** (likely tokenizer / transformers
+5.x compatibility issues during this run). All conclusions involving `model_ja` should
+be treated as provisional until JA loading is fixed and the notebook re-run.
+
+### Accuracy matrix under attack (rows = attack language, cols = model)
+
+|  | model_en | model_zh | model_ko | model_ja |
+|---|---|---|---|---|
+| **attack_en** | 21.0% | 59.5% | 29.0% | 16.5% |
+| **attack_zh** | 97.5% | 84.0% | 98.5% | 18.5% |
+| **attack_ko** | 96.5% | 97.5% | 97.5% | 16.5% |
+| **attack_ja** | 97.0% | 89.5% | 97.5% | 17.0% |
+
+### ASR matrix (attack success — pred == written class)
+
+|  | model_en | model_zh | model_ko | model_ja |
+|---|---|---|---|---|
+| **attack_en** | **79.0%** | **39.5%** | **70.5%** | 5.0% |
+| **attack_zh** | 0.0% | 14.5% | 0.0% | 4.5% |
+| **attack_ko** | 0.5% | 0.0% | 0.0% | 5.0% |
+| **attack_ja** | 0.5% | 7.5% | 0.5% | 5.0% |
+
+Best attack per model (highest ASR in column): **English for all four models.**
+
+Cropping sanity check (attack_en, `where="center"`): model_en center acc = 14.0% vs
+bottom acc = 21.0% — attack still effective when centered, so results are not an
+artefact of bottom-crop preprocessing alone.
+
+### Conclusions
+
+1. **English typographic attack dominates.** Writing an English target word fools the
+   EN model (ASR 79%), KO model (70.5%), and ZH model (39.5%). This is the only attack
+   language with high cross-model impact.
+
+2. **Non-English script attacks do not transfer.** ZH/KO/JA attack rows keep EN/ZH/KO
+   accuracy above 84% and ASR near zero on those models. A Chinese-script word on the
+   image does not reliably fool the Korean or English classifier.
+
+3. **Separate encoders disagree under English attack — unlike Q1.** Under `attack_en`,
+   model_en accuracy (21%) ≠ model_zh (59.5%) ≠ model_ko (29%). With the shared
+   multilingual CLIP (Q1), all languages collapsed to ~0% simultaneously and agreed
+   on the wrong answer. Here, the models diverge, which is exactly the detection signal
+   the consensus defence needs — at least for typographic (not PGD) attacks.
+
+4. **No simple diagonal ASR pattern.** The strongest attack against every model is
+   English, not "attack in language X fools model X." Script/language of the written
+   word and model training language are not 1:1 coupled; Latin-script English text is
+   visually salient across all encoders.
+
+5. **JA column is unreliable in this run.** 14% clean accuracy means `model_ja`
+   results (ASR ~5% under all attacks) reflect a broken baseline, not robustness.
+   Re-run after fixing JA model loading before using JA in the ensemble.
+
+### Connection to prior work
+
+| prior result | typographic result (this run) |
+|---|---|
+| Q1 shared encoder + PGD: all languages collapse together | separate encoders + EN typographic: models disagree |
+| Experiment G dual encoder + PGD: >50% retention at ε≤4 | typographic: EN word fools multiple models but not all equally |
+| Consensus defence fails on shared architecture | disagreement-based **detection** may work with separate encoders under typographic threat |
+
+### Next steps
+
+1. Fix JA model (clean acc should be ~90%+) and re-run the full 4×4 grid.
+2. Quantify **agreement rate** clean vs attacked (fraction of images where all models
+   predict the same class) — the metric from `CODE_GUIDE_separate_langs_typographic.md`.
+3. Test whether a **majority-vote or disagreement detector** on the four separate models
+   flags typographic attacks with AUC > 0.5 (Q2 analogue for this threat model).
