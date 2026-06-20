@@ -1,0 +1,93 @@
+{
+  "dataset": "cifar10",
+  "attack": "pgd",
+  "steps": 40,
+  "attacked": [
+    "en",
+    "ko",
+    "es",
+    "fr",
+    "ja"
+  ],
+  "n": 1000,
+  "eps_grid": [
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    4.0
+  ],
+  "results": {
+    "0.25": {
+      "acc": {
+        "en": 0.138,
+        "ko": 0.142,
+        "es": 0.152,
+        "fr": 0.148,
+        "ja": 0.146
+      },
+      "ens": 0.147,
+      "agreement": 0.841,
+      "transfer_fraction": {}
+    },
+    "0.5": {
+      "acc": {
+        "en": 0.028,
+        "ko": 0.026,
+        "es": 0.032,
+        "fr": 0.032,
+        "ja": 0.031
+      },
+      "ens": 0.034,
+      "agreement": 0.912,
+      "transfer_fraction": {}
+    },
+    "1.0": {
+      "acc": {
+        "en": 0.004,
+        "ko": 0.002,
+        "es": 0.006,
+        "fr": 0.004,
+        "ja": 0.004
+      },
+      "ens": 0.004,
+      "agreement": 0.951,
+      "transfer_fraction": {}
+    },
+    "2.0": {
+      "acc": {
+        "en": 0.0,
+        "ko": 0.0,
+        "es": 0.0,
+        "fr": 0.0,
+        "ja": 0.0
+      },
+      "ens": 0.0,
+      "agreement": 0.963,
+      "transfer_fraction": {}
+    },
+    "4.0": {
+      "acc": {
+        "en": 0.0,
+        "ko": 0.0,
+        "es": 0.0,
+        "fr": 0.0,
+        "ja": 0.0
+      },
+      "ens": 0.0,
+      "agreement": 0.982,
+      "transfer_fraction": {}
+    }
+  },
+  "clean": {
+    "acc": {
+      "en": 0.937,
+      "ko": 0.844,
+      "es": 0.942,
+      "fr": 0.944,
+      "ja": 0.936
+    },
+    "ens": 0.944,
+    "agreement": 0.851
+  }
+}

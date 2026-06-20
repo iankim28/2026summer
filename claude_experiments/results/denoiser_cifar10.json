@@ -1,0 +1,28 @@
+{
+  "dataset": "cifar10",
+  "total": 500,
+  "clean_nodenoise": 94.4,
+  "clean_denoise": 47.8,
+  "by_eps": {
+    "2": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 46.0,
+      "denoised_adaptive": 0.0
+    },
+    "4": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 44.2,
+      "denoised_adaptive": 0.0
+    },
+    "8": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 44.2,
+      "denoised_adaptive": 0.0
+    },
+    "16": {
+      "no_defense": 0.0,
+      "denoised_nonadaptive": 40.8,
+      "denoised_adaptive": 0.0
+    }
+  }
+}

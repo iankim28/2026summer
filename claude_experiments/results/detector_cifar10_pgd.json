@@ -1,0 +1,33 @@
+{
+  "clean_all_agree": 0.851,
+  "by_eps": {
+    "2": {
+      "all_agree": 0.934,
+      "uniq_per_img": 1.066,
+      "auc_n_unique": 0.458335,
+      "auc_vote_entropy": 0.458077,
+      "auc_mean_js": 0.246989
+    },
+    "4": {
+      "all_agree": 0.949,
+      "uniq_per_img": 1.051,
+      "auc_n_unique": 0.4508725,
+      "auc_vote_entropy": 0.4506175,
+      "auc_mean_js": 0.218864
+    },
+    "8": {
+      "all_agree": 0.936,
+      "uniq_per_img": 1.064,
+      "auc_n_unique": 0.45734,
+      "auc_vote_entropy": 0.457092,
+      "auc_mean_js": 0.235333
+    },
+    "16": {
+      "all_agree": 0.914,
+      "uniq_per_img": 1.086,
+      "auc_n_unique": 0.468285,
+      "auc_vote_entropy": 0.467927,
+      "auc_mean_js": 0.257254
+    }
+  }
+}
