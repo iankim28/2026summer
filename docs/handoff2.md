@@ -1,7 +1,7 @@
 # Agent Handoff Document — v2
 
 **Project:** `d:\ian\2026summer`  
-**Notebook under review:** `notebooks/updated_multilingual_consensus_colab.ipynb`  
+**Notebook under review:** `lib/notebooks/updated_multilingual_consensus_colab.ipynb`  
 **Handoff from:** session that resolved Q1  
 **Next task:** Resolve Q2 and Q3 (see Section 6 below)
 
@@ -23,15 +23,20 @@ full experimental background.
 
 ```
 2026summer/
-├── notebooks/
-│   ├── updated_multilingual_consensus_colab.ipynb   ← MAIN notebook (sections 1–11, fully run)
-│   ├── multilingual_adversarial_defence_tutorial.ipynb  ← longer tutorial version
-│   └── intro_to_CLIP.ipynb                          ← background reading
-├── research_goal.md     ← plain-English project summary
-├── handoff.md           ← original handoff (full experimental results, Sections 1–10)
-├── handoff2.md          ← this file
-├── research_diary.md    ← currently empty
-├── requirements.txt     ← pinned deps
+├── docs/
+│   ├── research_goal.md         ← plain-English project summary
+│   ├── handoff.md               ← original handoff (full experimental results, Sections 1–10)
+│   ├── handoff2.md              ← this file
+│   ├── research_diary.md        ← running lab log
+│   └── ...
+├── lib/
+│   ├── notebooks/
+│   │   ├── updated_multilingual_consensus_colab.ipynb   ← MAIN notebook (sections 1–11, fully run)
+│   │   ├── multilingual_adversarial_defence_tutorial.ipynb  ← longer tutorial version
+│   │   └── intro_to_CLIP.ipynb                          ← background reading
+│   └── *.py                     ← notebook build/review scripts
+├── claude_experiments/          ← UNTOUCHED (not created by the user)
+├── requirements.txt
 └── .venv/               ← Python venv (Python 3.13, CUDA, RTX 5070 Ti)
 ```
 

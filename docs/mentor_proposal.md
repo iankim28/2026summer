@@ -1,7 +1,7 @@
 # Proposal: Dual Language-Specific Encoder Pairs for Adversarial Robustness in Multilingual CLIP
 
 **Date:** June 19, 2026
-**Notebook:** `notebooks/dual_encoder_divergence.ipynb`
+**Notebook:** `lib/notebooks/dual_encoder_divergence.ipynb`
 **Estimated runtime:** ~80 minutes (RTX 5070 Ti)
 
 ---
@@ -238,7 +238,7 @@ drops below 85%, the λ_div term is dominating and λ_div should be reduced to 0
   ~320s/epoch × 15 epochs; added LoRA layers and text heads add <5% overhead)
 - **GPU memory:** ~2–3 GB for adapters + frozen backbone + PGD graph; well within
   the RTX 5070 Ti's 16 GB
-- **Notebook:** `notebooks/dual_encoder_divergence.ipynb` (self-contained; does not
+- **Notebook:** `lib/notebooks/dual_encoder_divergence.ipynb` (self-contained; does not
   depend on any prior session state from the existing notebook)
 - **Monitoring:** loss should decrease steadily after epoch 1; if loss diverges or
   clean accuracy drops below 50% by epoch 3, stop and reduce LR to 5e-5

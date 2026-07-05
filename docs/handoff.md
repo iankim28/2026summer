@@ -1,7 +1,7 @@
 # Agent Handoff Document
 
 **Project:** `d:\ian\2026summer`  
-**Notebook under review:** `notebooks/updated_multilingual_consensus_colab.ipynb`  
+**Notebook under review:** `lib/notebooks/updated_multilingual_consensus_colab.ipynb`  
 **Handoff from:** previous chat session  
 **Next task:** Improve or extend the notebook based on the experimental findings below
 
@@ -23,13 +23,19 @@ See `research_goal.md` for a plain-English summary aimed at a general audience.
 
 ```
 2026summer/
-├── notebooks/
-│   ├── updated_multilingual_consensus_colab.ipynb   ← MAIN notebook (fully run)
-│   ├── multilingual_adversarial_defence_tutorial.ipynb  ← longer tutorial version
-│   └── intro_to_CLIP.ipynb                          ← background reading
-├── research_goal.md     ← plain-English project summary
-├── research_diary.md    ← currently empty
-├── requirements.txt     ← pinned deps including transformers, datasets, open_clip_torch
+├── docs/
+│   ├── research_goal.md         ← plain-English project summary
+│   ├── research_diary.md        ← running lab log
+│   ├── handoff.md               ← this file
+│   └── ...
+├── lib/
+│   ├── notebooks/
+│   │   ├── updated_multilingual_consensus_colab.ipynb   ← MAIN notebook (fully run)
+│   │   ├── multilingual_adversarial_defence_tutorial.ipynb  ← longer tutorial version
+│   │   └── intro_to_CLIP.ipynb                          ← background reading
+│   └── *.py                     ← notebook build/review scripts
+├── claude_experiments/          ← UNTOUCHED (not created by the user)
+├── requirements.txt
 └── .venv/               ← Python venv (Python 3.14, CUDA 13, RTX 5070 Ti)
 ```
 

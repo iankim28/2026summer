@@ -307,7 +307,7 @@ not diverge enough.
 
 ## 2026-06-19 (evening) — Experiment G: Dual language-specific encoder pairs
 
-**Notebook:** `notebooks/dual_encoder_divergence.ipynb`
+**Notebook:** `lib/notebooks/dual_encoder_divergence.ipynb`
 **Hardware:** RTX 5070 Ti (local), 282s training time.
 
 ### Setup
@@ -397,8 +397,8 @@ makes both sides language-specific simultaneously, so the two losses cooperate.
 
 ## 2026-06-19 (night) — Typographic attack confusion matrices (separate per-language CLIPs)
 
-**Notebook:** `notebooks/typographic_attack_confusion.ipynb`
-**Results:** `notebooks/results/confusion_results.json`, `typographic_heatmaps.png`, `confusion_matrices.png`
+**Notebook:** `lib/notebooks/typographic_attack_confusion.ipynb`
+**Results:** `lib/notebooks/results/confusion_results.json`, `typographic_heatmaps.png`, `confusion_matrices.png`
 **Dataset:** STL-10 test split, 200 random images (seed 0)
 **Attack:** typographic — write the adversarial target class name onto the image (no
 gradients). Four attack languages (EN, ZH, KO, JA) × four independent classifiers.
@@ -495,3 +495,156 @@ artefact of bottom-crop preprocessing alone.
    predict the same class) — the metric from `CODE_GUIDE_separate_langs_typographic.md`.
 3. Test whether a **majority-vote or disagreement detector** on the four separate models
    flags typographic attacks with AUC > 0.5 (Q2 analogue for this threat model).
+
+---
+
+## 2026-07-04 — Re-entry briefing after 2-week hiatus
+
+### TL;DR
+
+Two research threads were active when work paused. Thread A (shared multilingual CLIP + PGD attacks) reached its first result above the 50% retention target with the dual-encoder design (Experiment G). Thread B (separate per-language CLIP models + typographic attacks) showed that separate encoders disagree under English typographic attack — a detection signal that disappears when the encoder is shared — but the Japanese model is broken and needs fixing before conclusions can be drawn. Neither thread is closed; both have clear next steps.
+
+---
+
+### Goal of the project
+
+The core question is whether labelling an image in five languages simultaneously (EN, KO, ES, FR, JA) using a multilingual CLIP model provides adversarial robustness. The proposed defence assumes that an attack crafted to fool English labels will leave the other languages unaffected, and that this cross-language disagreement can detect or repair the attack. The project tests this assumption empirically and, when it fails, attempts to engineer model modifications that make the assumption hold.
+
+Three sub-questions:
+- **Q1:** Does an English-only PGD attack transfer to other languages? (answered: yes, completely)
+- **Q2:** Can model modifications produce genuine language-specific representations, limiting transfer? (partially answered: Experiment G exceeds 50% at moderate attack budgets)
+- **Q3:** Can a denoiser trained on attacked images restore correct classification under adaptive attacks? (still open)
+
+---
+
+### Two research threads
+
+**Thread A — Shared multilingual CLIP, image-space PGD attacks**
+
+Model: `xlm-roberta-base-ViT-B-32` (one shared ViT-B/32 image encoder, XLM-RoBERTa text encoder, LAION-5B pretraining). Dataset: CIFAR-10. Attack: L∞ PGD, English-only target, 20 steps.
+
+**Thread B — Four independent per-language CLIP models, typographic attacks**
+
+Models: OpenAI ViT-B/32 (EN), OFA-Sys Chinese CLIP (ZH), Bingsu KO CLIP (KO), CLYP Japanese base (JA). Dataset: STL-10. Attack: typographic — render the adversarial class name as text on the image, no gradient computation.
+
+These threads are complementary. Thread A tests the original defence architecture (shared encoder) under the standard threat model (imperceptible perturbations). Thread B tests an alternative architecture (separate encoders) under a simpler threat model (visible text overlay).
+
+---
+
+### Chronology (step by step)
+
+**2026-06-16 — Q1: transfer confirmed**
+
+Ran English-only PGD at ε = 0.5–8/255 on the shared `xlm-roberta-base-ViT-B-32`. All five languages collapsed to near-zero accuracy simultaneously at every budget. Best observed retention rate (fraction of EN-fooled images where another language stayed correct): 3.2% (ES, ε=0.5). The 50% threshold the defence requires was never approached. Root cause: same-class cross-lingual cosine similarity between text embeddings is 0.914, higher than the within-language different-class cosine of 0.792 — language boundaries are weaker than class boundaries, so any class-targeted gradient is simultaneously class-targeted for all languages.
+
+**2026-06-17 — Experiments A–E: attempts to break the shared image encoder**
+
+All experiments used the same shared ViT backbone (frozen), training on 1000 CIFAR-10 images with a three-term loss: classification CE + image divergence penalty + adversarial retention loss.
+
+- **Exp A (rank-8 output-proj LoRA):** small adapters at the final 512-d output projection, one per language. Best KO retention at ε=8: 8.7%. Capacity too low.
+- **Exp B (rank-64 output-proj LoRA):** same architecture, 8× capacity. Best KO retention at ε=8: **29.0%** — the previous best clean result.
+- **Exp C (multi-layer LoRA, rank-16 inside ViT blocks 6/8/10/11):** training diverged at LR=1e-3, all languages collapsed to ~10% accuracy (random chance). Results uninformative. Needs re-run with LR=1e-4.
+- **Exp D (text projection orthogonalisation):** fine-tuned `model.text.proj` to push same-class cross-lingual cosine from 0.914 → 0.313. Ran in 3 seconds. Effect on retention untested in isolation because the evaluation was confounded by the collapsed Exp C image adapters.
+- **Exp E (five independent per-language ViT copies, 5 epochs):** clean accuracy improved (KO: 83.6% → 94.6%) but adversarial retention was 0% at every budget. The five copies started from identical pretrained weights and 5 epochs was insufficient to break the symmetry; estimate 50–100 epochs needed.
+- **Exp F (base encoder + text orth in isolation):** frozen shared image encoder with only the orthogonalised text projections. Best retention: 12.5% (KO, ε=8). Text-side changes alone cannot help because the shared image encoder still maps each input to a single point in R^512; PGD adapts to any text geometry and finds a cross-language direction.
+
+**2026-06-19 (afternoon) — Experiment G: dual language-specific encoders, first >50% result**
+
+Notebook: `lib/notebooks/dual_encoder_divergence.ipynb`. Hardware: local RTX 5070 Ti, 282 s training.
+
+Architecture: per-language LoRA adapters injected at all 12 ViT transformer blocks (rank-32, applied to the CLS token in NLD layout — fixing the NLD/LND layout bug from Exp C) plus per-language text projection heads (`nn.Linear(768, 512)`) bypassing the shared text projection. 4.92M trainable parameters. Training: 1000 CIFAR-10 images, 15 epochs, LR=1e-4, inner PGD 7 steps at `DUAL_TRAIN_EPS=2/255`.
+
+Results — adversarial retention (PGD 20 steps vs EN pair):
+
+| ε | KO | ES | FR | JA |
+|---|---|---|---|---|
+| 0.5 | 72.8% | 68.8% | 72.8% | 73.9% |
+| 1 | 75.6% | 73.5% | 69.9% | 77.8% |
+| 2 | **79.6%** | **80.3%** | **74.6%** | **82.1%** |
+| 4 | 69.5% | 73.1% | 69.9% | 70.6% |
+| 8 | 44.8% | 35.8% | 44.8% | 39.8% |
+
+This is the first experiment to exceed the 50% target. At ε ≤ 4/255 all four non-EN languages are above 50%. The ε=8 gap (44.8% KO, target >50%) is explained by the training epsilon being only 2/255 — the model has not seen strong enough attacks during training. The fix is straightforward: retrain with `DUAL_TRAIN_EPS = 4` or `8`.
+
+Why this worked where A–F failed: for the first time, both the image and text sides are language-specific simultaneously. Classification and divergence losses now reinforce each other (in A–F, shared text anchors pulled image embeddings back toward a common point, limiting how far adapters could push them apart).
+
+**2026-06-19 (night) — Thread B: typographic attack confusion matrices with separate encoders**
+
+Notebook: `lib/notebooks/typographic_attack_confusion.ipynb`. Dataset: STL-10, 200 random images (seed 0).
+
+A 4×4 grid: four attack languages (EN, ZH, KO, JA) × four independent classifiers. For each combination, the adversarial class name is rendered as text on the image and the model classifies it. Key results:
+
+- **English typographic attack dominates.** Writing an English target word achieves ASR 79% on the EN model, 70.5% on KO, 39.5% on ZH. No other attack language achieves >15% ASR on any model.
+- **Non-English script attacks do not transfer.** ZH/KO/JA text on the image leaves EN/ZH/KO accuracy above 84% and ASR near zero.
+- **Separate encoders disagree under EN attack.** Under `attack_en`, EN model accuracy (21%) ≠ ZH (59.5%) ≠ KO (29%). This is qualitatively different from Thread A: with the shared encoder, all languages collapsed to ~0% simultaneously and agreed on the wrong answer. Separate encoders produce a detection signal.
+- **JA column is broken.** The `line-corporation/clip-japanese-base` model loaded with 14% clean accuracy (should be ~90%+). Cause: tokenizer/sentencepiece/protobuf compatibility issue with transformers 5.x. All JA conclusions are provisional until this is fixed and the notebook re-run.
+
+---
+
+### Results at a glance
+
+**Thread A leaderboard (KO retention at ε=8/255):**
+
+| Method | KO retention @ ε=8 | Notes |
+|---|---|---|
+| No defence (baseline) | ~86% transfer (all fooled) | — |
+| Rank-8 output-proj LoRA (Exp A) | 8.7% | low capacity |
+| TXT_ORTH isolated (Exp F) | 12.5% | text-only ceiling |
+| Combined C+D (Exp D confounded) | ~14% | image side was broken |
+| Rank-64 output-proj LoRA (Exp B) | 29.0% | previous best |
+| Multi-layer LoRA r16 (Exp C) | 0% | training diverged |
+| Per-language ViT 5 epochs (Exp E) | 0% | undertrained |
+| **Dual encoder G (train ε=2)** | **44.8%** | **new best; >50% at ε≤4** |
+| Target | **> 50%** | |
+
+**Thread B (separate encoders, typographic, EN attack):**
+
+| Model | Accuracy under EN attack | ASR (EN word) |
+|---|---|---|
+| model_en | 21.0% | 79.0% |
+| model_zh | 59.5% | 39.5% |
+| model_ko | 29.0% | 70.5% |
+| model_ja | 16.5% | 5.0% (broken baseline) |
+
+---
+
+### What is broken or provisional
+
+1. **JA model in Thread B.** `line-corporation/clip-japanese-base` loads but achieves 14% clean accuracy. The error trace points to a sentencepiece/tiktoken/protobuf incompatibility in transformers 5.x. The fix is to either pin an earlier transformers version or find a compatible checkpoint. Until fixed, treat all JA columns as unreliable.
+2. **Experiment C results are uninformative.** Multi-layer LoRA at LR=1e-3 caused training collapse. The architectural idea is sound but needs a rerun with LR=1e-4.
+3. **Experiment G ε=8 gap.** The dual encoder was trained with `DUAL_TRAIN_EPS=2`. Retention at ε=8 is ~40–45%, below the 50% target. This is not a fundamental failure — simply a training budget issue.
+4. **Q3 denoiser still untested.** The denoiser work (Sections 9–10 of `lib/notebooks/updated_multilingual_consensus_colab.ipynb`) established that a non-adaptive denoiser achieves partial recovery but an adaptive attacker reduces accuracy to 0%. No Q2/G-style architectural fix has been applied to Q3 yet.
+
+---
+
+### Recommended next steps (prioritized)
+
+1. **Scale Experiment G training epsilon** — in `lib/notebooks/dual_encoder_divergence.ipynb`, change `DUAL_TRAIN_EPS` from `2` to `4` or `8` and re-run (~5 minutes on local GPU). This is the single highest-leverage action: the architecture already works and the gap is purely a training budget issue.
+
+2. **Fix JA model loading for Thread B** — install `sentencepiece` and `protobuf` in the venv, or test `trust_remote_code=True` with an older transformers pin. Then re-run `lib/notebooks/typographic_attack_confusion.ipynb` to get a reliable 4×4 grid.
+
+3. **Compute disagreement-based detection metrics (Thread B Q2 analogue)** — once the JA column is valid, compute the fraction of images where all four models agree on the same class (clean vs attacked), and test a majority-vote or disagreement detector for AUC > 0.5. The methodology is in `docs/CODE_GUIDE_separate_langs_typographic.md`.
+
+4. **Re-run Experiment C with ML_LR=1e-4** — this is lower priority now that Experiment G succeeded, but multi-layer LoRA inside ViT blocks could still outperform output-only adapters if the training is stable.
+
+5. **Q3 denoiser on dual-encoder G architecture** — the most open-ended item. Worth revisiting only after steps 1–3 are done.
+
+---
+
+### Repo layout after today's reorganization
+
+The project was reorganized today (2026-07-04):
+
+```
+2026summer/
+├── docs/          ← all project markdown (research_diary.md, research_goal.md,
+│                     handoff.md, handoff2.md, mentor_proposal.md, and plan files)
+├── lib/
+│   ├── notebooks/ ← all .ipynb files + results/
+│   └── *.py       ← notebook build and review scripts
+├── claude_experiments/  ← UNTOUCHED (not created by the user)
+├── requirements.txt
+└── .venv/
+```
+
+`claude_experiments/` is a separate working directory created by an automated agent and was not reorganized.

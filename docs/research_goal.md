@@ -82,6 +82,6 @@ coincidence or a flaw in the attack; it is a mathematical property of the archit
 As long as one shared image-processing brain is used for all languages, the proposed
 defence cannot work in its current form.
 
-> **Notebook:** `notebooks/updated_multilingual_consensus_colab.ipynb`
+> **Notebook:** `lib/notebooks/updated_multilingual_consensus_colab.ipynb`
 > **Dataset:** CIFAR-10 (10 object classes, 500 test images, 300 attacked)
 > **Model:** multilingual CLIP (`xlm-roberta-base-ViT-B-32`, trained on LAION-5B)

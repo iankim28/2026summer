@@ -577,7 +577,8 @@ nb = {
     "cells": cells
 }
 
-out_path = r'd:\ian\2026summer\notebooks\dual_encoder_divergence.ipynb'
+from pathlib import Path
+out_path = str(Path(__file__).resolve().parents[1] / 'lib' / 'notebooks' / 'dual_encoder_divergence.ipynb')
 with open(out_path, 'w', encoding='utf-8') as f:
     json.dump(nb, f, indent=1, ensure_ascii=False)
 

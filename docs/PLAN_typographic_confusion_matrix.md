@@ -51,7 +51,7 @@ Serialized `acc_matrix`, `asr_matrix`, and `clean_acc` for later reference.
 
 ## Target file
 
-`notebooks/typographic_attack_confusion.ipynb` (new notebook)
+`lib/notebooks/typographic_attack_confusion.ipynb` (new notebook)
 
 ---
 

@@ -4,9 +4,11 @@ Runs a headless kernel and executes the setup + architecture cells only
 (no training, no dataset download) to catch import/shape/API errors.
 """
 import json, sys, queue, time
+from pathlib import Path
 sys.stdout.reconfigure(encoding='utf-8')
 
-with open(r'd:\ian\2026summer\notebooks\dual_encoder_divergence.ipynb', 'r', encoding='utf-8') as f:
+nb_path = Path(__file__).resolve().parents[1] / 'lib' / 'notebooks' / 'dual_encoder_divergence.ipynb'
+with open(nb_path, 'r', encoding='utf-8') as f:
     nb = json.load(f)
 cells = nb['cells']
 
