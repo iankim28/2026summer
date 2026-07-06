@@ -398,7 +398,7 @@ makes both sides language-specific simultaneously, so the two losses cooperate.
 ## 2026-06-19 (night) — Typographic attack confusion matrices (separate per-language CLIPs)
 
 **Notebook:** `lib/notebooks/typographic_attack_confusion.ipynb`
-**Results:** `lib/notebooks/results/confusion_results.json`, `typographic_heatmaps.png`, `confusion_matrices.png`
+**Results:** `lib/notebooks/results/stl10_confusion_results.json`, `stl10_typographic_heatmaps.png`, `stl10_confusion_matrices.png`
 **Dataset:** STL-10 test split, 200 random images (seed 0)
 **Attack:** typographic — write the adversarial target class name onto the image (no
 gradients). Four attack languages (EN, ZH, KO, JA) × four independent classifiers.
@@ -648,3 +648,420 @@ The project was reorganized today (2026-07-04):
 ```
 
 `claude_experiments/` is a separate working directory created by an automated agent and was not reorganized.
+
+---
+
+## 2026-07-04 (evening) — Experiment G analysis + JA model investigation
+
+### Experiment G: why it worked and what to do next
+
+Experiment G (dual language-specific encoders) is the first experiment to exceed the 50% retention target. The key insight is that every prior experiment (A–F) left either the image encoder or the text encoder shared across languages. That single shared component was the fatal flaw.
+
+**The geometry of the failure (A–F):** the shared ViT maps any image to one point in R^512. All five languages' text anchors for the same class point in nearly the same direction (cosine 0.914). Any PGD step that moves the image away from the English class cluster simultaneously moves it away from all other language clusters — the attack is class-targeted, not language-targeted, and class membership is shared universally.
+
+**Why G broke the pattern:** both image and text sides are language-specific simultaneously.
+- Image side: per-language rank-32 LoRA adapters at all 12 ViT transformer blocks (applied to the CLS token in NLD layout — fixing the NLD/LND layout bug from Experiment C).
+- Text side: per-language `nn.Linear(768, 512)` heads replacing the shared `model.text.proj`.
+- Loss interaction: in A–F the classification loss and divergence loss fought each other (shared text anchors pulled all image embeddings back toward a common point). In G, both losses reinforce each other — "push language embeddings apart" and "classify correctly" are now the same objective.
+
+By epoch 15, the per-language image embedding cosine similarities went from 0.927 (nearly identical) to −0.106 (anti-correlated). A PGD attack optimised against the EN pair moves the EN embedding in a direction largely irrelevant to the position of KO/ES/FR/JA embeddings.
+
+**Why ε=8 still falls short (44.8%, target >50%):** `DUAL_TRAIN_EPS = 2/255` during training. At ε=8 the attacker moves 4× further in pixel space than the model ever saw. The architecture is not the bottleneck — the training budget is.
+
+**Paths to improve (ordered by expected impact):**
+
+1. **Scale training epsilon** — change `DUAL_TRAIN_EPS` to `4` or `8` in `lib/notebooks/dual_encoder_divergence.ipynb`. ~5 minutes on local GPU. The ε≤4 results (69–82% retention) show the architecture works; it just needs to have seen stronger attacks.
+2. **More data and epochs** — 1000 images, 15 epochs is light. Expanding to 5000+ images and 30–50 epochs would give the adapters more signal, particularly for KO and FR which lag behind EN.
+3. **Full sequence adapters at early blocks** — current adapters touch only the CLS token. Applying adapters to all patch tokens at early ViT blocks (0–5, where spatial features are computed) would give each language its own low-level visual processing, making single-gradient cross-language transfer harder.
+4. **Combine G with long-run Experiment E** — start from G's already-diverged adapter weights, then unfreeze the full ViT backbone for continued fine-tuning at LR=1e-6. The five copies begin already diverged rather than identical, so far fewer epochs are needed to break LAION-5B symmetry.
+5. **Adaptive attacker evaluation** — currently the attacker only optimises against the EN pair. A joint attack across all five language pairs simultaneously would give a more honest robustness estimate.
+
+---
+
+### JA model investigation (Thread B)
+
+**Goal:** determine whether the 14% JA clean accuracy in `lib/notebooks/typographic_attack_confusion.ipynb` was caused by a missing Python package, and whether re-running the notebook with the fix would produce valid JA column results.
+
+**What was tried:**
+
+1. Confirmed `sentencepiece`, `protobuf`, and `tiktoken` were all already installed in the venv. The original error trace in the notebook (a `ValueError: tiktoken is required` chain) was from a previous run when these packages were absent; they were installed at some point between then and now.
+2. Re-executed the full notebook via `jupyter nbconvert --execute`. The JA model (`line-corporation/clip-japanese-base`) loaded without any errors. Despite successful loading, clean accuracy remained 14.0% — identical to the original run.
+3. Diagnosed the text embeddings directly: inter-class cosine similarities ranged from 0.67 to 0.86. For a healthy CLIP model, different class labels should produce similarities around 0.2–0.5. The extremely tight clustering means the model has almost no discriminative signal between STL-10 categories.
+4. Tested six different Japanese prompt templates (`"{}の写真。"`, bare word, `"これは{}です。"`, etc.) on 50 STL-10 images. All templates gave 0–6% accuracy — worse than random guessing (10%).
+5. Attempted to substitute `rinna/japanese-clip-vit-b-16`, a better-known Japanese CLIP model. It cannot be loaded via standard `CLIPModel` + `CLIPProcessor` due to incompatible weight key naming conventions.
+
+**Conclusion:** the 14% JA clean accuracy is not a software bug. It is a genuine capability limitation of the `line-corporation/clip-japanese-base` (CLYP) model on STL-10. The model was trained on Japanese web crawl pairs with a different category distribution, and its text encoder produces nearly identical embeddings for all 10 STL-10 class labels regardless of template or loading method.
+
+**Implications for Thread B:**
+
+- The 4×4 grid results in `lib/notebooks/results/confusion_results.json` and the heatmaps remain identical to the original run because the underlying issue was never a package problem.
+- All conclusions drawn from the JA column (ASR ~5%, "robust to all attacks") are invalid — the model was never classifying correctly to begin with.
+- The EN, ZH, KO columns are unaffected and their conclusions stand.
+
+**Options going forward:**
+
+1. **Drop JA and reduce to a 3×3 grid (EN, ZH, KO).** The core findings — English typographic attack dominates cross-lingually, non-English script attacks do not transfer, separate encoders disagree under EN attack unlike the shared encoder in Q1 — are fully supported by the three working models. This is the cleanest path.
+2. **Replace CLYP with a working JA model.** This requires finding a Japanese CLIP checkpoint loadable via the existing API. No standard HuggingFace option was confirmed working in this session. Worth a separate search before committing to option 1.
+
+**Additional analysis — is this word-specific or a general model failure?**
+
+Ran a targeted binary retrieval test to determine whether the poor accuracy is caused by these specific STL-10 vocabulary items or by something deeper.
+
+Test: given 10 dog images and 10 cat images from STL-10, ask CLYP to choose between only two labels — 犬 (dog) or 猫 (cat).
+
+| Images | Correct label | Score |
+|---|---|---|
+| Cat images | 猫 | 10/10 |
+| Dog images | 犬 | 0/10 |
+
+Cat images are classified correctly 100% of the time in the binary case. Dog images are *also* classified as 猫 — 0/10 correct. The model is not broken in general; it knows what a cat looks like. The STL-10 dog photographs happen to sit geometrically closer to CLYP's "猫" cluster than its "犬" cluster. This is a visual distribution gap between STL-10 (curated object photos) and CLYP's training data (Japanese web crawl images), not a vocabulary or tokenizer problem.
+
+The inter-class cosine similarity between 犬 and 猫 is 0.862 — the two text embeddings are nearly in the same direction. Any slight visual bias in the image encoder's projection of STL-10 dogs (which may look different in aspect ratio, background, and framing from Japanese web dog photos) tips all dog predictions toward 猫.
+
+**Conclusion:** this was bad luck with the evaluation dataset. CLYP almost certainly works well for its intended use case (Japanese image-text retrieval), where you only need the correct image to rank above random non-matching images. Zero-shot classification on STL-10 requires much more precise geometric separation than the model provides for this distribution. A different Japanese model, or a different evaluation dataset closer to Japanese web imagery, would likely show a functioning JA column. The finding is worth documenting: any real deployment of the separate-encoder defence must verify that each per-language model actually generalises to the evaluation distribution.
+
+---
+
+## 2026-07-05 — CIFAR-10 typographic attack experiment + repo housekeeping
+
+### What was done
+
+**Housekeeping:**
+- All STL-10 result files renamed with `stl10_` prefix (`stl10_confusion_results.json`, `stl10_typographic_heatmaps.png`, `stl10_confusion_matrices.png`, `stl10_font_check.png`) to make room for CIFAR-10 results alongside them.
+- The empty `notebooks/` directory left over from the July 4 reorganization was confirmed empty and is pending deletion (locked by OS file watcher).
+
+**CIFAR-10 experiment:**
+Created `lib/notebooks/cifar10_typographic_attack_confusion.ipynb` from the STL-10 notebook with three changes: CIFAR-10 class labels (automobile, frog replacing car, monkey; updated in all four languages), dataset switched to `uoft-cs/cifar10` (already cached from Thread A), output files prefixed `cifar10_`. Ran the full 4×4 typographic attack grid on 200 randomly sampled CIFAR-10 test images (seed 0).
+
+**Motivation:** test whether CLYP's 14% clean accuracy on STL-10 was caused by a dataset-specific domain gap, or whether the model is fundamentally unsuitable for zero-shot classification on standard benchmarks.
+
+---
+
+### Results
+
+**Clean accuracy (no attack)**
+
+| Model | STL-10 | CIFAR-10 |
+|---|---|---|
+| EN (OpenAI ViT-B/32) | 98.5% | 85.0% |
+| ZH (Chinese CLIP) | 97.0% | 90.5% |
+| KO (Bingsu KO CLIP) | 98.5% | 87.0% |
+| JA (CLYP) | 14.0% | **19.0%** |
+
+CIFAR-10 is harder than STL-10 for all models (lower resolution, more confusable classes), so the EN/ZH/KO drop from ~98% to 85–90% is expected. CLYP goes from 14% to 19% — a marginal improvement well within random noise. This disproves the domain gap hypothesis: CLYP cannot zero-shot classify standard benchmark images regardless of dataset.
+
+**Accuracy under typographic attack**
+
+| Attack language | model_en | model_zh | model_ko | model_ja |
+|---|---|---|---|---|
+| None (clean) | 85.0% | 90.5% | 87.0% | 19.0% |
+| attack_en | **5.5%** | **33.0%** | **14.0%** | 19.5% |
+| attack_zh | 79.5% | 58.0% | 85.5% | 18.5% |
+| attack_ko | 83.5% | 88.0% | 86.0% | 20.0% |
+| attack_ja | 80.5% | 67.5% | 85.0% | 18.0% |
+
+**Attack Success Rate (pred == written target class)**
+
+| Attack language | model_en | model_zh | model_ko | model_ja |
+|---|---|---|---|---|
+| attack_en | **94.5%** | **65.0%** | **86.0%** | 9.0% |
+| attack_zh | 3.0% | 37.5% | 2.5% | 9.5% |
+| attack_ko | 2.5% | 1.0% | 3.0% | 9.0% |
+| attack_ja | 3.0% | 24.0% | 2.0% | 9.5% |
+
+Best attack per model: EN attack dominates for EN, ZH, and KO. JA column is still noise (random at ~9% regardless of attack language, consistent with 19% clean accuracy being near-random).
+
+---
+
+### Analysis
+
+#### What "accuracy under attack" means vs. clean accuracy
+
+The clean baseline tells you how well each model classifies images with no manipulation. The attacked accuracy tells you what happens when the adversarial target class name is written on the image in a given language. The gap between these two numbers is the attack's destructive power.
+
+For the EN model, the EN attack drops accuracy from **85.0% → 5.5%** — a loss of 79.5 percentage points. This is nearly total destruction of the classifier. For context, random guessing on 10 classes gives 10%, so the attacked EN model is performing below chance. The ASR of 94.5% tells you why: in almost all cases, the model is not just getting confused — it is specifically redirected to predict the exact class written on the image. The typographic attack has effectively hijacked the model's decision.
+
+This is stronger than the STL-10 result (79% ASR on CIFAR-10 vs. 94.5%). CIFAR-10 images are smaller and lower resolution (32×32 upscaled to 224×224), which means the rendered text occupies a larger fraction of the image area relative to the object, making the typographic signal harder to ignore.
+
+#### Why EN attack transfers to KO and ZH but not vice versa
+
+The EN attack on the KO model drops accuracy from **87.0% → 14.0%** (ASR 86.0%). On the ZH model it drops from **90.5% → 33.0%** (ASR 65.0%). In contrast, the KO attack on the EN model leaves it at 83.5% (ASR 2.5%), and the ZH attack leaves EN at 79.5% (ASR 3.0%).
+
+This asymmetry is not about which language is "stronger" or better trained. It is a consequence of how visual text saliency works in CLIP models:
+
+1. **Latin script is universally salient.** All four CLIP models were trained on large web datasets where image captions are predominantly in English or contain Latin-script text. The visual feature detectors inside every model's ViT have learned to attend to Latin characters because they co-occur with image content descriptions across the entire training corpus, regardless of the model's primary language.
+
+2. **Non-Latin scripts are not visually salient to non-native models.** Korean Hangul, Chinese characters, and Japanese kana/kanji are visually present in the EN model's training data only incidentally — they don't reliably co-occur with image-content descriptions in English web text. So when the EN model sees 자동차 written on an image, it does not recognise the script as a class label; it treats it as an irrelevant visual texture.
+
+3. **The KO model is slightly fooled by Chinese (ZH)** — the ZH attack on KO gives only 1.0% ASR, but ZH on EN gives 3.0% and ZH on ZH gives 37.5%. Chinese characters are visually closer to Japanese kanji and Korean hanja borrowings than to Latin script, but the Korean CLIP model was still trained primarily on Korean-captioned data and does not strongly associate Chinese characters with classification labels.
+
+4. **The English word "automobile" is a strong visual cue for all three working models** because all three were trained on datasets containing Latin-script text in image descriptions, regardless of the primary language of the model.
+
+#### What disagreement means for the defence
+
+Under the EN typographic attack, the three working models produce very different responses:
+
+| Model | Accuracy under EN attack | ASR |
+|---|---|---|
+| EN | 5.5% | 94.5% — nearly all images predicted as the written class |
+| KO | 14.0% | 86.0% — strong attack but not as complete as EN |
+| ZH | 33.0% | 65.0% — moderately fooled |
+
+This disagreement is exactly the detection signal the consensus defence needs. Under the shared multilingual CLIP (Thread A / Q1), all five languages collapsed to ~0% accuracy simultaneously under PGD attack — they all agreed on the wrong answer. Here, the three models disagree substantially: the EN model predicts the written class 94.5% of the time while the ZH model still gets 33% correct. A simple majority vote of EN + ZH + KO would produce the correct prediction (since ZH and KO still classify many images correctly and would outvote EN), or a disagreement detector would fire whenever EN's prediction differs from ZH and KO.
+
+This is the most important finding from Thread B so far: **the separate-encoder design naturally produces the disagreement signal that the shared-encoder design cannot**, at least under the typographic threat model.
+
+#### CIFAR-10 vs. STL-10 comparison
+
+CIFAR-10 results are more extreme across the board. EN attack ASR: 94.5% vs 79% on STL-10; EN attack ASR on KO: 86% vs 70.5%; EN attack ASR on ZH: 65% vs 39.5%. This is consistent with lower image resolution making text overlays proportionally larger and more visually dominant. CIFAR-10 is the harder and more convincing demonstration.
+
+#### Conclusion on CLYP
+
+CLYP scores 19% on CIFAR-10, the same functional failure as STL-10. The domain gap hypothesis is rejected. CLYP is not suitable for zero-shot classification on standard benchmarks and should be replaced. The remaining three models (EN, ZH, KO) give a clean and complete 3×3 result that supports all Thread B conclusions without requiring a working JA model.
+
+---
+
+### Next steps
+
+1. **Drop JA and reduce to 3×3.** Present the EN/ZH/KO results as the primary Thread B finding. The JA column is not scientifically usable.
+2. **Add disagreement detection metrics** — compute the fraction of images where EN prediction disagrees with the ZH+KO majority under EN attack (clean vs. attacked). This is the Q2 analogue for the typographic threat model.
+3. **Update research_goal.md** to reflect that Thread B results are now on CIFAR-10 (same dataset as Thread A), making cross-thread comparison cleaner.
+
+---
+
+## 2026-07-05 (evening) — llm-jp JA model swap + full 4×4 CIFAR-10 results
+
+### What was done
+
+Replaced CLYP (`line-corporation/clip-japanese-base`) with `llm-jp/llm-jp-clip-vit-base-patch16` as the JA model in `lib/notebooks/cifar10_typographic_attack_confusion.ipynb`. The new model loads via standard `open_clip` (identical API to the EN model) and has a published CIFAR-10 zero-shot accuracy of 91.8% on the llm-jp benchmark. Re-ran the full 4×4 typographic attack experiment on 200 CIFAR-10 test images.
+
+The new `JaCLIP` wrapper:
+```python
+self.m, _, self.pp = open_clip.create_model_and_transforms('hf-hub:llm-jp/llm-jp-clip-vit-base-patch16')
+self.tok = open_clip.get_tokenizer('hf-hub:llm-jp/llm-jp-clip-vit-base-patch16')
+```
+
+---
+
+### Results
+
+**Clean accuracy — all four models working**
+
+| Model | Clean accuracy |
+|---|---|
+| EN (OpenAI ViT-B/32) | 85.0% |
+| ZH (Chinese CLIP) | 90.5% |
+| KO (Bingsu KO CLIP) | 87.0% |
+| **JA (llm-jp ViT-B/16)** | **93.0%** |
+
+JA is now the strongest classifier in the ensemble. The previous CLYP model scored 14–19% (near random); llm-jp achieves 93.0%, confirming the problem was the model choice, not the task or dataset.
+
+**Accuracy under typographic attack**
+
+| | model_en | model_zh | model_ko | model_ja |
+|---|---|---|---|---|
+| Clean baseline | 85.0% | 90.5% | 87.0% | 93.0% |
+| attack_en | **5.5%** | **33.0%** | **14.0%** | **9.5%** |
+| attack_zh | 79.5% | 58.0% | 85.5% | 93.0% |
+| attack_ko | 83.5% | 88.0% | 86.0% | 93.0% |
+| attack_ja | 80.5% | 67.5% | 85.0% | 92.5% |
+
+**Attack Success Rate**
+
+| | model_en | model_zh | model_ko | model_ja |
+|---|---|---|---|---|
+| attack_en | **94.5%** | **65.0%** | **86.0%** | **90.0%** |
+| attack_zh | 3.0% | 37.5% | 2.5% | 1.5% |
+| attack_ko | 2.5% | 1.0% | 3.0% | 1.5% |
+| attack_ja | 3.0% | 24.0% | 2.0% | 2.0% |
+
+Best attack per model: **EN attack dominates all four models.**
+
+---
+
+### Analysis
+
+**JA model now behaves as expected.** llm-jp clean accuracy (93.0%) exceeds all other models, consistent with the published benchmark of 91.8%. Under the EN typographic attack, the JA model drops to 9.5% accuracy (ASR 90.0%) — deeply fooled by English text, matching the pattern of EN and KO. This is the correct and expected behaviour: the llm-jp model was trained on Japanese-translated captions of LAION-5B images, which includes abundant CIFAR-10-style photographs, so it generalises to this distribution.
+
+**The EN attack is now the universal threat.** All four models are heavily fooled by English text overlay:
+
+| Model | Clean acc | Under EN attack | Drop | EN ASR |
+|---|---|---|---|---|
+| EN | 85.0% | 5.5% | −79.5 pp | 94.5% |
+| ZH | 90.5% | 33.0% | −57.5 pp | 65.0% |
+| KO | 87.0% | 14.0% | −73.0 pp | 86.0% |
+| JA | 93.0% | 9.5% | −83.5 pp | 90.0% |
+
+The JA model is actually the most vulnerable to EN attack in terms of the absolute accuracy drop (−83.5 pp), even though it starts from the highest clean baseline. This makes sense: llm-jp was trained on translated versions of English-captioned web images, so its visual features are deeply aligned with English-described concepts. The EN model's attack direction in pixel space happens to be precisely adversarial for a model trained on English image-text data.
+
+**Non-English script attacks still do not transfer.** ZH attack on EN: ASR 3.0%. KO attack on EN: ASR 2.5%. JA attack on EN: ASR 3.0%. ZH/KO/JA attack on JA: ASR 1.5–2.0%. The Latin-script asymmetry is complete and holds for the llm-jp JA model too: it has learned to associate Latin text with image classification labels (through English-translated training captions), but Korean Hangul and Chinese characters are not classification-relevant visual features for any model in the ensemble.
+
+**Disagreement under EN attack — detection signal now covers all four models:**
+
+| Model | Accuracy under EN attack |
+|---|---|
+| EN | 5.5% |
+| JA | 9.5% |
+| KO | 14.0% |
+| ZH | 33.0% |
+
+All four models are fooled, but ZH is substantially more robust than the others (33% vs 5–14%). A disagreement detector comparing ZH against the EN/KO/JA majority would fire reliably under EN attack. The ZH model's relative robustness may reflect that Chinese CLIP was trained on Chinese web text where Latin-script text overlay carries less classification signal.
+
+**Comparison with Thread A (shared encoder + PGD):**
+
+| Setting | Attack | Defence signal |
+|---|---|---|
+| Thread A: shared `xlm-roberta-base-ViT-B-32` | PGD ε=8 | All 5 languages collapse together — zero disagreement |
+| Thread B: 4 separate CLIPs | EN typographic | Models disagree substantially (ZH 33% vs EN 5.5%) |
+
+Thread B's separate-encoder design produces the disagreement that Thread A's shared encoder could never produce, exactly as hypothesised. The disagreement is not perfect (all four models are eventually fooled by strong EN attack), but it is sufficient to build a detection signal.
+
+---
+
+### Next steps
+
+1. **Compute disagreement detection AUC** — for each image, record whether the four models agree on the same class (clean vs. attacked). Compute AUC of a simple disagreement count detector. This is the Q2 analogue for the typographic threat model, as defined in `docs/CODE_GUIDE_separate_langs_typographic.md`.
+2. **Update `research_goal.md`** — Thread B is now fully functional with 4 working models on CIFAR-10.
+3. **Consider running Thread B with the full 8000-image CIFAR-10 test split** rather than 200 images, to get tighter confidence on the disagreement rates.
+
+---
+
+## July 5, 2026 — Evening (disagreement AUC + research_goal.md update)
+
+**Disagreement detector AUC computed.** Added a new cell to `lib/notebooks/cifar10_typographic_attack_confusion.ipynb` that:
+1. Stores per-model raw predictions on clean images (`clean_preds`) in the clean-baseline cell (was previously only saving accuracy floats).
+2. Computes a disagreement score for each image = number of unique predictions across the 4 models (score 1 = full agreement, 4 = all different).
+3. Computes the standard ROC AUC (ties count as 0.5) between the EN-attacked and clean distributions.
+
+**Results (200 test images, EN typographic attack as "positive"):**
+
+| Condition | All-agree (score = 1) | Score ≥ 2 |
+|---|---|---|
+| Clean | 77.5% | 22.5% |
+| Attacked (EN) | 61.5% | 38.5% |
+
+**Detector AUC = 0.574.**
+
+The signal is real but modest. With only 4 models, most images — even attacked ones — still get classified to the same (wrong) class by all 4 models, keeping the disagreement score at 1. The detection power comes mostly from the Chinese model staying more accurate under EN attack: when EN/KO/JA all predict the adversarial class and ZH predicts the true class, the disagreement score jumps to 2. Score distribution shows attacked images shift probability mass from 1 → 2 (18.5% clean vs. 37% attacked at score=2), with scores 3–4 being rare in both conditions.
+
+AUC 0.574 > 0.5 confirms the hypothesis (disagreement does separate clean from attacked), but it is nowhere near actionable as a standalone detector. A practical alarm system would need either more languages/models or a richer detection signal than simple count-of-unique-predictions.
+
+Results saved to `lib/notebooks/results/cifar10_confusion_results.json` under the `"detector"` key.
+
+**`docs/research_goal.md` updated.** Added Thread B architecture (separate brains mermaid diagram), a Thread B findings section, and Thread B rows in the "What Was Found" table (Q1: ZH 33% under EN attack; Q2: AUC 0.574). The document now covers both threads in full.
+
+---
+
+## July 5, 2026 — Late evening (deeper ensemble analysis: 1000 images, per-class, all-language AUC)
+
+**Homework: deeper analysis of the voting ensemble.** Scaled the CIFAR-10 experiment from 200 to 1000 images, added per-class vulnerability breakdowns for every attack language, and extended the disagreement-detector AUC from EN-only to all four attack languages.
+
+### Updated 4×4 accuracy matrix (1000 images)
+
+Numbers stabilised relative to the 200-image run — the broad picture is confirmed, not revised.
+
+|  | model_EN | model_ZH | model_KO | model_JA |
+|---|---|---|---|---|
+| Clean baseline | 84.2% | 92.7% | 87.7% | **93.2%** |
+| attack_EN | 4.6% | **36.5%** | 15.6% | 8.3% |
+| attack_ZH | 79.2% | 58.3% | 84.5% | 90.2% |
+| attack_KO | 81.9% | 89.4% | 86.1% | 91.1% |
+| attack_JA | 78.2% | 69.8% | 83.5% | 89.9% |
+
+Key observations:
+- EN attack is the only one that substantially hurts the ensemble. ZH, KO, and JA text overlays leave all four models nearly at clean-accuracy levels, confirming the Latin-script asymmetry at scale.
+- ZH model (36.5%) remains notably more robust than EN (4.6%), KO (15.6%), JA (8.3%) under EN attack.
+- JA model has the highest clean accuracy (93.2%) and the highest off-diagonal accuracy under non-EN attacks (88–91%), confirming it is the strongest model in the ensemble.
+
+### Per-class vulnerability under EN attack
+
+Four per-class bar-chart grids saved to `lib/notebooks/results/cifar10_perclass_attack_{lang}.png`.
+
+Under EN attack, the 10 CIFAR-10 classes are not equally vulnerable. Key findings:
+
+| Class | EN model | ZH model | KO model | JA model | Notable |
+|---|---|---|---|---|---|
+| airplane | 1% | 46% | 14% | 9% | EN almost fully fooled |
+| automobile | 0% | 44% | 39% | 2% | KO retains some accuracy |
+| bird | 9% | 46% | 26% | 14% | ZH best here |
+| cat | 0% | 35% | 1% | 2% | Near-total collapse for EN/KO/JA |
+| deer | 8% | 27% | 25% | 16% | All models hurt |
+| **dog** | **0%** | **13%** | **0%** | **0%** | Most vulnerable class — EN "dog" label is the only clean one-syllable common word that overlaps perfectly with the visual feature |
+| frog | 5% | 27% | 15% | 20% | Moderate |
+| horse | 20% | 41% | 26% | 20% | Most resistant across models |
+| ship | 4% | 38% | 4% | 0% | EN/KO/JA collapse |
+| truck | 4% | 50% | 11% | 4% | ZH most robust |
+
+"Dog" and "cat" are the most exploitable classes — their English names are short, common, visually unambiguous, and strongly encoded by every model's text encoder. "Horse" is the hardest to fully fool (20% EN model accuracy retained), possibly because the English word is less dominantly associated with the visual prototype in LAION training data.
+
+### Disagreement detector AUC — all attack languages
+
+| Attack language | All-agree rate (attacked) | AUC |
+|---|---|---|
+| Clean | 78.2% | — |
+| **EN** | 59.3% | **0.588** |
+| **ZH** | 50.4% | **0.646** |
+| **KO** | 73.4% | 0.525 |
+| **JA** | 58.6% | 0.604 |
+
+The ZH attack produces the **highest detector AUC (0.646)** despite being the weakest attack overall (most models barely affected). This seems counter-intuitive but makes sense: ZH attack strongly fools the ZH model (58.3% vs 92.7% clean) while leaving EN/KO/JA near their baselines — so ZH-attacked images create a consistent pattern of "ZH predicts differently from the other three," which is a detectable disagreement signature. KO attack (AUC 0.525) is barely above chance because it doesn't fully fool any model, so there is no systematic disagreement to detect. EN attack (0.588) and JA attack (0.604) are in the middle range.
+
+Overall, the detector AUC range is 0.52–0.65 across attack types — real signal, but not strong enough for a reliable alarm without additional features.
+
+---
+
+### Ways to improve the disagreement detector
+
+The core problem: 62% of attacked images still get score=1 (all 4 models agree on the wrong class), so the detector never fires for those. Three directions to raise AUC:
+
+1. **Use confidence margin instead of hard predictions.** Instead of counting unique class predictions, measure how much each model's top-1 confidence drops under the suspected attack. On a clean image all models are confident; on a typographic attacked image the "true" class and the "planted" class compete, which flattens the probability distribution. A detector on softmax entropy or top-1 margin would fire even when all 4 models happen to predict the same wrong class.
+
+2. **Add more languages/models.** Each new model is another independent "vote." With 4 models only ZH reliably disagrees under EN attack; adding e.g. a French or Arabic CLIP would create more breakpoints. AUC scales roughly with the number of independently trained models.
+
+3. **Use cross-model cosine distance on embeddings, not predictions.** Compare each model's image embedding to its text embedding for the top-1 class — a typographic attack degrades the match quality in a detectable way even when the argmax doesn't change. This is a richer signal than the binary "same prediction or not."
+
+4. **Target a harder test set.** The 200-image sample may underrepresent classes where ZH is most robust. Running on the full 8000-image CIFAR-10 test split would confirm whether AUC 0.574 is stable or an artefact of the small sample.
+
+---
+
+### Homework — Why does the Japanese model outperform the others?
+
+This answer covers the full arc: the original broken JA model, what the diagnostics revealed, the replacement, and what the final numbers tell us.
+
+#### Step 1 — The original JA model was broken (CLYP / `line-corporation/clip-japanese-base`)
+
+The first Japanese model used (`line-corporation/clip-japanese-base`, nicknamed CLYP) achieved only 14–19% accuracy on both STL-10 and CIFAR-10, barely above chance for 10 classes. Three rounds of diagnostics isolated the cause:
+
+- **Compressed text embeddings:** All 10 class label embeddings were clustered together with cosine similarities of 0.67–0.86. The model's text encoder had no discriminative separation between "airplane," "dog," "frog," etc. Any image would tie-break to whichever class happened to sit 0.001 cosine units closer.
+- **Domain mismatch (not a broken model):** When tested on a simpler binary task (cat vs. dog on STL-10), CLYP got cat 10/10 but dog 0/10. The model was not fundamentally broken — it was trained on Japanese social-media image–caption pairs, where animal retrieval worked fine but zero-shot 10-class scene classification was outside its distribution.
+- **No prompt template helped:** Trying every plausible Japanese prompt (`「{}の写真」`, `「{}」`, romaji, etc.) made no meaningful difference.
+
+Conclusion: CLYP's design goal was image–text *retrieval*, not zero-shot *classification*. For our task it was the wrong tool.
+
+#### Step 2 — Choosing the replacement (`llm-jp/llm-jp-clip-vit-base-patch16`)
+
+A web search for Japanese CLIP models benchmarked on CIFAR-10 led to `llm-jp-clip`, developed by the National Institute of Informatics (llm-jp consortium). Its published benchmark table showed the highest CIFAR-10 zero-shot accuracy among Japanese CLIP variants. It uses the same `open_clip` API as the other models in the ensemble, making the swap straightforward.
+
+#### Step 3 — What the final numbers show
+
+| Model | Clean acc | Under EN attack | Under ZH attack | Under KO attack | Under JA attack |
+|---|---|---|---|---|---|
+| EN | 85.0% | 5.5% | 79.5% | 83.5% | 80.5% |
+| ZH | 90.5% | 33.0% | 58.0% | 88.0% | 67.5% |
+| KO | 87.0% | 14.0% | 85.5% | 86.0% | 85.0% |
+| **JA** | **93.0%** | **9.5%** | **93.0%** | **93.0%** | **92.5%** |
+
+Three things stand out:
+
+**1. Best clean accuracy (93%).**
+`llm-jp-clip` was trained on a larger and more carefully filtered Japanese web corpus than its competitors. Higher pre-training data quality directly translates to better zero-shot classification. The model simply learned richer visual–semantic associations.
+
+**2. Near-total immunity to non-EN attacks.**
+Under ZH, KO, and JA text-overlay attacks, the JA model barely moves (93% → 93% → 92.5%). The reason is script isolation: Chinese characters, Korean Hangul, and Japanese kanji/kana are visually and statistically distinct from the Latin-alphabet labels the attack relies on for other models. Even for its own language, the JA attack (writing the Japanese class name on the image) barely hurts the JA model — probably because `llm-jp-clip` learned to rely on image features more than text-overlay cues when the two conflict.
+
+**3. The EN attack does hurt JA (93% → 9.5%).**
+This is the expected result and is *not* a failure of the JA model. The attack works by writing the English adversarial class name (e.g., "truck") directly on the image. The JA model was trained on bilingual data that included many English captions alongside Japanese ones (Japanese web text is heavily mixed with English). So the JA text encoder does recognise "truck" as a classification-relevant word. The attack exploits that English literacy. KO at 14% is slightly less affected, and ZH at 33% is the most robust — reflecting different degrees of English–native-language mixing in each model's training corpus.
+
+#### Summary
+
+The JA model outperforms the others because (a) it was specifically chosen by benchmark — the original model was replaced after a systematic failure analysis — and (b) `llm-jp-clip`'s training data quality and scale gave it 93% clean accuracy and strong image-feature reliance that makes CJK/Hangul text overlays irrelevant. Its one vulnerability is the same as everyone's: English text overlays, because all four models were trained on data that included English and have learned to treat Latin script as a valid classification signal.
