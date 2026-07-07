@@ -4,6 +4,57 @@
 
 ---
 
+## Experimental setup reference
+
+### The 4 typographic attacks
+
+All four attacks use the same method (`draw_word()` — render text on the image, no gradients). They differ only in which language the **adversarial target class name** is written in:
+
+| Attack | What gets written on the image |
+|---|---|
+| **attack_en** | Target class name in English (e.g. `"truck"`) |
+| **attack_zh** | Target class name in Chinese (e.g. `"卡车"`) |
+| **attack_ko** | Target class name in Korean (e.g. `"트럭"`) |
+| **attack_ja** | Target class name in Japanese (e.g. `"トラック"`) |
+
+Each attack is evaluated against all four models, producing a 4×4 accuracy / ASR matrix (rows = attack language, cols = model language).
+
+### Models used (4 per-language CLIP classifiers)
+
+These are the **classifiers**, not separate models per attack. Every attack is run against all four:
+
+| Language | Model | Library |
+|---|---|---|
+| **EN** | `ViT-B-32` (OpenAI weights) | `open_clip` |
+| **ZH** | `OFA-Sys/chinese-clip-vit-base-patch16` | Hugging Face `transformers` |
+| **KO** | `Bingsu/clip-vit-base-patch32-ko` | Hugging Face `transformers` |
+| **JA** | `llm-jp/llm-jp-clip-vit-base-patch16` | `open_clip` via `hf-hub:` |
+
+**Note on Japanese:** The STL-10 notebook originally used `line-corporation/clip-japanese-base` (CLYP). It was replaced in the CIFAR-10 notebook with `llm-jp/llm-jp-clip-vit-base-patch16` because CLYP scored ~14% clean accuracy; llm-jp reaches ~93%.
+
+### Model sources (Hugging Face + GitHub)
+
+| Lang | Hugging Face path | GitHub repo |
+|---|---|---|
+| EN | OpenAI weights via `open_clip` | [openai/CLIP](https://github.com/openai/CLIP), [mlfoundations/open_clip](https://github.com/mlfoundations/open_clip) |
+| ZH | [OFA-Sys/chinese-clip-vit-base-patch16](https://huggingface.co/OFA-Sys/chinese-clip-vit-base-patch16) | [OFA-Sys/Chinese-CLIP](https://github.com/OFA-Sys/Chinese-CLIP) |
+| KO | [Bingsu/clip-vit-base-patch32-ko](https://huggingface.co/Bingsu/clip-vit-base-patch32-ko) | [Bingsu/clip-vit-base-patch32-ko](https://github.com/Bingsu/clip-vit-base-patch32-ko) |
+| JA (current) | [llm-jp/llm-jp-clip-vit-base-patch16](https://huggingface.co/llm-jp/llm-jp-clip-vit-base-patch16) | [llm-jp/llm-jp-clip](https://github.com/llm-jp/llm-jp-clip) |
+| JA (original, broken) | [line-corporation/clip-japanese-base](https://huggingface.co/line-corporation/clip-japanese-base) | [line/CLIP-Japanese-base](https://github.com/line/CLIP-Japanese-base) |
+
+### Local repo directories
+
+| Path | Role |
+|---|---|
+| `lib/notebooks/cifar10_typographic_attack_confusion.ipynb` | CIFAR-10 4×4 experiment (llm-jp JA model) |
+| `lib/notebooks/typographic_attack_confusion.ipynb` | STL-10 version |
+| `docs/PLAN_typographic_confusion_matrix.md` | Experiment plan + model table |
+| `docs/CODE_GUIDE_separate_langs_typographic.md` | Code guide for the 4 model wrappers |
+| `claude_experiments/perlang_models.py` | Reusable model wrapper definitions |
+| `claude_experiments/typographic_attack.py` | `draw_word` + attack matrix logic |
+
+---
+
 ## Assignment 1 — Why is the JA model performing better than the others?
 
 **Short answer:** The original JA model was broken and was replaced with a better one; the replacement happens to be the strongest model in the ensemble.
