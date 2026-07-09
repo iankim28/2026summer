@@ -130,7 +130,7 @@ def load_shared_subset():
     hf = load_dataset("uoft-cs/cifar10", split="test")
     label_key = "label" if "label" in hf.column_names else "labels"
     image_key = "img" if "img" in hf.column_names else "image"
-    indices_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shared", "cifar10_1000_indices.json")
+    indices_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "image_samples", "CIFAR10_4LANG_1000_SAMPLE.json")
     if not os.path.exists(indices_path):
         rng = random.Random(0)
         idx = rng.sample(range(len(hf)), 1000)
