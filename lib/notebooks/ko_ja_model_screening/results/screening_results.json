@@ -1,0 +1,181 @@
+{
+  "sample": "CIFAR10_BALANCED_1000_SAMPLE",
+  "n_images": 1000,
+  "device": "cuda",
+  "classes_en": [
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck"
+  ],
+  "models": [
+    {
+      "key": "en_openai",
+      "lang": "en",
+      "label": "OpenAI ViT-B/32",
+      "hf_id": "openai",
+      "notes": "EN baseline",
+      "current": false,
+      "status": "ok",
+      "clean_acc": 0.859,
+      "per_class": {
+        "0": 0.87,
+        "1": 0.78,
+        "2": 0.93,
+        "3": 0.77,
+        "4": 0.82,
+        "5": 0.88,
+        "6": 0.62,
+        "7": 0.95,
+        "8": 0.98,
+        "9": 0.99
+      },
+      "load_eval_s": 4.0
+    },
+    {
+      "key": "zh_chinese",
+      "lang": "zh",
+      "label": "Chinese CLIP ViT-B/16",
+      "hf_id": "OFA-Sys/chinese-clip-vit-base-patch16",
+      "notes": "ZH baseline",
+      "current": false,
+      "status": "ok",
+      "clean_acc": 0.914,
+      "per_class": {
+        "0": 0.89,
+        "1": 0.99,
+        "2": 0.92,
+        "3": 0.91,
+        "4": 0.84,
+        "5": 0.87,
+        "6": 0.88,
+        "7": 0.89,
+        "8": 0.96,
+        "9": 0.99
+      },
+      "load_eval_s": 4.5
+    },
+    {
+      "key": "ko_bingsu_b32",
+      "lang": "ko",
+      "label": "Bingsu ViT-B/32",
+      "hf_id": "Bingsu/clip-vit-base-patch32-ko",
+      "notes": "Current KO model in 4-lang notebook",
+      "current": true,
+      "status": "ok",
+      "clean_acc": 0.897,
+      "per_class": {
+        "0": 0.93,
+        "1": 0.97,
+        "2": 0.92,
+        "3": 0.89,
+        "4": 0.86,
+        "5": 0.83,
+        "6": 0.74,
+        "7": 0.97,
+        "8": 0.97,
+        "9": 0.89
+      },
+      "load_eval_s": 2.7
+    },
+    {
+      "key": "ko_bingsu_l14",
+      "lang": "ko",
+      "label": "Bingsu ViT-L/14",
+      "hf_id": "Bingsu/clip-vit-large-patch14-ko",
+      "notes": "Larger Bingsu distillation model",
+      "current": false,
+      "status": "ok",
+      "clean_acc": 0.965,
+      "per_class": {
+        "0": 0.96,
+        "1": 0.97,
+        "2": 0.97,
+        "3": 0.96,
+        "4": 0.97,
+        "5": 0.95,
+        "6": 0.91,
+        "7": 0.98,
+        "8": 0.98,
+        "9": 1.0
+      },
+      "load_eval_s": 10.9
+    },
+    {
+      "key": "ja_llmjp_b16",
+      "lang": "ja",
+      "label": "llm-jp ViT-B/16",
+      "hf_id": "llm-jp/llm-jp-clip-vit-base-patch16",
+      "notes": "Current JA model in 4-lang notebook",
+      "current": true,
+      "status": "ok",
+      "clean_acc": 0.925,
+      "per_class": {
+        "0": 0.95,
+        "1": 0.99,
+        "2": 0.93,
+        "3": 0.8,
+        "4": 0.88,
+        "5": 0.96,
+        "6": 0.84,
+        "7": 0.95,
+        "8": 0.97,
+        "9": 0.98
+      },
+      "load_eval_s": 4.9
+    },
+    {
+      "key": "ja_llmjp_l14",
+      "lang": "ja",
+      "label": "llm-jp ViT-L/14",
+      "hf_id": "llm-jp/llm-jp-clip-vit-large-patch14",
+      "notes": "Larger llm-jp; 96.4% CIFAR-10 in model card",
+      "current": false,
+      "status": "ok",
+      "clean_acc": 0.97,
+      "per_class": {
+        "0": 0.95,
+        "1": 0.98,
+        "2": 0.98,
+        "3": 0.96,
+        "4": 0.95,
+        "5": 0.97,
+        "6": 0.94,
+        "7": 0.99,
+        "8": 0.99,
+        "9": 0.99
+      },
+      "load_eval_s": 12.5
+    },
+    {
+      "key": "ja_ly_v2",
+      "lang": "ja",
+      "label": "LY clip-japanese-base-v2",
+      "hf_id": "line-corporation/clip-japanese-base-v2",
+      "notes": "~2B pairs + distillation; strong Recruit/WAON scores",
+      "current": false,
+      "status": "error",
+      "error": "'CLYPModel' object has no attribute 'all_tied_weights_keys'",
+      "traceback": "Traceback (most recent call last):\n  File \"d:\\ian\\2026summer\\lib\\notebooks\\ko_ja_model_screening\\screen_ko_ja_models.py\", line 230, in main\n    model = load_wrapper(spec)\n  File \"d:\\ian\\2026summer\\lib\\notebooks\\ko_ja_model_screening\\screen_ko_ja_models.py\", line 147, in load_wrapper\n    model = AutoModel.from_pretrained(spec.hf_id, trust_remote_code=True).to(DEVICE).eval()\n            ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\models\\auto\\auto_factory.py\", line 391, in from_pretrained\n    return model_class.from_pretrained(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        pretrained_model_name_or_path, *model_args, config=config, **hub_kwargs, **kwargs\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\modeling_utils.py\", line 4328, in from_pretrained\n    loading_info = cls._finalize_model_loading(model, load_config, loading_info)\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\modeling_utils.py\", line 4484, in _finalize_model_loading\n    model._move_missing_keys_from_meta_to_device(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        loading_info.missing_and_mismatched(),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<2 lines>...\n        load_config.hf_quantizer,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\modeling_utils.py\", line 4774, in _move_missing_keys_from_meta_to_device\n    for key in missing_keys - self.all_tied_weights_keys.keys():\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\torch\\nn\\modules\\module.py\", line 1967, in __getattr__\n    raise AttributeError(\n        f\"'{type(self).__name__}' object has no attribute '{name}'\"\n    )\nAttributeError: 'CLYPModel' object has no attribute 'all_tied_weights_keys'. Did you mean: '_tied_weights_keys'?\n",
+      "load_eval_s": 0.4
+    },
+    {
+      "key": "ja_stable_l16",
+      "lang": "ja",
+      "label": "Stability JA ViT-L/16",
+      "hf_id": "stabilityai/japanese-stable-clip-vit-l-16",
+      "notes": "Gated HF repo; 97.6% CIFAR-10 in llm-jp table",
+      "current": false,
+      "status": "error",
+      "error": "You are trying to access a gated repo.\nMake sure to have access to it at https://huggingface.co/stabilityai/japanese-stable-clip-vit-l-16.\n401 Client Error. (Request ID: Root=1-6a516ce5-5f3ae7816babaa3c5a3765ad;4691df57-74f6-4a41-a529-9381e81bf63a)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/japanese-stable-clip-vit-l-16/resolve/main/config.json.\nAccess to model stabilityai/japanese-stable-clip-vit-l-16 is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\utils\\_http.py\", line 761, in hf_raise_for_status\n    response.raise_for_status()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\httpx\\_models.py\", line 829, in raise_for_status\n    raise HTTPStatusError(message, request=request, response=self)\nhttpx.HTTPStatusError: Client error '401 Unauthorized' for url 'https://huggingface.co/stabilityai/japanese-stable-clip-vit-l-16/resolve/main/config.json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\utils\\hub.py\", line 437, in cached_files\n    hf_hub_download(\n    ~~~~~~~~~~~~~~~^\n        path_or_repo_id,\n        ^^^^^^^^^^^^^^^^\n    ...<10 lines>...\n        tqdm_class=tqdm_class,\n        ^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\utils\\_validators.py\", line 88, in _inner_fn\n    return fn(*args, **kwargs)\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\file_download.py\", line 1015, in hf_hub_download\n    return _hf_hub_download_to_cache_dir(\n        # Destination\n    ...<15 lines>...\n        dry_run=dry_run,\n    )\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\file_download.py\", line 1166, in _hf_hub_download_to_cache_dir\n    _raise_on_head_call_error(head_call_error, force_download, local_files_only)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\file_download.py\", line 1804, in _raise_on_head_call_error\n    raise head_call_error\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\file_download.py\", line 1690, in _get_metadata_or_catch_error\n    metadata = get_hf_file_metadata(\n        url=url,\n    ...<4 lines>...\n        retry_on_errors=retry_on_errors,\n    )\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\utils\\_validators.py\", line 88, in _inner_fn\n    return fn(*args, **kwargs)\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\file_download.py\", line 1612, in get_hf_file_metadata\n    response = _httpx_follow_relative_redirects_with_backoff(\n        method=\"HEAD\", url=url, headers=hf_headers, timeout=timeout, retry_on_errors=retry_on_errors\n    )\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\utils\\_http.py\", line 692, in _httpx_follow_relative_redirects_with_backoff\n    hf_raise_for_status(response)\n    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\huggingface_hub\\utils\\_http.py\", line 787, in hf_raise_for_status\n    raise _format(GatedRepoError, message, response, repo_type=repo_type, repo_id=repo_id) from e\nhuggingface_hub.errors.GatedRepoError: 401 Client Error. (Request ID: Root=1-6a516ce5-5f3ae7816babaa3c5a3765ad;4691df57-74f6-4a41-a529-9381e81bf63a)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/japanese-stable-clip-vit-l-16/resolve/main/config.json.\nAccess to model stabilityai/japanese-stable-clip-vit-l-16 is restricted. You must have access to it and be authenticated to access it. Please log in.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"d:\\ian\\2026summer\\lib\\notebooks\\ko_ja_model_screening\\screen_ko_ja_models.py\", line 230, in main\n    model = load_wrapper(spec)\n  File \"d:\\ian\\2026summer\\lib\\notebooks\\ko_ja_model_screening\\screen_ko_ja_models.py\", line 147, in load_wrapper\n    model = AutoModel.from_pretrained(spec.hf_id, trust_remote_code=True).to(DEVICE).eval()\n            ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\models\\auto\\auto_factory.py\", line 338, in from_pretrained\n    config, kwargs = AutoConfig.from_pretrained(\n                     ~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        pretrained_model_name_or_path,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\models\\auto\\configuration_auto.py\", line 376, in from_pretrained\n    config_dict, unused_kwargs = PreTrainedConfig.get_config_dict(pretrained_model_name_or_path, **kwargs)\n                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\configuration_utils.py\", line 687, in get_config_dict\n    config_dict, kwargs = cls._get_config_dict(pretrained_model_name_or_path, **kwargs)\n                          ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\configuration_utils.py\", line 742, in _get_config_dict\n    resolved_config_file = cached_file(\n        pretrained_model_name_or_path,\n    ...<9 lines>...\n        _commit_hash=commit_hash,\n    )\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\utils\\hub.py\", line 293, in cached_file\n    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)\n  File \"D:\\ian\\2026summer\\.venv\\Lib\\site-packages\\transformers\\utils\\hub.py\", line 503, in cached_files\n    raise OSError(\n    ...<2 lines>...\n    ) from e\nOSError: You are trying to access a gated repo.\nMake sure to have access to it at https://huggingface.co/stabilityai/japanese-stable-clip-vit-l-16.\n401 Client Error. (Request ID: Root=1-6a516ce5-5f3ae7816babaa3c5a3765ad;4691df57-74f6-4a41-a529-9381e81bf63a)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/japanese-stable-clip-vit-l-16/resolve/main/config.json.\nAccess to model stabilityai/japanese-stable-clip-vit-l-16 is restricted. You must have access to it and be authenticated to access it. Please log in.\n",
+      "load_eval_s": 0.1
+    }
+  ]
+}

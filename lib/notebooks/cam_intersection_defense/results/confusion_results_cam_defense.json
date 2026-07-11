@@ -1,0 +1,353 @@
+{
+  "sample": "CIFAR10_BALANCED_1000_SAMPLE",
+  "best_threshold_tune": 0.95,
+  "default_config": {
+    "strategy": "intersection",
+    "mode": "min",
+    "threshold": 0.95,
+    "dilate": 3
+  },
+  "baseline": {
+    "clean_acc": {
+      "en": 0.859,
+      "zh": 0.914
+    },
+    "acc_matrix": [
+      [
+        0.046,
+        0.371
+      ],
+      [
+        0.809,
+        0.578
+      ]
+    ],
+    "asr_matrix": [
+      [
+        0.953,
+        0.612
+      ],
+      [
+        0.019,
+        0.387
+      ]
+    ]
+  },
+  "defense": {
+    "en_attack": {
+      "coverage_mean": 0.08976811623086735,
+      "models": {
+        "en": {
+          "acc": 0.514,
+          "asr": 0.317,
+          "recovery_rate": 0.5,
+          "baseline_acc": 0.046,
+          "baseline_asr": 0.953
+        },
+        "zh": {
+          "acc": 0.679,
+          "asr": 0.198,
+          "recovery_rate": 0.5500794912559619,
+          "baseline_acc": 0.371,
+          "baseline_asr": 0.612
+        }
+      }
+    },
+    "zh_attack": {
+      "coverage_mean": 0.09312009725765305,
+      "models": {
+        "en": {
+          "acc": 0.666,
+          "asr": 0.028,
+          "recovery_rate": 0.1256544502617801,
+          "baseline_acc": 0.809,
+          "baseline_asr": 0.019
+        },
+        "zh": {
+          "acc": 0.701,
+          "asr": 0.151,
+          "recovery_rate": 0.4549763033175355,
+          "baseline_acc": 0.578,
+          "baseline_asr": 0.387
+        }
+      }
+    }
+  },
+  "ablations": {
+    "intersection_min": {
+      "coverage_mean": 0.08976811623086735,
+      "models": {
+        "en": {
+          "acc": 0.514,
+          "asr": 0.317
+        },
+        "zh": {
+          "acc": 0.679,
+          "asr": 0.198
+        }
+      }
+    },
+    "intersection_product": {
+      "coverage_mean": 0.08260805963010204,
+      "models": {
+        "en": {
+          "acc": 0.544,
+          "asr": 0.311
+        },
+        "zh": {
+          "acc": 0.694,
+          "asr": 0.185
+        }
+      }
+    },
+    "en_only": {
+      "coverage_mean": 0.07316906489158165,
+      "models": {
+        "en": {
+          "acc": 0.434,
+          "asr": 0.471
+        },
+        "zh": {
+          "acc": 0.615,
+          "asr": 0.299
+        }
+      }
+    },
+    "zh_only": {
+      "coverage_mean": 0.0838901666135204,
+      "models": {
+        "en": {
+          "acc": 0.55,
+          "asr": 0.288
+        },
+        "zh": {
+          "acc": 0.728,
+          "asr": 0.156
+        }
+      }
+    },
+    "bottom_prior": {
+      "coverage_mean": 0.11342498405612246,
+      "models": {
+        "en": {
+          "acc": 0.664,
+          "asr": 0.151
+        },
+        "zh": {
+          "acc": 0.758,
+          "asr": 0.094
+        }
+      }
+    },
+    "oracle_bottom": {
+      "coverage_mean": 0.25,
+      "models": {
+        "en": {
+          "acc": 0.797,
+          "asr": 0.027
+        },
+        "zh": {
+          "acc": 0.86,
+          "asr": 0.023
+        }
+      }
+    }
+  },
+  "clean_degradation": {
+    "coverage_mean": 0.1134367825255102,
+    "models": {
+      "en": {
+        "baseline_acc": 0.859,
+        "masked_acc": 0.686,
+        "delta_acc": -0.17299999999999993
+      },
+      "zh": {
+        "baseline_acc": 0.914,
+        "masked_acc": 0.811,
+        "delta_acc": -0.10299999999999998
+      }
+    }
+  },
+  "threshold_sweep": [
+    {
+      "condition": "en_attack",
+      "model": "en",
+      "threshold": 0.75,
+      "baseline_acc": 0.04,
+      "masked_acc": 0.28,
+      "masked_asr": 0.21,
+      "coverage": 0.45520428093112253
+    },
+    {
+      "condition": "en_attack",
+      "model": "zh",
+      "threshold": 0.75,
+      "baseline_acc": 0.36,
+      "masked_acc": 0.43,
+      "masked_asr": 0.15,
+      "coverage": 0.45520428093112253
+    },
+    {
+      "condition": "en_attack",
+      "model": "en",
+      "threshold": 0.8,
+      "baseline_acc": 0.04,
+      "masked_acc": 0.36,
+      "masked_asr": 0.23,
+      "coverage": 0.36784080038265315
+    },
+    {
+      "condition": "en_attack",
+      "model": "zh",
+      "threshold": 0.8,
+      "baseline_acc": 0.36,
+      "masked_acc": 0.49,
+      "masked_asr": 0.14,
+      "coverage": 0.36784080038265315
+    },
+    {
+      "condition": "en_attack",
+      "model": "en",
+      "threshold": 0.85,
+      "baseline_acc": 0.04,
+      "masked_acc": 0.42,
+      "masked_asr": 0.27,
+      "coverage": 0.2731108498086734
+    },
+    {
+      "condition": "en_attack",
+      "model": "zh",
+      "threshold": 0.85,
+      "baseline_acc": 0.36,
+      "masked_acc": 0.54,
+      "masked_asr": 0.15,
+      "coverage": 0.2731108498086734
+    },
+    {
+      "condition": "en_attack",
+      "model": "en",
+      "threshold": 0.9,
+      "baseline_acc": 0.04,
+      "masked_acc": 0.45,
+      "masked_asr": 0.25,
+      "coverage": 0.16575215242346938
+    },
+    {
+      "condition": "en_attack",
+      "model": "zh",
+      "threshold": 0.9,
+      "baseline_acc": 0.36,
+      "masked_acc": 0.65,
+      "masked_asr": 0.14,
+      "coverage": 0.16575215242346938
+    },
+    {
+      "condition": "en_attack",
+      "model": "en",
+      "threshold": 0.95,
+      "baseline_acc": 0.04,
+      "masked_acc": 0.48,
+      "masked_asr": 0.31,
+      "coverage": 0.08520727040816327
+    },
+    {
+      "condition": "en_attack",
+      "model": "zh",
+      "threshold": 0.95,
+      "baseline_acc": 0.36,
+      "masked_acc": 0.7,
+      "masked_asr": 0.22,
+      "coverage": 0.08520727040816327
+    },
+    {
+      "condition": "zh_attack",
+      "model": "en",
+      "threshold": 0.75,
+      "baseline_acc": 0.69,
+      "masked_acc": 0.35,
+      "masked_asr": 0.07,
+      "coverage": 0.46514568718112237
+    },
+    {
+      "condition": "zh_attack",
+      "model": "zh",
+      "threshold": 0.75,
+      "baseline_acc": 0.56,
+      "masked_acc": 0.37,
+      "masked_asr": 0.17,
+      "coverage": 0.46514568718112237
+    },
+    {
+      "condition": "zh_attack",
+      "model": "en",
+      "threshold": 0.8,
+      "baseline_acc": 0.69,
+      "masked_acc": 0.46,
+      "masked_asr": 0.05,
+      "coverage": 0.36370336415816323
+    },
+    {
+      "condition": "zh_attack",
+      "model": "zh",
+      "threshold": 0.8,
+      "baseline_acc": 0.56,
+      "masked_acc": 0.44,
+      "masked_asr": 0.19,
+      "coverage": 0.36370336415816323
+    },
+    {
+      "condition": "zh_attack",
+      "model": "en",
+      "threshold": 0.85,
+      "baseline_acc": 0.69,
+      "masked_acc": 0.55,
+      "masked_asr": 0.06,
+      "coverage": 0.28228097098214283
+    },
+    {
+      "condition": "zh_attack",
+      "model": "zh",
+      "threshold": 0.85,
+      "baseline_acc": 0.56,
+      "masked_acc": 0.5,
+      "masked_asr": 0.18,
+      "coverage": 0.28228097098214283
+    },
+    {
+      "condition": "zh_attack",
+      "model": "en",
+      "threshold": 0.9,
+      "baseline_acc": 0.69,
+      "masked_acc": 0.56,
+      "masked_asr": 0.04,
+      "coverage": 0.18555923150510203
+    },
+    {
+      "condition": "zh_attack",
+      "model": "zh",
+      "threshold": 0.9,
+      "baseline_acc": 0.56,
+      "masked_acc": 0.59,
+      "masked_asr": 0.13,
+      "coverage": 0.18555923150510203
+    },
+    {
+      "condition": "zh_attack",
+      "model": "en",
+      "threshold": 0.95,
+      "baseline_acc": 0.69,
+      "masked_acc": 0.59,
+      "masked_asr": 0.04,
+      "coverage": 0.09488998724489797
+    },
+    {
+      "condition": "zh_attack",
+      "model": "zh",
+      "threshold": 0.95,
+      "baseline_acc": 0.56,
+      "masked_acc": 0.65,
+      "masked_asr": 0.16,
+      "coverage": 0.09488998724489797
+    }
+  ]
+}

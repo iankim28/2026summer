@@ -1241,3 +1241,144 @@ The original 1000-image CIFAR-10 sample (`CIFAR10_4LANG_1000_SAMPLE.json`) is a 
 
 
 A new sample (`CIFAR10_BALANCED_1000_SAMPLE.json`) with exactly 100 images per class has been created in `image_samples/`.
+
+---
+
+
+
+## July 10, 2026
+
+**Notebook:** `lib/notebooks/en_zh_typographic/balanced_typographic_comparison.ipynb`
+**Results:** `lib/notebooks/en_zh_typographic/results/balanced/`
+
+EN vs ZH typographic attack experiment on the balanced 1000-image CIFAR-10 sample (100 per class). Same overlay style as `large_font_typographic_comparison.ipynb`: upscale to 224×224, font size 40.
+
+### Bug fix — balanced sample JSON
+
+`CIFAR10_BALANCED_1000_SAMPLE.json` had a pairing bug: `idx` was shuffled but `true` was saved in class-block order (`[0]×100, [1]×100, …`). Loading triggered an assertion error and, if bypassed, would have used the wrong labels. Regenerated the file with seed 0 so `idx` and `true` stay aligned; verified 100 images per class.
+
+### Results (large font, balanced sample)
+
+
+|                | model_EN | model_ZH |
+| -------------- | -------- | -------- |
+| Clean baseline | 85.9%    | 91.4%    |
+| attack_EN      | 4.6%     | 37.1%    |
+| attack_ZH      | 80.9%    | 57.8%    |
+
+
+Attack Success Rate (pred == written adversarial class):
+
+
+|           | model_EN | model_ZH |
+| --------- | -------- | -------- |
+| attack_EN | 95.3%    | 61.2%    |
+| attack_ZH | 1.9%     | 38.7%    |
+
+
+Disagreement detector (unique predictions across EN + ZH):
+
+
+| Attack | All-agree (attacked) | AUC   |
+| ------ | -------------------- | ----- |
+| EN     | 62.1%                | 0.614 |
+| ZH     | 54.4%                | 0.652 |
+
+
+
+
+### Observations
+
+1. **Large font changes everything.** On the same balanced indices, the small-font overlay (native 32×32, `h // 24`) barely moved accuracy (EN attack: ~82–89% retained). Size-40 text on 224×224 matches the 4-model CIFAR-10 notebook behaviour: EN attack collapses EN model to 4.6% and fools ZH 61% of the time.
+2. **Balanced sample enables fair per-class breakdowns.** With exactly 100 images per class, per-class accuracy bars are no longer skewed by sample-size bias (unlike the seed-0 random 1000 draw where cat had 123 images and horse only 80).
+3. **ZH attack is asymmetric.** ZH overlay hurts the ZH model (91.4% → 57.8%) more than EN (85.9% → 80.9%), but EN attack remains the dominant threat for both models.
+4. **Detector signal is modest.** ZH attack gives the highest AUC (0.652) because it fools ZH while leaving EN relatively stable — the same cross-model disagreement pattern seen in the 4-model runs, but weaker with only two voters.
+
+
+
+### Next steps
+
+- Per-class bar charts on the balanced sample (compare EN vs ZH vulnerability class-by-class with equal N).
+- Save fixed `target` labels in the JSON (currently regenerated at load time with seed 0) so attack targets are reproducible across runs without re-deriving.
+
+
+
+### KO / JA CLIP model screening
+
+**Script:** `lib/notebooks/ko_ja_model_screening/screen_ko_ja_models.py`
+**Results:** `lib/notebooks/ko_ja_model_screening/results/screening_results.json`
+
+Screened Korean and Japanese CLIP candidates against EN/ZH baselines on the same balanced 1000-image CIFAR-10 sample (100 per class). Goal: find KO/JA models as strong as Chinese CLIP (91.4%) and the current JA model.
+
+**Recommended upgrades for the 4-lang typographic notebook:**
+
+
+| Role | HuggingFace id                         | Architecture                       |
+| ---- | -------------------------------------- | ---------------------------------- |
+| KO   | `Bingsu/clip-vit-large-patch14-ko`     | ViT-L/14, Korean distillation CLIP |
+| JA   | `llm-jp/llm-jp-clip-vit-large-patch14` | ViT-L/14, Japanese OpenCLIP        |
+
+
+Both use the same loading pattern as the current models (HF `AutoModel` for KO, `open_clip` hf-hub for JA).
+
+**Clean accuracy — balanced 1000-image CIFAR-10 (100 per class):**
+
+
+| Model                    | Lang   | Clean acc | vs ZH (91.4%) | Status                        |
+| ------------------------ | ------ | --------- | ------------- | ----------------------------- |
+| OpenAI ViT-B/32          | EN     | 85.9%     | —             | baseline                      |
+| Chinese CLIP ViT-B/16    | ZH     | 91.4%     | —             | baseline                      |
+| Bingsu ViT-B/32          | KO     | 89.7%     | −1.7pp        | current in 4-lang notebook    |
+| **Bingsu ViT-L/14**      | **KO** | **96.5%** | **+5.1pp**    | **recommended KO upgrade**    |
+| llm-jp ViT-B/16          | JA     | 92.5%     | +1.1pp        | current in 4-lang notebook    |
+| **llm-jp ViT-L/14**      | **JA** | **97.0%** | **+5.6pp**    | **recommended JA upgrade**    |
+| LY clip-japanese-base-v2 | JA     | —         | —             | load error (transformers 5.x) |
+| Stability JA ViT-L/16    | JA     | —         | —             | gated HuggingFace repo        |
+
+
+**Per-class accuracy (recommended models vs current):**
+
+
+| Class      | EN  | ZH  | KO B/32 | **KO L/14** | JA B/16 | **JA L/14** |
+| ---------- | --- | --- | ------- | ----------- | ------- | ----------- |
+| airplane   | 87% | 89% | 93%     | 96%         | 95%     | 95%         |
+| automobile | 78% | 99% | 97%     | 97%         | 99%     | 98%         |
+| bird       | 93% | 92% | 92%     | 97%         | 93%     | 98%         |
+| cat        | 77% | 91% | 89%     | 96%         | 80%     | 96%         |
+| deer       | 82% | 84% | 86%     | 97%         | 88%     | 95%         |
+| dog        | 88% | 87% | 83%     | 95%         | 96%     | 97%         |
+| frog       | 62% | 88% | 74%     | 91%         | 84%     | 94%         |
+| horse      | 95% | 89% | 97%     | 98%         | 95%     | 99%         |
+| ship       | 98% | 96% | 97%     | 98%         | 97%     | 99%         |
+| truck      | 99% | 99% | 89%     | 100%        | 98%     | 99%         |
+
+
+Key findings:
+
+1. **KO upgrade is the bigger win.** Current Bingsu B/32 (89.7%) trails ZH; Bingsu L/14 (96.5%) jumps +6.8pp over current KO and +5.1pp over ZH. Biggest per-class gains: frog (74%→91%), cat (89%→96%), truck (89%→100%).
+2. **JA is already above ZH** with llm-jp B/16 (92.5%); L/14 (97.0%) is the best model tested. Cat improves 80%→96%.
+3. **No exotic architecture needed** — scaling up within the same families (Bingsu, llm-jp) beats hunting alternatives. KELIP (~55% Korean CIFAR-10 per paper) and LY clip-japanese-base-v2 (load broken) were not viable.
+4. **Next:** swap recommended models into `cifar10_typographic_4lang/typographic_attack_confusion.ipynb` and re-run the 4×4 attack grid.
+
+## 2026-07-10 — CAM intersection masking defense (EN/ZH typographic)
+
+**Notebook:** `lib/notebooks/cam_intersection_defense/cam_intersection_defense.ipynb` (fast re-run: `run_cam_defense_fast.py`)
+**Results:** `lib/notebooks/cam_intersection_defense/results/`
+
+**Idea:** On typographic-attacked images, EN and ZH CLIP models often co-attend the same text strip (visible in GradCAM). Intersect high-saliency regions from both models, mask them (mean-fill), and re-classify.
+
+**Setup:** Balanced 1000-image CIFAR-10 sample, large-font overlay (size 40 @ 224px). GradCAM target = each model's own attacked prediction. Best threshold = 95th percentile on 100-image tune subset (~9% pixels masked).
+
+**EN attack results (primary case):**
+
+| Model | Baseline acc | After masking | ASR before → after | Recovery |
+|-------|-------------|---------------|-------------------|----------|
+| EN | 4.6% | **51.4%** | 95.3% → 31.7% | 50.0% |
+| ZH | 37.1% | **67.9%** | 61.2% → 19.8% | 55.0% |
+
+**Ablations (EN attack):** intersection+product (54.4% EN acc) beats min-only (51.4%). Bottom-band prior ∩ CAM reaches 66.4% EN / 75.8% ZH. Oracle bottom-25% mask upper bound: 79.7% EN / 86.0% ZH — confirms most recoverable signal is in the text strip.
+
+**Failure mode:** Clean images degrade (EN 85.9%→68.6%, ZH 91.4%→81.1%) because both models attend to the object, not text. Defense is useful as targeted preprocessing when attack is suspected, not blind application.
+
+**Conclusion:** Cross-lingual saliency agreement is a viable spatial defense signal for typographic attacks, complementary to the existing prediction-disagreement detector. Next step: gate masking on disagreement score to avoid clean-image degradation.
+
