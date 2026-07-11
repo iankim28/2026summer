@@ -1,0 +1,143 @@
+{
+  "n": 2000,
+  "rows": {
+    "clean": {
+      "vote_acc": 0.9615,
+      "vote_asr": 0.005,
+      "soft_acc": 0.9595,
+      "soft_asr": 0.0045,
+      "agree": 0.8905,
+      "best_single_acc": 0.9635,
+      "mean_single_acc": 0.9437000000000001,
+      "per_lang_acc": {
+        "en": 0.963,
+        "ko": 0.876,
+        "es": 0.9635,
+        "fr": 0.959,
+        "ja": 0.957
+      },
+      "per_lang_asr": {
+        "en": 0.0045,
+        "ko": 0.012,
+        "es": 0.0045,
+        "fr": 0.0055,
+        "ja": 0.007
+      }
+    },
+    "en": {
+      "vote_acc": 0.456,
+      "vote_asr": 0.5395,
+      "soft_acc": 0.463,
+      "soft_asr": 0.5325,
+      "agree": 0.681,
+      "best_single_acc": 0.5485,
+      "mean_single_acc": 0.4631,
+      "per_lang_acc": {
+        "en": 0.3595,
+        "ko": 0.4305,
+        "es": 0.5205,
+        "fr": 0.5485,
+        "ja": 0.4565
+      },
+      "per_lang_asr": {
+        "en": 0.6385,
+        "ko": 0.561,
+        "es": 0.471,
+        "fr": 0.444,
+        "ja": 0.5385
+      }
+    },
+    "ko": {
+      "vote_acc": 0.9445,
+      "vote_asr": 0.0075,
+      "soft_acc": 0.9415,
+      "soft_asr": 0.009,
+      "agree": 0.896,
+      "best_single_acc": 0.9465,
+      "mean_single_acc": 0.9305999999999999,
+      "per_lang_acc": {
+        "en": 0.9465,
+        "ko": 0.88,
+        "es": 0.941,
+        "fr": 0.945,
+        "ja": 0.9405
+      },
+      "per_lang_asr": {
+        "en": 0.0065,
+        "ko": 0.0145,
+        "es": 0.008,
+        "fr": 0.008,
+        "ja": 0.009
+      }
+    },
+    "es": {
+      "vote_acc": 0.936,
+      "vote_asr": 0.0185,
+      "soft_acc": 0.9335,
+      "soft_asr": 0.0205,
+      "agree": 0.8545,
+      "best_single_acc": 0.933,
+      "mean_single_acc": 0.9166000000000001,
+      "per_lang_acc": {
+        "en": 0.932,
+        "ko": 0.865,
+        "es": 0.9205,
+        "fr": 0.933,
+        "ja": 0.9325
+      },
+      "per_lang_asr": {
+        "en": 0.0205,
+        "ko": 0.029,
+        "es": 0.0415,
+        "fr": 0.02,
+        "ja": 0.0135
+      }
+    },
+    "fr": {
+      "vote_acc": 0.923,
+      "vote_asr": 0.032,
+      "soft_acc": 0.9195,
+      "soft_asr": 0.0335,
+      "agree": 0.8495,
+      "best_single_acc": 0.9315,
+      "mean_single_acc": 0.9056,
+      "per_lang_acc": {
+        "en": 0.9225,
+        "ko": 0.849,
+        "es": 0.92,
+        "fr": 0.905,
+        "ja": 0.9315
+      },
+      "per_lang_asr": {
+        "en": 0.0285,
+        "ko": 0.0385,
+        "es": 0.0335,
+        "fr": 0.0585,
+        "ja": 0.0205
+      }
+    },
+    "ja": {
+      "vote_acc": 0.949,
+      "vote_asr": 0.008,
+      "soft_acc": 0.9475,
+      "soft_asr": 0.009,
+      "agree": 0.887,
+      "best_single_acc": 0.956,
+      "mean_single_acc": 0.9351,
+      "per_lang_acc": {
+        "en": 0.956,
+        "ko": 0.887,
+        "es": 0.948,
+        "fr": 0.946,
+        "ja": 0.9385
+      },
+      "per_lang_asr": {
+        "en": 0.007,
+        "ko": 0.0125,
+        "es": 0.0075,
+        "fr": 0.0085,
+        "ja": 0.0105
+      }
+    }
+  }
+}
