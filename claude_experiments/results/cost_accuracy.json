@@ -1,0 +1,40 @@
+{
+  "points": [
+    {
+      "name": "no defense",
+      "cost": 1,
+      "acc": 26.666666666666668
+    },
+    {
+      "name": "occlusion 2x2",
+      "cost": 6,
+      "acc": 76.0
+    },
+    {
+      "name": "occlusion 4x4",
+      "cost": 18,
+      "acc": 84.0
+    },
+    {
+      "name": "occlusion 7x7",
+      "cost": 51,
+      "acc": 84.0
+    },
+    {
+      "name": "occlusion 14x14",
+      "cost": 198,
+      "acc": 64.0
+    },
+    {
+      "name": "2-model overlap 7x7",
+      "cost": 100,
+      "acc": 76.0
+    },
+    {
+      "name": "oracle (known box)",
+      "cost": 2,
+      "acc": 96.0
+    }
+  ],
+  "n": 150
+}
