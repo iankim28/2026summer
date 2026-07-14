@@ -1488,3 +1488,23 @@ Clean accuracy: **EN CLIP 85.9%, ZH CLIP 91.4%** (identical across all condition
 - **Unilingual ZH model is partially robust by default**: even without defense, ZH CLIP achieves 27.1% accuracy under an English-only typographic attack (vs 7.3% under the multilingual dual-language attack), because the ZH model is less sensitive to English text overlays.
 - **CAM masking degrades clean accuracy significantly** (~25–37pp drop), which is the main cost of this defense strategy.
 
+### Cost vs. performance chart
+
+`cost_vs_performance.ipynb` aggregates all 9 result JSONs and plots inference cost (forward passes / image) against mean post-defence accuracy for both setups. Chart saved to `cost_vs_performance.png`. The Pareto frontier is cam_2mod at cost 6: every cheaper method (no_defense at cost 2) gives near-zero accuracy, and every more expensive method (cam_4mod at 10, grid defences at 32–62) gives equal or worse accuracy. The chart makes the cam_4mod regression and grid failure visually unambiguous.
+
+### Exhaustive grid test
+
+**Notebook:** `lib/notebooks/en_zh_multi_uni_attack/_test_exhaustive_grid/exhaustive_grid_test.ipynb`
+**Results:** `_test_exhaustive_grid/results/comparison.json`
+
+Tested whether replacing the greedy 2-patch search with an exhaustive search over all C(16,2) = 120 patch pairs changes the outcome. Run on the 100-image tune subset (multilingual attack).
+
+| Method | acc_en | acc_zh | acc_mean | asr_mean | Runtime (100 imgs) |
+|---|---:|---:|---:|---:|---:|
+| no_defense | 6.0% | 4.0% | 5.0% | 95.0% | — |
+| grid_1patch | 5.0% | 14.0% | 9.5% | 90.5% | 9.5 s |
+| grid_2patch_greedy | 6.0% | 16.0% | 11.0% | 89.0% | 8.2 s |
+| grid_2patch_exhaustive | 6.0% | 17.0% | 11.5% | 88.5% | 51.3 s |
+
+Greedy was suboptimal for 22 of 100 images (22%), but the performance gap is negligible: acc_mean 11.0% vs 11.5%, asr_mean 89.0% vs 88.5%. Exhaustive search costs 240 forward passes vs 62 for greedy and runs 6× slower for a gain of 0.5 pp in mean accuracy. Conclusion: **greedy is sufficient** — the dominant failure mode is not patch-pair selection quality but the fundamental inability of a 4×4 grid to isolate the text boxes when they can land anywhere in the 224×224 image.
+
