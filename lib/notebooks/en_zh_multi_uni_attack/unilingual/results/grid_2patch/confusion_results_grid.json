@@ -1,0 +1,37 @@
+{
+  "setup": "unilingual",
+  "method": "grid_2patch",
+  "attack": "unilingual",
+  "n_images": 1000,
+  "inference_cost": 62,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "baseline_acc": {
+    "en": 0.034,
+    "zh": 0.271
+  },
+  "baseline_asr": {
+    "en": 0.965,
+    "zh": 0.718
+  },
+  "defense": {
+    "en": {
+      "acc": 0.04,
+      "asr": 0.957,
+      "recovery_rate": 0.018633540372670808,
+      "baseline_acc": 0.034,
+      "baseline_asr": 0.965
+    },
+    "zh": {
+      "acc": 0.216,
+      "asr": 0.773,
+      "recovery_rate": 0.04252400548696845,
+      "baseline_acc": 0.271,
+      "baseline_asr": 0.718
+    }
+  },
+  "defense_acc_mean": 0.128,
+  "defense_asr_mean": 0.865
+}

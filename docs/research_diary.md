@@ -1382,3 +1382,72 @@ Key findings:
 
 **Conclusion:** Cross-lingual saliency agreement is a viable spatial defense signal for typographic attacks, complementary to the existing prediction-disagreement detector. Next step: gate masking on disagreement score to avoid clean-image degradation.
 
+## 2026-07-12 — Multilingual vs unilingual attack study (design + notebooks)
+
+**Notebooks:** `lib/notebooks/en_zh_multi_uni_attack/`
+**Status:** Notebooks generated, not yet run.
+
+### Motivation
+
+The existing `en_zh_multiple_placement` experiment uses two random EN text boxes, or two random ZH text boxes, separately. A natural question is: what happens when we place *both* languages simultaneously (one EN box, one ZH box), and how does this compare against a pure unilingual (EN+EN) attack? Further, the CAM intersection defense has so far used only the natural pairing (each model looks at its own language). This study systematically explores both the attack dimension and the defence cost dimension.
+
+### Experiment design
+
+**Attack setups** (2 typographic boxes per image, same random placement seeds):
+
+| Setup | Box-0 | Box-1 |
+|---|---|---|
+| Multilingual | EN attack word | ZH attack word |
+| Unilingual | EN attack word | EN attack word (repeated) |
+
+Both setups evaluated on EN CLIP (ViT-B/32 OpenAI) and ZH CLIP (ChineseCLIP ViT-B/16).
+
+**Defence strategies:**
+
+| Method | Description | Forward passes / image |
+|---|---|---|
+| no_defense | baseline (classify only) | 2 |
+| cam_2mod (multilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,ZH) | ~6 |
+| cam_4mod (multilingual) | all 4 cross-combos: EN-EN ∩ EN-ZH ∩ ZH-EN ∩ ZH-ZH | ~10 |
+| cam_2mod (unilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,EN-via-ZH-encoder) | ~6 |
+| grid_1patch | 4×4 grid, best single occlusion by max mean confidence | 32 |
+| grid_2patch | greedy best 2nd patch given 1st | 62 |
+
+The **4-mod** defence introduces cross-language GradCAM probes: the EN model is scored against its own encoding of ZH class names, and the ZH model is scored against its own encoding of EN class names. These cross-lingual saliency maps potentially catch text regions that only one model attends to strongly.
+
+The **grid search defence** is deliberately model-agnostic: no GradCAM, no text information, just trying all 16 patches (or greedy 2-patch pairs) and keeping whichever occlusion makes both models most confident. This is a black-box upper bound on what spatial occlusion alone can achieve.
+
+### Technical notes
+
+- `draw_multilingual_attack()`: box-0 uses Latin font + EN word, box-1 uses CJK font + ZH word; both use the same `random.Random(img_idx * NUM_BOXES + box_i)` seed scheme as existing dual-box code.
+- `TEXT_EMBS` dict holds all 4 `(model_lang, text_lang)` cross-embedding combinations; the two non-standard combos (EN model tokenising Chinese glyphs, ZH model encoding English words) are computed once at model-load time.
+- Generalised `gradcam_en_with_emb` / `gradcam_zh_with_emb` functions accept any text embedding matrix and return `(cam, target_idx)`.
+- `compute_and_cache_cams` saves a single `.npz` per condition with all 4 CAMs; the 2-mod defence just slices the `cam_en_en` and `cam_zh_zh` keys from the same cache.
+- Grid defence batches all 16 occluded variants of one image in a single `embed_images` call per model.
+
+### Folder structure
+
+```
+en_zh_multi_uni_attack/
+├── _build_notebooks.py
+├── cost_vs_performance.ipynb
+├── multilingual/
+│   ├── attack_comparison.ipynb
+│   ├── cam_defense.ipynb          (2-mod + 4-mod)
+│   ├── grid_defense.ipynb         (1-patch + 2-patch)
+│   └── results/{attack/, cam_2mod/, cam_4mod/, grid_1patch/, grid_2patch/}
+└── unilingual/
+    ├── attack_comparison.ipynb
+    ├── cam_defense.ipynb           (2-mod only)
+    ├── grid_defense.ipynb
+    └── results/{attack/, cam_2mod/, grid_1patch/, grid_2patch/}
+```
+
+All results JSONs carry `"method"`, `"setup"`, `"inference_cost"`, and `"defense_acc_mean"` keys so `cost_vs_performance.ipynb` can aggregate them without path-hardcoding.
+
+### Next steps
+
+- Run all notebooks (order: `attack_comparison` → `cam_defense` → `grid_defense` → `cost_vs_performance`).
+- Primary question: does 4-mod CAM meaningfully improve over 2-mod, and is it worth 10 vs 6 forward passes?
+- Secondary question: does grid search (32 passes, no GradCAM) outperform 2-mod CAM (6 passes, model-aware)?
+
