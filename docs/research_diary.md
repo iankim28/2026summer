@@ -1451,3 +1451,40 @@ All results JSONs carry `"method"`, `"setup"`, `"inference_cost"`, and `"defense
 - Primary question: does 4-mod CAM meaningfully improve over 2-mod, and is it worth 10 vs 6 forward passes?
 - Secondary question: does grid search (32 passes, no GradCAM) outperform 2-mod CAM (6 passes, model-aware)?
 
+---
+
+## 2026-07-13 — Full results: en_zh_multi_uni_attack
+
+All 9 experiments complete. CIFAR-10 balanced 1000-image sample, 100/class.
+Clean accuracy: **EN CLIP 85.9%, ZH CLIP 91.4%** (identical across all conditions).
+
+### Complete results table
+
+| Setup | Method | Cost (fwd/img) | EN acc | EN ASR | ZH acc | ZH ASR | Mean acc |
+|---|---|---:|---:|---:|---:|---:|---:|
+| multilingual | no_defense | 2 | 4.3% | 95.5% | 7.3% | 92.7% | 5.8% |
+| multilingual | cam_2mod | 6 | 32.0% | 34.0% | 34.3% | 44.4% | **33.2%** |
+| multilingual | cam_4mod | 10 | 29.8% | 40.6% | 31.9% | 50.9% | 30.9% |
+| multilingual | grid_1patch | 32 | 5.4% | 94.4% | 16.3% | 83.3% | 10.9% |
+| multilingual | grid_2patch | 62 | 6.5% | 93.2% | 16.9% | 82.6% | 11.7% |
+| unilingual | no_defense | 2 | 3.4% | 96.5% | 27.1% | 71.8% | 15.3% |
+| unilingual | cam_2mod | 6 | 25.7% | 46.0% | 39.2% | 35.7% | **32.5%** |
+| unilingual | grid_1patch | 32 | 2.9% | 97.0% | 24.1% | 75.0% | 13.5% |
+| unilingual | grid_2patch | 62 | 4.0% | 95.7% | 21.6% | 77.3% | 12.8% |
+
+### Clean-image degradation under CAM masking
+
+| Setup | Method | EN clean→masked | ZH clean→masked |
+|---|---|---:|---:|
+| multilingual | cam_2mod | 85.9% → 50.5% (−35.4pp) | 91.4% → 64.9% (−26.5pp) |
+| multilingual | cam_4mod | 85.9% → 52.8% (−33.1pp) | 91.4% → 68.6% (−22.8pp) |
+| unilingual | cam_2mod | 85.9% → 48.7% (−37.2pp) | 91.4% → 63.0% (−28.4pp) |
+
+### Key findings
+
+- **cam_2mod is the clear winner** on both setups. At only 6 forward passes it delivers ~33% post-defense mean accuracy vs ~6% (multilingual) and ~15% (unilingual) for no_defense.
+- **cam_4mod underperforms cam_2mod** despite costing 10 passes instead of 6. The cross-language GradCAM probes did not add useful masking signal — mean accuracy dropped from 33.2% to 30.9% on the multilingual attack.
+- **Grid defenses largely fail**: grid_1patch and grid_2patch spend 32–62 passes and barely lift accuracy above the no_defense baseline (10–12% vs 5–15%). Blind spatial occlusion cannot reliably hit the text boxes.
+- **Unilingual ZH model is partially robust by default**: even without defense, ZH CLIP achieves 27.1% accuracy under an English-only typographic attack (vs 7.3% under the multilingual dual-language attack), because the ZH model is less sensitive to English text overlays.
+- **CAM masking degrades clean accuracy significantly** (~25–37pp drop), which is the main cost of this defense strategy.
+
