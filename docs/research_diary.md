@@ -1407,9 +1407,9 @@ Both setups evaluated on EN CLIP (ViT-B/32 OpenAI) and ZH CLIP (ChineseCLIP ViT-
 | Method | Description | Forward passes / image |
 |---|---|---|
 | no_defense | baseline (classify only) | 2 |
-| cam_2mod (multilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,ZH) | ~6 |
-| cam_4mod (multilingual) | all 4 cross-combos: EN-EN ∩ EN-ZH ∩ ZH-EN ∩ ZH-ZH | ~10 |
-| cam_2mod (unilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,EN-via-ZH-encoder) | ~6 |
+| cam_2mod (multilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,ZH) | 6 |
+| cam_4mod (multilingual) | all 4 cross-combos: EN-EN ∩ EN-ZH ∩ ZH-EN ∩ ZH-ZH | 10 |
+| cam_2mod (unilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,EN-via-ZH-encoder) | 6 |
 | grid_1patch | 4×4 grid, best single occlusion by max mean confidence | 32 |
 | grid_2patch | greedy best 2nd patch given 1st | 62 |
 
@@ -1507,4 +1507,47 @@ Tested whether replacing the greedy 2-patch search with an exhaustive search ove
 | grid_2patch_exhaustive | 6.0% | 17.0% | 11.5% | 88.5% | 51.3 s |
 
 Greedy was suboptimal for 22 of 100 images (22%), but the performance gap is negligible: acc_mean 11.0% vs 11.5%, asr_mean 89.0% vs 88.5%. Exhaustive search costs 240 forward passes vs 62 for greedy and runs 6× slower for a gain of 0.5 pp in mean accuracy. Conclusion: **greedy is sufficient** — the dominant failure mode is not patch-pair selection quality but the fundamental inability of a 4×4 grid to isolate the text boxes when they can land anywhere in the 224×224 image.
+
+### Attention-based saliency: can we cut cam_2mod from 6 → 4 forward passes?
+
+**Notebook:** `lib/notebooks/en_zh_multi_uni_attack/_test_attention_defense/attention_defense_test.ipynb`
+
+**Motivation:** GradCAM needs a backward pass per model to compute saliency gradients. ViT self-attention weights are available for free during the normal forward pass — no backward needed. If attention maps produce equally good masks, the defense drops from 6 to 4 forward passes.
+
+**Inference cost breakdown:**
+
+| Method | Operations | Total passes |
+|---|---|---:|
+| GradCAM cam_2mod | 2 × (fwd + back) + 2 × fwd | **6** |
+| Attn cam_2mod | 2 × fwd + 2 × fwd | **4** |
+
+The key identity: `2 × (fwd + back) = 4 ops` vs `2 × fwd = 2 ops` — attention saves exactly 2 backward passes (one per model). Classification is **fused** with saliency extraction in both cases; there is no separate pre-classify step.
+
+**Two attention variants tested:**
+- `Attn-last`: CLS→patch attention from the final transformer block, heads averaged.
+- `Attn-rollout`: Abnar & Zuidema (2020) rollout — propagates attention through all layers via `∏(0.5·A + 0.5·I)`.
+
+**Models:** EN CLIP `open_clip` ViT-B/32 (8 heads, 7×7 = 49 patches at 32 px/patch), ZH CLIP `ChineseCLIP` ViT-B/16 (12 heads, 14×14 = 196 patches at 16 px/patch). EN CLIP hardcodes `need_weights=False` in `open_clip`, so EN attention is extracted via a `register_forward_hook` on each residual block's `attn` sub-module, recomputing weights from the QKV projections. ZH CLIP (via `transformers`) natively supports `output_attentions=True`.
+
+**Tuning subset results (100 images, multilingual attack):** GradCAM reproduced the production result exactly (mean acc 33.1% at threshold 0.85). The notebook full-1000 evaluation was interrupted mid-run for the attention variants; full results pending.
+
+**GradCAM confirmed at cost 6.** Attention variants confirmed at cost 4. Full accuracy comparison pending re-run.
+
+**Update — full 1000-image results (simplified summary):**
+
+| Method | Cost | Mean acc | Coverage | Clean-acc drop |
+|---|---:|---:|---:|---:|
+| GradCAM | 6 | 33.1% | 26.6% | −35.4pp EN / −26.5pp ZH |
+| Attn-rollout | 4 | 62.9% | 21.4% | −25.6pp EN / −16.8pp ZH |
+| Attn-last | 4 | **72.6%** | **7.7%** | **−8.8pp EN / −2.6pp ZH** |
+
+Attention wins on every axis — cheaper, more accurate, and far less damage to clean images. `Attn-last` is the best variant.
+
+*How each method works, in one line:*
+- **GradCAM** = backprop the predicted class's score down to the first conv/patch layer, weight each channel by its average gradient, sum → needs a backward pass.
+- **Attn-last** = just read the CLS token's attention weights from the *last* transformer block (already computed for free during the forward pass) — literally "what the model was looking at right before deciding."
+- **Attn-rollout** = multiply the attention matrices from *all 12* layers together (blended 50/50 with identity each layer) to trace attention all the way back to the input patches — no backward pass either, but the 12x blending smooths/dilutes the signal.
+
+*Why attention (esp. Attn-last) wins:* the typographic attack works by hijacking the model's attention onto the injected text. Attn-last reads that hijacked attention directly, one hop from the final decision — so its mask lands tightly on just the text (sharp, sparse peaks). GradCAM's gradient has to flow backward through all 12 layers to reach the first-layer activation it's computed on, which blurs the signal across the text *and* the real object, forcing a bigger, sloppier mask that also wrecks clean images. Rollout sits in between because its layer-by-layer identity-blending smooths the signal, but less destructively than GradCAM's full backward pass.
+
 

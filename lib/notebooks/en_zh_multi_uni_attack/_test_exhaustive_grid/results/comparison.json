@@ -3,9 +3,9 @@
   "n_images": 100,
   "n_patch_pairs_exhaustive": 120,
   "runtime_seconds": {
-    "grid_1patch": 9.478983640670776,
-    "grid_2patch_greedy": 8.231369972229004,
-    "grid_2patch_exhaustive": 51.332195520401
+    "grid_1patch": 92.1640989780426,
+    "grid_2patch_greedy": 73.56356811523438,
+    "grid_2patch_exhaustive": 564.3826570510864
   },
   "results": [
     {
