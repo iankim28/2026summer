@@ -1550,4 +1550,49 @@ Attention wins on every axis — cheaper, more accurate, and far less damage to 
 
 *Why attention (esp. Attn-last) wins:* the typographic attack works by hijacking the model's attention onto the injected text. Attn-last reads that hijacked attention directly, one hop from the final decision — so its mask lands tightly on just the text (sharp, sparse peaks). GradCAM's gradient has to flow backward through all 12 layers to reach the first-layer activation it's computed on, which blurs the signal across the text *and* the real object, forcing a bigger, sloppier mask that also wrecks clean images. Rollout sits in between because its layer-by-layer identity-blending smooths the signal, but less destructively than GradCAM's full backward pass.
 
+---
+
+## 2026-07-16 — Plain-language recap: GradCAM vs. attention vs. grid search
+
+No code, no notebooks today — just writing down the plain-English version of the above for future reference, since it's easy to lose the intuition under all the math.
+
+### The three saliency methods, simplified
+
+Think of all three as different ways of answering the same question: **"which part of the image is the AI model actually looking at when it makes its decision?"** Once we know that, we can black out that region (hopefully the sneaky text sticker) and ask the model again.
+
+**GradCAM** — Run the image through the model to get an answer, then trace *backward* to see which pixels "pulled" the answer in that direction. It's like asking someone to explain their reasoning after the fact by rewinding through every step. This rewinding (the "backward pass") is extra work — it roughly doubles the computation compared to just getting an answer.
+
+**Attn-last** — Modern AI vision models don't just look at everything equally; internally they already decide "how much attention" to give each patch of the image, layer by layer, as part of normal operation. Attn-last just peeks at that attention amount from the model's very *last* internal step — right before it commits to an answer. No rewinding needed, it's information the model already had lying around.
+
+**Attn-rollout** — Same idea as attn-last (peek at internal attention, no rewinding), but instead of just looking at the last step, it combines the attention from *every* step the model took, all the way through. It's like averaging together everywhere the model glanced throughout its whole "thought process," instead of just its final glance.
+
+**Similarities:** all three produce a heatmap of "where the model is looking," all three feed into the exact same next step (blur/mask the hot spots, then re-ask the model for its answer).
+
+**Differences:**
+- GradCAM needs extra rewinding work; the two attention methods don't.
+- GradCAM's map ends up blurry — it smears over both the sticker *and* the real object, because the rewinding gets diluted as it passes back through many layers.
+- Attn-last's map is sharp and pinpoints almost exactly the sticker, because it's a single, undiluted glance.
+- Attn-rollout is blurrier than attn-last (since it averages many glances together) but sharper than GradCAM.
+
+That's why attn-last won: cheapest to compute *and* the most precise, so blacking out its hot spots barely damages the rest of the image.
+
+### Where grid search fits in
+
+Grid search is a completely different, much dumber approach — it doesn't look at what the model is "thinking" at all. Instead it just chops the image into a 4×4 checkerboard of 16 chunks and **brute-force tries blacking out chunks one at a time (or two at a time)**, checking after each attempt whether the model's confidence goes up. Whichever chunk(s) made the model most confident gets kept as the "mask." No heatmap, no shortcuts — pure trial and error.
+
+**Is it still used?** No. It was tested purely as a sanity-check baseline to see if a "dumb," model-agnostic approach could compete with the saliency-based methods — it couldn't, and it's not part of the production defense.
+
+**Results — it basically failed:**
+
+| Method | Cost (passes/image) | Mean accuracy after defense |
+|---|---:|---:|
+| No defense (do nothing) | 2 | 5.8% |
+| Grid search, 1 chunk blacked out | 32 | 10.9% |
+| Grid search, 2 chunks blacked out (smart/greedy) | 62 | 11.7% |
+| Grid search, 2 chunks (tried literally every possible pair) | 240 | ~11.5% |
+| GradCAM | 6 | 33.1% |
+| Attn-last (best) | 4 | 72.6% |
+
+Grid search barely beats doing nothing (11% vs 6%), while costing **5–40× more compute** than the attention methods. Even letting it try every single possible pair of chunks (an exhaustive search, instead of a quick smart guess) only nudged results from 11.0% to 11.5% — basically no difference. That confirms the problem isn't "picking better chunks" — it's that a coarse 4×4 checkerboard is just too blunt an instrument to reliably land on a small text sticker that can appear anywhere in the image. Grid search is kept in the notebooks only as a "proof that dumb occlusion doesn't work" reference point, not as a real candidate.
+
 
