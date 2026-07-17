@@ -1510,7 +1510,7 @@ Greedy was suboptimal for 22 of 100 images (22%), but the performance gap is neg
 
 ### Attention-based saliency: can we cut cam_2mod from 6 → 4 forward passes?
 
-**Notebook:** `lib/notebooks/en_zh_multi_uni_attack/_test_attention_defense/attention_defense_test.ipynb`
+**Notebook:** `lib/notebooks/en_zh_multi_uni_attack/_test_attention_defense/attention_defense_test.ipynb` (moved on 2026-07-16 to its own top-level folder, `lib/notebooks/attention_defense/attention_defense_test.ipynb` — see the note at the end of this entry)
 
 **Motivation:** GradCAM needs a backward pass per model to compute saliency gradients. ViT self-attention weights are available for free during the normal forward pass — no backward needed. If attention maps produce equally good masks, the defense drops from 6 to 4 forward passes.
 
@@ -1594,5 +1594,18 @@ Grid search is a completely different, much dumber approach — it doesn't look 
 | Attn-last (best) | 4 | 72.6% |
 
 Grid search barely beats doing nothing (11% vs 6%), while costing **5–40× more compute** than the attention methods. Even letting it try every single possible pair of chunks (an exhaustive search, instead of a quick smart guess) only nudged results from 11.0% to 11.5% — basically no difference. That confirms the problem isn't "picking better chunks" — it's that a coarse 4×4 checkerboard is just too blunt an instrument to reliably land on a small text sticker that can appear anywhere in the image. Grid search is kept in the notebooks only as a "proof that dumb occlusion doesn't work" reference point, not as a real candidate.
+
+### Notebook reorganization
+
+`_test_attention_defense/` was promoted out of `en_zh_multi_uni_attack/` into its own top-level folder, `lib/notebooks/attention_defense/`, now that the full 1000-image results confirm it's a real finding (not just a sub-experiment) — cheaper AND more accurate than the production GradCAM defense. Moved via `git mv` (history preserved), fixed the one relative path inside the notebook (`../../image_samples/...` → `../image_samples/...` to account for the shallower folder depth), and added a dedicated `README.md`. Both `lib/notebooks/README.md` and this diary's notebook-path reference above were updated to point at the new location.
+
+### To-do
+
+- [ ] Swap in the stronger KO/JA CLIP models found in `ko_ja_model_screening/` (`Bingsu/clip-vit-large-patch14-ko` 96.5%, `llm-jp/llm-jp-clip-vit-large-patch14` 97.0%) — not yet used anywhere beyond the screening notebook itself.
+- [ ] Improve grid search — current 4×4 blind occlusion barely beats no-defense; see if a finer grid, smarter scoring, or combining it with a saliency prior helps.
+- [ ] Organize notebooks + GitHub branches — clean up folder structure further, decide on a branching strategy for ongoing experiments.
+- [ ] Think of ways to improve our heatmap-based defense — attention (Attn-last) is the best so far at 72.6% mean acc, but there's still a large gap to fully recovering clean accuracy (85.9%/91.4%).
+- [ ] Start paper.
+- [ ] Write up results.
 
 
