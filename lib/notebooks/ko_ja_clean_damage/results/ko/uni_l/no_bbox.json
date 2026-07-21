@@ -1,0 +1,57 @@
+{
+  "L": "ko",
+  "attack": "uni_l",
+  "variant": "no_bbox",
+  "threshold": 0.95,
+  "dilate": 3,
+  "bbox_snap": false,
+  "ran_full": true,
+  "clean_acc": {
+    "en": 0.859,
+    "ko": 0.896
+  },
+  "baseline_acc": {
+    "en": 0.705,
+    "ko": 0.784
+  },
+  "baseline_asr": {
+    "en": 0.025,
+    "ko": 0.022
+  },
+  "defense": {
+    "en": {
+      "acc": 0.649,
+      "asr": 0.027,
+      "baseline_acc": 0.705,
+      "baseline_asr": 0.025
+    },
+    "ko": {
+      "acc": 0.726,
+      "asr": 0.028,
+      "baseline_acc": 0.784,
+      "baseline_asr": 0.022
+    },
+    "mean_acc": 0.6875
+  },
+  "clean_deg": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.761,
+      "delta_acc": -0.09799999999999998
+    },
+    "ko": {
+      "baseline_acc": 0.896,
+      "masked_acc": 0.809,
+      "delta_acc": -0.08699999999999997
+    }
+  },
+  "coverage": 0.06781608737244897,
+  "mean_acc": 0.6875,
+  "mean_clean_delta": -0.09249999999999997,
+  "cost": 4,
+  "mask_cfg": {
+    "threshold": 0.95,
+    "dilate": 3,
+    "bbox_snap": false
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "setup": "unilingual",
+  "method": "no_defense",
+  "attack": "unilingual",
+  "sample": "CIFAR10_BALANCED_1000_SAMPLE",
+  "n_images": 1000,
+  "inference_cost": 2,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "attacked_acc": {
+    "en": 0.034,
+    "zh": 0.271
+  },
+  "attacked_asr": {
+    "en": 0.965,
+    "zh": 0.718
+  },
+  "attacked_acc_mean": 0.15250000000000002
+}

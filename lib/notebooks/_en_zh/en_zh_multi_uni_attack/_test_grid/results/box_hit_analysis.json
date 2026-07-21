@@ -1,0 +1,166 @@
+{
+  "n_images": 1000,
+  "attack": "multilingual",
+  "grid": "4x4",
+  "defense": "greedy_2patch_confdrop",
+  "mean": {
+    "method": "B_2p_confdrop_mean",
+    "n_images": 1000,
+    "overall": {
+      "acc_en": 0.457,
+      "acc_zh": 0.463,
+      "acc_mean": 0.46
+    },
+    "by_pattern": [
+      {
+        "pattern": "hit_both",
+        "n": 549,
+        "freq": 0.549,
+        "acc_en": 0.6721311475409836,
+        "acc_zh": 0.692167577413479,
+        "acc_mean": 0.6821493624772312,
+        "recovery_en": 0.6654275092936803,
+        "recovery_zh": 0.6908752327746741,
+        "asr_en": 0.2204007285974499,
+        "asr_zh": 0.22404371584699453
+      },
+      {
+        "pattern": "hit_EN_only",
+        "n": 302,
+        "freq": 0.302,
+        "acc_en": 0.28807947019867547,
+        "acc_zh": 0.271523178807947,
+        "acc_mean": 0.27980132450331124,
+        "recovery_en": 0.2895622895622896,
+        "recovery_zh": 0.1541501976284585,
+        "asr_en": 0.6788079470198676,
+        "asr_zh": 0.7052980132450332
+      },
+      {
+        "pattern": "hit_ZH_only",
+        "n": 36,
+        "freq": 0.036,
+        "acc_en": 0.027777777777777776,
+        "acc_zh": 0.027777777777777776,
+        "acc_mean": 0.027777777777777776,
+        "recovery_en": 0.0,
+        "recovery_zh": 0.0,
+        "asr_en": 0.9722222222222222,
+        "asr_zh": 0.9722222222222222
+      },
+      {
+        "pattern": "hit_neither",
+        "n": 113,
+        "freq": 0.113,
+        "acc_en": 0.0,
+        "acc_zh": 0.0,
+        "acc_mean": 0.0,
+        "recovery_en": 0.0,
+        "recovery_zh": 0.0,
+        "asr_en": 1.0,
+        "asr_zh": 1.0
+      }
+    ],
+    "single_language_hits": {
+      "hit_EN_only": {
+        "n": 302,
+        "acc_en": 0.28807947019867547,
+        "acc_zh": 0.271523178807947
+      },
+      "hit_ZH_only": {
+        "n": 36,
+        "acc_en": 0.027777777777777776,
+        "acc_zh": 0.027777777777777776
+      },
+      "delta_acc_en_hitting_own_vs_other": 0.2603016924208977,
+      "delta_acc_zh_hitting_own_vs_other": -0.24374540103016923,
+      "delta_mean_EN_only_minus_ZH_only": 0.25202354672553345
+    },
+    "pattern_counts": {
+      "hit_both": 549,
+      "hit_EN_only": 302,
+      "hit_ZH_only": 36,
+      "hit_neither": 113
+    }
+  },
+  "blur": {
+    "method": "C_2p_confdrop_blur",
+    "n_images": 1000,
+    "overall": {
+      "acc_en": 0.481,
+      "acc_zh": 0.489,
+      "acc_mean": 0.485
+    },
+    "by_pattern": [
+      {
+        "pattern": "hit_both",
+        "n": 587,
+        "freq": 0.587,
+        "acc_en": 0.676320272572402,
+        "acc_zh": 0.6933560477001703,
+        "acc_mean": 0.6848381601362862,
+        "recovery_en": 0.6724436741767764,
+        "recovery_zh": 0.6925734024179621,
+        "asr_en": 0.21635434412265758,
+        "asr_zh": 0.21635434412265758
+      },
+      {
+        "pattern": "hit_EN_only",
+        "n": 287,
+        "freq": 0.287,
+        "acc_en": 0.289198606271777,
+        "acc_zh": 0.28222996515679444,
+        "acc_mean": 0.2857142857142857,
+        "recovery_en": 0.2867383512544803,
+        "recovery_zh": 0.13852813852813853,
+        "asr_en": 0.6759581881533101,
+        "asr_zh": 0.6898954703832753
+      },
+      {
+        "pattern": "hit_ZH_only",
+        "n": 45,
+        "freq": 0.045,
+        "acc_en": 0.0,
+        "acc_zh": 0.0,
+        "acc_mean": 0.0,
+        "recovery_en": 0.0,
+        "recovery_zh": 0.0,
+        "asr_en": 1.0,
+        "asr_zh": 1.0
+      },
+      {
+        "pattern": "hit_neither",
+        "n": 81,
+        "freq": 0.081,
+        "acc_en": 0.012345679012345678,
+        "acc_zh": 0.012345679012345678,
+        "acc_mean": 0.012345679012345678,
+        "recovery_en": 0.0,
+        "recovery_zh": 0.0,
+        "asr_en": 0.9876543209876543,
+        "asr_zh": 0.9876543209876543
+      }
+    ],
+    "single_language_hits": {
+      "hit_EN_only": {
+        "n": 287,
+        "acc_en": 0.289198606271777,
+        "acc_zh": 0.28222996515679444
+      },
+      "hit_ZH_only": {
+        "n": 45,
+        "acc_en": 0.0,
+        "acc_zh": 0.0
+      },
+      "delta_acc_en_hitting_own_vs_other": 0.289198606271777,
+      "delta_acc_zh_hitting_own_vs_other": -0.28222996515679444,
+      "delta_mean_EN_only_minus_ZH_only": 0.2857142857142857
+    },
+    "pattern_counts": {
+      "hit_both": 587,
+      "hit_EN_only": 287,
+      "hit_ZH_only": 45,
+      "hit_neither": 81
+    }
+  }
+}

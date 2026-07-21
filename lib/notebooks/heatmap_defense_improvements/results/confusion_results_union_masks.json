@@ -1,0 +1,42 @@
+{
+  "variant": "union_masks",
+  "config": {
+    "mask_mode": "union",
+    "fill": "mean",
+    "threshold": 0.9,
+    "peakiness_max": 0.1
+  },
+  "n_images": 1000,
+  "inference_cost": 4,
+  "coverage_mean": 0.22548686623086736,
+  "gated_off_frac": 0.0,
+  "defense": {
+    "en": {
+      "acc": 0.595,
+      "asr": 0.038,
+      "baseline_acc": 0.043,
+      "baseline_asr": 0.955
+    },
+    "zh": {
+      "acc": 0.707,
+      "asr": 0.034,
+      "baseline_acc": 0.073,
+      "baseline_asr": 0.927
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.533,
+      "delta_acc": -0.32599999999999996
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.655,
+      "delta_acc": -0.259
+    }
+  },
+  "defense_acc_mean": 0.651,
+  "defense_asr_mean": 0.036000000000000004,
+  "clean_delta_mean": -0.2925
+}

@@ -1,0 +1,51 @@
+{
+  "L": "zh",
+  "attack": "uni_en",
+  "threshold": 0.95,
+  "tune_mean_acc": 0.5800000000000001,
+  "sane": true,
+  "ran_full": true,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "baseline_acc": {
+    "en": 0.034,
+    "zh": 0.271
+  },
+  "baseline_asr": {
+    "en": 0.965,
+    "zh": 0.718
+  },
+  "cost": 4,
+  "defense": {
+    "en": {
+      "acc": 0.547,
+      "asr": 0.259,
+      "baseline_acc": 0.034,
+      "baseline_asr": 0.965
+    },
+    "zh": {
+      "acc": 0.656,
+      "asr": 0.176,
+      "baseline_acc": 0.271,
+      "baseline_asr": 0.718
+    },
+    "mean_acc": 0.6015
+  },
+  "clean_deg": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.837,
+      "delta_acc": -0.02200000000000002
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.907,
+      "delta_acc": -0.007000000000000006
+    }
+  },
+  "coverage": 0.0764348294005102,
+  "mean_acc": 0.6015,
+  "mean_clean_delta": -0.014500000000000013
+}

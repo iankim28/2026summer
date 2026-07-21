@@ -1,0 +1,43 @@
+{
+  "variant": "gated_disagree",
+  "config": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.9,
+    "gate": "disagree",
+    "peakiness_max": 0.1
+  },
+  "n_images": 1000,
+  "inference_cost": 4,
+  "coverage_mean": 0.014650729432397959,
+  "gated_off_frac": 0.904,
+  "defense": {
+    "en": {
+      "acc": 0.088,
+      "asr": 0.895,
+      "baseline_acc": 0.043,
+      "baseline_asr": 0.955
+    },
+    "zh": {
+      "acc": 0.097,
+      "asr": 0.894,
+      "baseline_acc": 0.073,
+      "baseline_asr": 0.927
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.857,
+      "delta_acc": -0.0020000000000000018
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.894,
+      "delta_acc": -0.020000000000000018
+    }
+  },
+  "defense_acc_mean": 0.0925,
+  "defense_asr_mean": 0.8945000000000001,
+  "clean_delta_mean": -0.01100000000000001
+}

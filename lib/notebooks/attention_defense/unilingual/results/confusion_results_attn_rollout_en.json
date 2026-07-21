@@ -1,0 +1,54 @@
+{
+  "setup": "unilingual",
+  "method": "attn_2mod_attn_rollout",
+  "variant": "Attn-rollout",
+  "attack": "en",
+  "n_images": 1000,
+  "best_threshold": 0.85,
+  "inference_cost": 4,
+  "heatmap_time_s": 18.58,
+  "time_per_image_ms": 18.6,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "baseline_acc": {
+    "en": 0.034,
+    "zh": 0.271
+  },
+  "baseline_asr": {
+    "en": 0.965,
+    "zh": 0.718
+  },
+  "defense": {
+    "en": {
+      "acc": 0.482,
+      "asr": 0.139,
+      "recovery_rate": 0.46845915201654603,
+      "baseline_acc": 0.034,
+      "baseline_asr": 0.965
+    },
+    "zh": {
+      "acc": 0.641,
+      "asr": 0.106,
+      "recovery_rate": 0.5596707818930041,
+      "baseline_acc": 0.271,
+      "baseline_asr": 0.718
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.603,
+      "delta_acc": -0.256
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.746,
+      "delta_acc": -0.16800000000000004
+    }
+  },
+  "coverage_mean": 0.21646516262755103,
+  "defense_acc_mean": 0.5615,
+  "defense_asr_mean": 0.1225
+}

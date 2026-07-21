@@ -1,0 +1,47 @@
+{
+  "hybrid_attn_confdrop_k4": {
+    "method": "hybrid_attn_confdrop_k4",
+    "inference_cost": 18.0,
+    "defense": {
+      "en": {
+        "acc": 0.548,
+        "asr": 0.298,
+        "baseline_acc": 0.043,
+        "baseline_asr": 0.955
+      },
+      "zh": {
+        "acc": 0.578,
+        "asr": 0.327,
+        "baseline_acc": 0.073,
+        "baseline_asr": 0.927
+      }
+    },
+    "defense_acc_mean": 0.563,
+    "defense_asr_mean": 0.3125
+  },
+  "attn_last_baseline": {
+    "method": "attn_last_baseline",
+    "inference_cost": 4.0,
+    "defense": {
+      "en": {
+        "acc": 0.687,
+        "asr": 0.03,
+        "baseline_acc": 0.043,
+        "baseline_asr": 0.955
+      },
+      "zh": {
+        "acc": 0.765,
+        "asr": 0.02,
+        "baseline_acc": 0.073,
+        "baseline_asr": 0.927
+      }
+    },
+    "defense_acc_mean": 0.726,
+    "defense_asr_mean": 0.025
+  },
+  "refs": {
+    "full_grid_confdrop_blur_cost": 62,
+    "full_grid_confdrop_blur_mean_acc": 0.485,
+    "published_attn_last_mean_acc": 0.726
+  }
+}

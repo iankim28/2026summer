@@ -1,0 +1,54 @@
+{
+  "setup": "unilingual",
+  "method": "attn_2mod_gradcam",
+  "variant": "GradCAM",
+  "attack": "en",
+  "n_images": 1000,
+  "best_threshold": 0.8,
+  "inference_cost": 6,
+  "heatmap_time_s": 63.92,
+  "time_per_image_ms": 63.9,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "baseline_acc": {
+    "en": 0.034,
+    "zh": 0.271
+  },
+  "baseline_asr": {
+    "en": 0.965,
+    "zh": 0.718
+  },
+  "defense": {
+    "en": {
+      "acc": 0.221,
+      "asr": 0.417,
+      "recovery_rate": 0.2140641158221303,
+      "baseline_acc": 0.034,
+      "baseline_asr": 0.965
+    },
+    "zh": {
+      "acc": 0.354,
+      "asr": 0.317,
+      "recovery_rate": 0.2812071330589849,
+      "baseline_acc": 0.271,
+      "baseline_asr": 0.718
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.417,
+      "delta_acc": -0.442
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.552,
+      "delta_acc": -0.362
+    }
+  },
+  "coverage_mean": 0.3578609095982143,
+  "defense_acc_mean": 0.2875,
+  "defense_asr_mean": 0.367
+}

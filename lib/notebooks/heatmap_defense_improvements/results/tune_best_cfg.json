@@ -1,0 +1,76 @@
+{
+  "attn_last_baseline": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.67,
+    "_tune_cov": 0.07707330197704083
+  },
+  "gated_peakiness": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "gate": "peakiness",
+    "peakiness_max": 0.08,
+    "_tune_en_acc": 0.67,
+    "_tune_cov": 0.07707330197704083
+  },
+  "gated_disagree": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.9,
+    "gate": "disagree",
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.09,
+    "_tune_cov": 0.012170360331632652
+  },
+  "union_masks": {
+    "mask_mode": "union",
+    "fill": "mean",
+    "threshold": 0.9,
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.56,
+    "_tune_cov": 0.2262460140306122
+  },
+  "blur_fill": {
+    "mask_mode": "intersection",
+    "fill": "blur",
+    "threshold": 0.95,
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.71,
+    "_tune_cov": 0.07707330197704083
+  },
+  "cc_filter": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "cc_filter": true,
+    "top_k": 2,
+    "bbox_snap": false,
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.7,
+    "_tune_cov": 0.06787507971938776
+  },
+  "cc_bbox": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "cc_filter": true,
+    "top_k": 2,
+    "bbox_snap": true,
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.71,
+    "_tune_cov": 0.08615812340561226
+  },
+  "peaked_heads": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "head_mode": "peaked",
+    "peaked_k": 4,
+    "peakiness_max": 0.1,
+    "_tune_en_acc": 0.6,
+    "_tune_cov": 0.07817303093112243
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "setup": "unilingual",
+  "method": "attn_2mod_attn_last",
+  "variant": "Attn-last",
+  "attack": "en",
+  "n_images": 1000,
+  "best_threshold": 0.95,
+  "inference_cost": 4,
+  "heatmap_time_s": 19.11,
+  "time_per_image_ms": 19.1,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "baseline_acc": {
+    "en": 0.034,
+    "zh": 0.271
+  },
+  "baseline_asr": {
+    "en": 0.965,
+    "zh": 0.718
+  },
+  "defense": {
+    "en": {
+      "acc": 0.632,
+      "asr": 0.065,
+      "recovery_rate": 0.6215098241985523,
+      "baseline_acc": 0.034,
+      "baseline_asr": 0.965
+    },
+    "zh": {
+      "acc": 0.72,
+      "asr": 0.038,
+      "recovery_rate": 0.6433470507544582,
+      "baseline_acc": 0.271,
+      "baseline_asr": 0.718
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.771,
+      "delta_acc": -0.08799999999999997
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.888,
+      "delta_acc": -0.026000000000000023
+    }
+  },
+  "coverage_mean": 0.08473543128188775,
+  "defense_acc_mean": 0.6759999999999999,
+  "defense_asr_mean": 0.051500000000000004
+}

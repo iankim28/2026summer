@@ -1,0 +1,51 @@
+{
+  "setup": "multilingual",
+  "en_arch": "ViT-B-16",
+  "method": "attn_last_2mod",
+  "best_threshold": 0.9,
+  "inference_cost": 4,
+  "coverage_mean": 0.1540424505739796,
+  "defense": {
+    "en": {
+      "acc": 0.698,
+      "asr": 0.033,
+      "baseline_acc": 0.019,
+      "baseline_asr": 0.981
+    },
+    "zh": {
+      "acc": 0.737,
+      "asr": 0.025,
+      "baseline_acc": 0.073,
+      "baseline_asr": 0.927
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.882,
+      "masked_acc": 0.677,
+      "delta_acc": -0.20499999999999996
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.785,
+      "delta_acc": -0.129
+    }
+  },
+  "defense_acc_mean": 0.7175,
+  "b32_reference": {
+    "defense_acc_mean": 0.726,
+    "coverage_mean": 0.07651468829719389,
+    "clean_degradation": {
+      "en": {
+        "baseline_acc": 0.859,
+        "masked_acc": 0.771,
+        "delta_acc": -0.08799999999999997
+      },
+      "zh": {
+        "baseline_acc": 0.914,
+        "masked_acc": 0.888,
+        "delta_acc": -0.026000000000000023
+      }
+    }
+  }
+}

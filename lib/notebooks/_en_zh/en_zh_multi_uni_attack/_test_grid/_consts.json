@@ -1,0 +1,38 @@
+{
+  "CLASSES": {
+    "en": [
+      "airplane",
+      "automobile",
+      "bird",
+      "cat",
+      "deer",
+      "dog",
+      "frog",
+      "horse",
+      "ship",
+      "truck"
+    ],
+    "zh": [
+      "飞机",
+      "汽车",
+      "鸟",
+      "猫",
+      "鹿",
+      "狗",
+      "青蛙",
+      "马",
+      "船",
+      "卡车"
+    ]
+  },
+  "TMPL": {
+    "en": "a photo of a {}.",
+    "zh": "一张{}的照片。"
+  },
+  "DISPLAY_SIZE": 224,
+  "NUM_BOXES": 2,
+  "FONT_SIZE": 24,
+  "PAD": 8,
+  "AGREE_BONUS": 0.05,
+  "BLUR_RADIUS": 12
+}

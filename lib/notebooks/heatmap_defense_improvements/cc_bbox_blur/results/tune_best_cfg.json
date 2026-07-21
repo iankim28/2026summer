@@ -1,0 +1,36 @@
+{
+  "attn_last_baseline": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "_tune_en_acc": 0.67,
+    "_tune_cov": 0.07707330197704083
+  },
+  "blur_fill": {
+    "mask_mode": "intersection",
+    "fill": "blur",
+    "threshold": 0.95,
+    "_tune_en_acc": 0.71,
+    "_tune_cov": 0.07707330197704083
+  },
+  "cc_bbox": {
+    "mask_mode": "intersection",
+    "fill": "mean",
+    "threshold": 0.95,
+    "cc_filter": true,
+    "top_k": 2,
+    "bbox_snap": true,
+    "_tune_en_acc": 0.71,
+    "_tune_cov": 0.08615812340561226
+  },
+  "cc_bbox_blur": {
+    "mask_mode": "intersection",
+    "fill": "blur",
+    "threshold": 0.95,
+    "cc_filter": true,
+    "top_k": 2,
+    "bbox_snap": true,
+    "_tune_en_acc": 0.7,
+    "_tune_cov": 0.08615812340561226
+  }
+}

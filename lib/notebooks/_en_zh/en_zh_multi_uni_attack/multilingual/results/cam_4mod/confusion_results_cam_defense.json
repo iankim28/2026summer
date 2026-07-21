@@ -1,0 +1,52 @@
+{
+  "setup": "multilingual",
+  "method": "cam_4mod",
+  "attack": "multilingual",
+  "n_images": 1000,
+  "best_threshold": 0.9,
+  "combos": "[('en', 'en'), ('en', 'zh'), ('zh', 'en'), ('zh', 'zh')]",
+  "inference_cost": 10,
+  "clean_acc": {
+    "en": 0.859,
+    "zh": 0.914
+  },
+  "baseline_acc": {
+    "en": 0.043,
+    "zh": 0.073
+  },
+  "baseline_asr": {
+    "en": 0.955,
+    "zh": 0.927
+  },
+  "defense": {
+    "en": {
+      "acc": 0.298,
+      "asr": 0.406,
+      "recovery_rate": 0.27899686520376177,
+      "baseline_acc": 0.043,
+      "baseline_asr": 0.955
+    },
+    "zh": {
+      "acc": 0.319,
+      "asr": 0.509,
+      "recovery_rate": 0.2912621359223301,
+      "baseline_acc": 0.073,
+      "baseline_asr": 0.927
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.528,
+      "delta_acc": -0.33099999999999996
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.686,
+      "delta_acc": -0.22799999999999998
+    }
+  },
+  "coverage_mean": 0.2171185626594388,
+  "defense_acc_mean": 0.3085,
+  "defense_asr_mean": 0.4575
+}

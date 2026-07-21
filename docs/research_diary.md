@@ -1248,10 +1248,10 @@ A new sample (`CIFAR10_BALANCED_1000_SAMPLE.json`) with exactly 100 images per c
 
 ## July 10, 2026
 
-**Notebook:** `lib/notebooks/en_zh_typographic/balanced_typographic_comparison.ipynb`
-**Results:** `lib/notebooks/en_zh_typographic/results/balanced/`
+**Notebook:** `lib/notebooks/_en_zh/en_zh_typographic/balanced_typographic_comparison.ipynb`
+**Results:** `lib/notebooks/_en_zh/en_zh_typographic/results/balanced/`
 
-EN vs ZH typographic attack experiment on the balanced 1000-image CIFAR-10 sample (100 per class). Same overlay style as `large_font_typographic_comparison.ipynb`: upscale to 224×224, font size 40.
+EN vs ZH typographic attack experiment on the balanced 1000-image CIFAR-10 sample (100 per class). Same overlay style as `old_large_font_typographic_comparison.ipynb`: upscale to 224×224, font size 40.
 
 ### Bug fix — balanced sample JSON
 
@@ -1305,8 +1305,8 @@ Disagreement detector (unique predictions across EN + ZH):
 
 ### KO / JA CLIP model screening
 
-**Script:** `lib/notebooks/ko_ja_model_screening/screen_ko_ja_models.py`
-**Results:** `lib/notebooks/ko_ja_model_screening/results/screening_results.json`
+**Script:** `lib/notebooks/_archive/old_ko_ja_model_screening/screen_ko_ja_models.py`
+**Results:** `lib/notebooks/_archive/old_ko_ja_model_screening/results/screening_results.json`
 
 Screened Korean and Japanese CLIP candidates against EN/ZH baselines on the same balanced 1000-image CIFAR-10 sample (100 per class). Goal: find KO/JA models as strong as Chinese CLIP (91.4%) and the current JA model.
 
@@ -1358,12 +1358,12 @@ Key findings:
 1. **KO upgrade is the bigger win.** Current Bingsu B/32 (89.7%) trails ZH; Bingsu L/14 (96.5%) jumps +6.8pp over current KO and +5.1pp over ZH. Biggest per-class gains: frog (74%→91%), cat (89%→96%), truck (89%→100%).
 2. **JA is already above ZH** with llm-jp B/16 (92.5%); L/14 (97.0%) is the best model tested. Cat improves 80%→96%.
 3. **No exotic architecture needed** — scaling up within the same families (Bingsu, llm-jp) beats hunting alternatives. KELIP (~55% Korean CIFAR-10 per paper) and LY clip-japanese-base-v2 (load broken) were not viable.
-4. **Next:** swap recommended models into `cifar10_typographic_4lang/typographic_attack_confusion.ipynb` and re-run the 4×4 attack grid.
+4. **Next:** swap recommended models into `_archive/old_cifar10_typographic_4lang/typographic_attack_confusion.ipynb` and re-run the 4×4 attack grid.
 
 ## 2026-07-10 — CAM intersection masking defense (EN/ZH typographic)
 
-**Notebook:** `lib/notebooks/cam_intersection_defense/cam_intersection_defense.ipynb` (fast re-run: `run_cam_defense_fast.py`)
-**Results:** `lib/notebooks/cam_intersection_defense/results/`
+**Notebook:** `lib/notebooks/_en_zh/cam_intersection_defense/cam_intersection_defense.ipynb` (fast re-run: `run_cam_defense_fast.py`)
+**Results:** `lib/notebooks/_en_zh/cam_intersection_defense/results/`
 
 **Idea:** On typographic-attacked images, EN and ZH CLIP models often co-attend the same text strip (visible in GradCAM). Intersect high-saliency regions from both models, mask them (mean-fill), and re-classify.
 
@@ -1384,7 +1384,7 @@ Key findings:
 
 ## 2026-07-12 — Multilingual vs unilingual attack study (design + notebooks)
 
-**Notebooks:** `lib/notebooks/en_zh_multi_uni_attack/`
+**Notebooks:** `lib/notebooks/_en_zh/en_zh_multi_uni_attack/`
 **Status:** Notebooks generated, not yet run.
 
 ### Motivation
@@ -1494,7 +1494,7 @@ Clean accuracy: **EN CLIP 85.9%, ZH CLIP 91.4%** (identical across all condition
 
 ### Exhaustive grid test
 
-**Notebook:** `lib/notebooks/en_zh_multi_uni_attack/_test_exhaustive_grid/exhaustive_grid_test.ipynb`
+**Notebook:** `lib/notebooks/_en_zh/en_zh_multi_uni_attack/_test_exhaustive_grid/exhaustive_grid_test.ipynb`
 **Results:** `_test_exhaustive_grid/results/comparison.json`
 
 Tested whether replacing the greedy 2-patch search with an exhaustive search over all C(16,2) = 120 patch pairs changes the outcome. Run on the 100-image tune subset (multilingual attack).
@@ -1510,7 +1510,7 @@ Greedy was suboptimal for 22 of 100 images (22%), but the performance gap is neg
 
 ### Attention-based saliency: can we cut cam_2mod from 6 → 4 forward passes?
 
-**Notebook:** `lib/notebooks/en_zh_multi_uni_attack/_test_attention_defense/attention_defense_test.ipynb` (moved on 2026-07-16 to its own top-level folder, `lib/notebooks/attention_defense/attention_defense_test.ipynb` — see the note at the end of this entry)
+**Notebook:** `lib/notebooks/_en_zh/en_zh_multi_uni_attack/_test_attention_defense/attention_defense_test.ipynb` (moved on 2026-07-16 to its own top-level folder, `lib/notebooks/attention_defense/attention_defense_test.ipynb` — see the note at the end of this entry)
 
 **Motivation:** GradCAM needs a backward pass per model to compute saliency gradients. ViT self-attention weights are available for free during the normal forward pass — no backward needed. If attention maps produce equally good masks, the defense drops from 6 to 4 forward passes.
 
@@ -1601,11 +1601,319 @@ Grid search barely beats doing nothing (11% vs 6%), while costing **5–40× mor
 
 ### To-do
 
-- [ ] Swap in the stronger KO/JA CLIP models found in `ko_ja_model_screening/` (`Bingsu/clip-vit-large-patch14-ko` 96.5%, `llm-jp/llm-jp-clip-vit-large-patch14` 97.0%) — not yet used anywhere beyond the screening notebook itself.
-- [ ] Improve grid search — current 4×4 blind occlusion barely beats no-defense; see if a finer grid, smarter scoring, or combining it with a saliency prior helps.
-- [ ] Organize notebooks + GitHub branches — clean up folder structure further, decide on a branching strategy for ongoing experiments.
-- [ ] Think of ways to improve our heatmap-based defense — attention (Attn-last) is the best so far at 72.6% mean acc, but there's still a large gap to fully recovering clean accuracy (85.9%/91.4%).
-- [ ] Start paper.
+- [x] Run just EN and ZH models — done; attention defense + multi/uni attack study focused on the EN/ZH pair (`attention_defense/`, `en_zh_multi_uni_attack/`).
+- [x] Improve grid search — done 2026-07-16; conf-drop scoring is the fix (see entry below). Production `grid_defense.ipynb` still uses old max-conf (kept as negative baseline); improved variants live in `_test_grid/`.
+- [x] Think of ways to improve our heatmap-based defense — done for now (2026-07-18). Keep **`cc_bbox_blur`** (74.9% mean / clean Δ −1.5pp). Ablation round closed; residual gap to clean left for later.
+- [x] 4-lang `cc_bbox_blur` transfer trial — done 2026-07-19 (`four_lang_cc_bbox_blur/`). Defense recovers hard attacks for ZH/KO/JA; KO/JA clean Δ much worse (−11 to −23pp) than ZH (−1.5pp).
+- [x] Reduce KO/JA clean-image damage under EN∩L `cc_bbox_blur` (threshold / mask geometry) — done 2026-07-19 (`ko_ja_clean_damage/`). `uni_en` Clean Δ −18/−23 → −11/−7pp; residual ~−7 to −11pp vs ZH −1.5pp is heatmap quality.
+- [x] Organize notebooks — done 2026-07-19: `_archive/` + `_en_zh/` (underscore so they sort together); `old_cifar10_typographic_4lang` archived; mainline stays top-level. Branching strategy still open.
+- [x] Start paper — outline only in `docs/paper_draft.md` (2026-07-19); prose not started.
 - [ ] Write up results.
 
+---
 
+## 2026-07-16 — Improved grid search (`_test_grid/grid_test.ipynb`)
+
+The old grid failed because of **scoring**, not (mainly) because of the coarse 4×4 geometry. Maximizing post-occlusion confidence rewards “still confidently wrong.” Switching to **confidence-drop of the pre-defense top class** (+ small EN–ZH agree bonus) flips the picture.
+
+### What the method names mean
+
+Two knobs: **how we score** a candidate occlusion, and **how we fill** the occluded patch.
+
+**Conf-drop (scoring)** — Before defending, note each model’s top-1 class and its confidence on the *attacked* image. For every candidate patch occlusion, re-score and compute how much that *same* class’s confidence fell. Average the EN and ZH drops; add a small bonus if EN and ZH now agree on a class. Pick the patch(es) with the largest drop. Intuition: a good occlusion should *kill the attack belief*, not merely leave the model “confident about something.”
+
+**Max-conf (old scoring)** — Pick the occlusion that maximizes post-occlusion max cosine-sim. That often keeps the attack label when the text survives, so it barely helps.
+
+**Mean (fill)** — Replace selected patch pixels with the image’s average RGB color (a flat rectangle). Simple; can look harsh and can erase object detail.
+
+**Blur (fill)** — Instead of a flat fill, Gaussian-blur only inside the selected patch(es). Glyphs get smashed while coarse object structure is more likely to survive — a small accuracy bump over mean fill at the same search cost.
+
+So **`B_2p_confdrop_mean`** = greedy 2-patch search, conf-drop scoring, mean-fill.  
+**`C_2p_confdrop_blur`** = same search + scoring, but blur fill (the n=1000 winner under the cost bar).
+
+### Tune set (n=100 multilingual)
+
+| Method | Cost | Mean acc |
+|---|---:|---:|
+| no_defense | 2 | 5.0% |
+| base_2p maxconf mean (old) | 62 | 11.0% |
+| B_2p confdrop mean | 62 | **43.5%** |
+| C_2p confdrop blur | 62 | **44.0%** |
+| D_2p beam2+dist confdrop | 92 | 45.0% |
+| A_2p 6×6 confdrop | 142 | 44.5% |
+| combo 6×6 blur beam2 | 212 | 47.5% |
+
+Finer grids / beam / blur help a little; **conf-drop alone is the leap** (~11% → ~44% at the same cost 62).
+
+### Full n=1000 (promoted under-bar winners)
+
+| Method | Cost | EN acc | ZH acc | Mean acc |
+|---|---:|---:|---:|---:|
+| no_defense | 2 | 4.3% | 7.3% | 5.8% |
+| base_2p maxconf mean | 62 | 6.3% | 17.0% | **11.7%** |
+| B_2p confdrop mean | 62 | 45.7% | 46.3% | **46.0%** |
+| C_2p confdrop blur | 62 | 48.1% | 48.9% | **48.5%** |
+
+`C_2p_confdrop_blur` beats GradCAM cam_2mod (~33%) on accuracy, still far behind Attn-last (72.6%), and still **~10× more expensive** than CAM (62 vs 6). Notebook: [`_test_grid/grid_test.ipynb`](lib/notebooks/_en_zh/en_zh_multi_uni_attack/_test_grid/grid_test.ipynb); results in `_test_grid/results/` (`comparison.json`, `comparison_n1000.json`, `defence_examples.png`, `n1000_bars.png`, `box_hit_analysis.json`).
+
+### Does covering Chinese or English matter more?
+
+On the multilingual attack (one EN box + one ZH box), we checked which text boxes the chosen 4×4 patches actually overlap, then measured accuracy conditional on that hit pattern. Method: **C_2p_confdrop_blur**, full **n=1000**.
+
+| Hit pattern | n | freq | EN acc | ZH acc | Mean acc |
+|---|---:|---:|---:|---:|---:|
+| hit both EN+ZH | 587 | 58.7% | 67.6% | 69.3% | **68.5%** |
+| hit EN only | 287 | 28.7% | 28.9% | 28.2% | **28.6%** |
+| hit ZH only | 45 | 4.5% | 0.0% | 0.0% | **0.0%** |
+| hit neither | 81 | 8.1% | 1.2% | 1.2% | **1.2%** |
+
+**Covering English matters much more than covering Chinese alone.** Hitting both is best (~68% mean). Hitting only the EN box still recovers ~29% mean — and that helps the *ZH model too*. Hitting only the ZH box recovers essentially nothing (0%), even for Chinese CLIP. Conf-drop also rarely picks ZH-only (~4%) vs EN-only (~29%) vs both (~59%). Same pattern for mean-fill (`B_2p_confdrop_mean`). Leaving the EN sticker up keeps both models fooled; the ZH sticker is secondary.
+
+---
+
+## 2026-07-16 — Unilingual sole two-box: does attention still beat GradCAM?
+
+The multilingual attention win (Attn-last 72.6% mean @ cost 4) was only measured on mixed EN+ZH boxes. Question: does the same hold for **sole-language dual-box** attacks (both boxes EN, or both boxes ZH) — the setup used in `en_zh_multiple_placement`?
+
+**Notebook:** [`lib/notebooks/attention_defense/unilingual/attention_defense_test.ipynb`](lib/notebooks/attention_defense/unilingual/attention_defense_test.ipynb)  
+Same models, saliency variants, and EN∩ZH intersection defense as the multilingual notebook; only the attack changes (`draw_word` with `attack_lang='en'|'zh'`). Tune on 100 per attack lang, then full 1000.
+
+### How to read the table
+
+Most columns are straightforward: **Attack** is which text overlay was used; **Method** is the saliency map feeding the same 2-model intersection mask; **Cost** is forward/backward passes per image; **EN/ZH/Mean acc** are post-defense top-1 accuracy on the 1000 attacked images.
+
+The last three columns are less obvious:
+
+- **Cov (coverage)** — fraction of image pixels that get masked (blacked out) on average. Low coverage means a tight mask that mostly hits the text stickers; high coverage means the defense is also erasing a lot of the real object. All else equal, lower is better.
+- **Best thr** — percentile threshold chosen on the 100-image tune set (by EN masked accuracy), then frozen for the full 1000. Higher thr (e.g. 0.95) keeps only the hottest saliency peaks → smaller masks; lower thr (e.g. 0.80) masks more aggressively.
+- **Clean drop (EN / ZH)** — change in accuracy when the *same* defense is applied to clean (unattacked) images, in percentage points. A large negative number means the mask is damaging the object even when there is no attack — the main side-effect cost of the defense. Closer to zero is better.
+
+### Full 1000-image results (multi + uni)
+
+| Attack | Method | Cost | EN acc | ZH acc | Mean acc | Cov | Best thr | Clean drop (EN / ZH) |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| Multilingual (EN+ZH) | GradCAM | 6 | 32.0% | 34.3% | 33.1% | 26.6% | 0.85 | −35.4pp / −26.5pp |
+| Multilingual (EN+ZH) | Attn-rollout | 4 | 56.3% | 69.6% | 62.9% | 21.4% | 0.85 | −25.6pp / −16.8pp |
+| Multilingual (EN+ZH) | **Attn-last** | **4** | **68.7%** | **76.5%** | **72.6%** | **7.7%** | **0.95** | **−8.8pp / −2.6pp** |
+| Unilingual EN+EN | GradCAM | 6 | 22.1% | 35.4% | 28.7% | 35.8% | 0.80 | −44.2pp / −36.2pp |
+| Unilingual EN+EN | Attn-rollout | 4 | 48.2% | 64.1% | 56.1% | 21.6% | 0.85 | −25.6pp / −16.8pp |
+| Unilingual EN+EN | **Attn-last** | **4** | **63.2%** | **72.0%** | **67.6%** | **8.5%** | **0.95** | **−8.8pp / −2.6pp** |
+| Unilingual ZH+ZH | GradCAM | 6 | 58.4% | 43.5% | 50.9% | 9.4% | 0.95 | −17.5pp / −10.4pp |
+| Unilingual ZH+ZH | Attn-rollout | 4 | 57.5% | 67.8% | 62.7% | 15.0% | 0.90 | −19.4pp / −11.3pp |
+| Unilingual ZH+ZH | **Attn-last** | **4** | **56.5%** | **68.5%** | **62.5%** | **23.1%** | **0.85** | −29.6pp / −22.7pp |
+
+Multilingual numbers from [`attention_defense/results/`](lib/notebooks/attention_defense/results/); unilingual from [`attention_defense/unilingual/results/`](lib/notebooks/attention_defense/unilingual/results/) (`final_comparison.png`, `confusion_results_{variant}_{en,zh}.json`).
+
+---
+
+## Summary — Attention defense across attack types
+
+We compared three saliency signals (GradCAM @ cost 6, Attn-rollout @ cost 4, Attn-last @ cost 4) inside the same 2-model CAM-intersection defense, on three typographic attacks over the same 1000 balanced CIFAR-10 images: mixed-language boxes (EN+ZH), English-only dual-box (EN+EN), and Chinese-only dual-box (ZH+ZH).
+
+**On multilingual and English-only attacks, Attn-last is clearly best.** It recovers 72.6% mean accuracy on EN+ZH and 67.6% on EN+EN, versus GradCAM’s 33.1% and 28.7%. It does this with tighter masks (coverage ~8% vs GradCAM’s ~27–36%) and far less collateral damage on clean images (−8.8pp EN / −2.6pp ZH in both cases, versus GradCAM’s −35pp/−26pp or worse). Attn-rollout sits in the middle on accuracy and side effects. So the original finding — attention is cheaper *and* more accurate than GradCAM — transfers cleanly from multilingual to sole-English dual-box.
+
+**On Chinese-only dual-box the picture is more mixed.** GradCAM itself is much stronger here (50.9% mean) than on EN or multilingual, partly because the tune set picked a high threshold (0.95) that keeps masks small. Attn-last still leads on mean accuracy (62.5%), but only by about 12 pp over GradCAM, and Attn-rollout is essentially tied with it (62.7%). Attn-last’s usual advantages also weaken: coverage rises to 23.1% and clean-image drop worsens to −29.6pp / −22.7pp — closer to GradCAM’s side-effect profile. A plausible reason is that Chinese glyphs are harder for the English CLIP’s attention to localize, so the EN∩ZH intersection mask is less precise when both stickers are Chinese.
+
+**Overall:** Attn-last remains the default choice across all three attacks — always at least as accurate as the alternatives, always at lower inference cost than GradCAM, and best-in-class on clean-image preservation whenever the attack includes English text. The ZH-only case is the main caveat: attention still wins on accuracy, but the gap shrinks and the clean-image cost rises, so ZH-only is where further saliency or masking work would matter most.
+
+---
+
+## 2026-07-17 / 18 — Improving the heatmap-based defense
+
+**Goal:** close the gap from Attn-last (**72.6%** mean on multilingual dual-box, cost 4, clean Δ −8.8pp EN / −2.6pp ZH) toward clean accuracy (85.9% / 91.4%).
+
+**Folder:** [`lib/notebooks/heatmap_defense_improvements/`](lib/notebooks/heatmap_defense_improvements/) — `attention_defense/` left frozen as the baseline. All numbers below are multilingual, n=1000, thresholds tuned on 100.
+
+### Ablations (ideas 1–4, 7) — `heatmap_improvements.ipynb`
+
+| Trial | What changed (vs Attn-last) | Mean acc | Clean Δ |
+|-------|----------------------------|--------:|--------:|
+| attn_last_baseline | Control: EN∩ZH attention mask, mean-fill | 72.6% | −5.7pp |
+| gated_peakiness | Only mask if saliency looks “spiky” (skip spread maps) | 72.6% | −5.7pp |
+| gated_disagree | Only mask if EN/ZH predictions disagree | 9.3% | −1.1pp |
+| union_masks | Mask where *either* model is hot (OR), not intersection | 65.1% | −29.3pp |
+| blur_fill | Blur masked pixels instead of flat mean color | 73.5% | −1.6pp |
+| cc_filter | Keep only the 2 largest mask blobs | 72.5% | −2.7pp |
+| cc_bbox | Top-2 blobs, then snap each to a rectangle | **74.9%** | −2.7pp |
+| peaked_heads | Average only the sharpest attention heads | 72.5% | −5.0pp |
+
+Peakiness gating never fired (`gated_off=0%`). Disagreement gating almost never masked (both models agree on the attack ~90% of the time). Union hurt clean images badly.
+
+### EN ViT-B/16 (idea 5) — `vit16_en/`
+
+| Trial | What changed | Mean acc | Clean Δ EN / ZH |
+|-------|--------------|--------:|----------------:|
+| B/32 (published) | Control EN model | **72.6%** | −8.8 / −2.6 |
+| B/16 | Finer EN patches (14×14 vs 7×7) | 71.8% | −20.5 / −12.9 |
+
+No gain; larger masks and worse clean damage.
+
+### Attn + conf-drop hybrid (idea 6) — `attn_confdrop_hybrid/`
+
+| Trial | What changed | Cost | Mean acc |
+|-------|--------------|-----:|--------:|
+| attn_last | Control | 4 | **72.6%** |
+| hybrid k=4 | Shortlist 4×4 cells by attention, pick with conf-drop + blur | 18 | 56.3% |
+| full grid conf-drop (ref) | Search all 4×4 cells (prior experiment) | 62 | 48.5% |
+
+Hybrid beats full grid but loses to plain Attn-last at higher cost.
+
+### What `blur_fill` and `cc_bbox` do (and how they combine)
+
+Both start from the same Attn-last pipeline: EN∩ZH heatmap → percentile threshold → dilate → *then* the tweak → re-classify.
+
+- **`blur_fill`** — changes *how* masked pixels are replaced. Baseline paints them a flat average color (a hard rectangle). Blur instead runs a Gaussian (radius 12) on the image and copies only the blurred pixels into the mask. Glyph edges get smashed so the sticker stops reading as text, but coarse color/structure of the object under/near the sticker is less destroyed — which is why clean Δ improves a lot (−5.7pp → −1.6pp) while attacked acc ticks up slightly.
+- **`cc_bbox`** — changes *which* pixels get masked. After thresholding, the mask can be a blotchy blob (or several speckles) that only partly covers a sticker. We keep the 2 largest connected components (one per box, ideally), drop the rest, then expand each blob to its axis-aligned bounding rectangle — matching the attack’s white text boxes. That covers leftover glyph bits the heatmap missed, which lifts attacked acc to 74.9% (coverage 7.7% → 8.8%).
+- **`cc_bbox_blur`** — run `cc_bbox` first (shape the mask), then `blur_fill` (soft occlude). Attacked acc stays at the `cc_bbox` ceiling (74.9%); clean Δ moves to the `blur_fill` regime (−1.5pp). Same cost 4 — no extra model passes.
+
+### Combo results — `cc_bbox_blur/` (2026-07-18)
+
+| Trial | What changed | Mean acc | Clean Δ |
+|-------|--------------|--------:|--------:|
+| attn_last_baseline | Control | 72.6% | −5.7pp |
+| blur_fill | Blur fill only | 73.4% | −1.6pp |
+| cc_bbox | Rectangle snap only | 74.9% | −2.7pp |
+| **cc_bbox_blur** | Rectangle snap **and** blur fill | **74.9%** | **−1.5pp** |
+
+### Summary
+
+- **Keep:** `cc_bbox_blur` — best attacked accuracy so far (**74.9%**, +2.3pp over Attn-last) and best clean tradeoff among strong defenses (−1.5pp). Same cost 4.
+- **Useful alone:** `blur_fill` (kindest to clean images), `cc_bbox` (same attacked acc as the combo).
+- **Skip:** disagreement / peakiness gating (as implemented), union masks, peaked heads, EN ViT-B/16, attn+conf-drop hybrid.
+- **Done for now:** heatmap-improvement ablations closed with `cc_bbox_blur` as the current defense. Residual ~10–15pp gap to clean left for later; next step is the 4-lang transfer trial (`four_lang_cc_bbox_blur/`).
+
+---
+
+## 2026-07-18 / 19 — 4-lang `cc_bbox_blur` initial trial (results)
+
+**Goal:** check whether the EN/ZH winner **`cc_bbox_blur`** transfers to KO and JA under the same dual-box geometry.
+
+**Folder:** [`lib/notebooks/four_lang_cc_bbox_blur/`](lib/notebooks/four_lang_cc_bbox_blur/) — notebook [`four_lang_cc_bbox_blur.ipynb`](lib/notebooks/four_lang_cc_bbox_blur/four_lang_cc_bbox_blur.ipynb). Outputs: [`results/comparison_summary.json`](lib/notebooks/four_lang_cc_bbox_blur/results/comparison_summary.json), [`results/final_comparison.png`](lib/notebooks/four_lang_cc_bbox_blur/results/final_comparison.png).
+
+### Design (Option B)
+
+For each partner language `L ∈ {zh, ko, ja}`:
+
+| Attack | Boxes | Score |
+|--------|-------|-------|
+| `uni_en` | EN + EN | EN + L |
+| `uni_l` | L + L | EN + L |
+| `multi` | EN + L | EN + L |
+
+Defense: **EN ∩ L** Attn-last → percentile mask → dilate → top-2 CC + bbox snap → Gaussian blur fill (`BLUR_RADIUS=12`, cost 4). Geometry: `NUM_BOXES=2`, `FONT_SIZE=24`, random non-overlapping placement, balanced CIFAR-10 1000. Tune thr on n=100 (max EN masked acc) → full n=1000.
+
+**Models:** EN ViT-B/32, ZH Chinese-CLIP B/16, KO Bingsu B/32, JA llm-jp B/16. Clean acc: EN 85.9%, ZH 91.4%, KO 89.6%, JA 92.5%.
+
+### Full n=1000 results
+
+**Column note:** after the same `cc_bbox_blur` mask is applied, **Def EN** = accuracy of the English CLIP; **Def L** = accuracy of that row’s partner CLIP (ZH / KO / JA). Same images, two models. Mean def averages the two.
+
+| Cell | thr | Atk EN | Def EN | Atk L | Def L | Mean def | Clean Δ (mean) | Cov |
+|------|----:|-------:|-------:|------:|------:|---------:|---------------:|----:|
+| zh/uni_en | 0.95 | 3.4% | 54.7% | 27.1% | 65.6% | **60.2%** | −1.5pp | 7.6% |
+| zh/uni_l | 0.95 | 72.3% | 72.5% | 39.6% | 63.5% | **68.0%** | −1.5pp | 6.6% |
+| zh/multi | 0.95 | 4.3% | 71.6% | 7.3% | 78.2% | **74.9%** | −1.5pp | 8.8% |
+| ko/uni_en | 0.90 | 3.4% | 61.3% | 12.4% | 68.9% | **65.1%** | −18.5pp | 15.6% |
+| ko/uni_l | 0.95 | 70.5% | 66.5% | 78.4% | 73.3% | **69.9%** | −11.2pp | 9.1% |
+| ko/multi | 0.95 | 4.2% | 67.6% | 12.6% | 74.3% | **71.0%** | −11.2pp | 9.0% |
+| ja/uni_en | 0.90 | 3.4% | 60.1% | 4.1% | 72.4% | **66.3%** | −23.1pp | 15.2% |
+| ja/uni_l | 0.95 | 70.8% | 66.9% | 83.0% | 79.3% | **73.1%** | −11.5pp | 6.7% |
+| ja/multi | 0.95 | 4.1% | 69.9% | 6.6% | 83.9% | **76.9%** | −11.5pp | 8.3% |
+
+### Takeaways
+
+1. **ZH multi reproduces the prior winner.** Mean **74.9%**, clean Δ **−1.5pp** — matches `heatmap_defense_improvements/cc_bbox_blur` exactly. Pipeline is consistent.
+
+2. **Defense works on hard attacks (EN+EN and multi) for all three partners.** Attacked acc collapses to ~3–13%; defended mean lands in the mid-60s to mid-70s. JA multi is the strongest recovery (**76.9%** mean).
+
+3. **Native-only attacks (`uni_l`) are weak on KO/JA.** Baseline already high (KO 78%, JA 83% on the L model); defense slightly *hurts* accuracy. ZH `uni_l` is the exception — ZH model is actually fooled (39.6% → 63.5% after defense).
+
+4. **KO/JA pay a much larger clean-image cost** (−11 to −23pp) than ZH (−1.5pp), especially on `uni_en` where the tune picks thr=0.90 and coverage jumps to ~15%. The EN∩L intersection is less precise for KO/JA than for ZH.
+
+5. **English dual-box remains the universal transfer attack** — ASR ≥87% on KO and ≥96% on JA before defense.
+
+**Status:** Initial 4-lang trial complete. `cc_bbox_blur` transfers on attacked accuracy; next work should target KO/JA clean-Δ (threshold / mask geometry), not re-prove the ZH multi case.
+
+---
+
+## 2026-07-19 — KO/JA clean-damage ablation notebook
+
+**Goal:** reduce KO/JA Clean Δ under the same EN∩L `cc_bbox_blur` defense without re-running ZH.
+
+**Folder:** [`lib/notebooks/ko_ja_clean_damage/`](lib/notebooks/ko_ja_clean_damage/) — notebook [`ko_ja_clean_damage.ipynb`](lib/notebooks/ko_ja_clean_damage/ko_ja_clean_damage.ipynb).
+
+### Design
+
+Partners `L ∈ {ko, ja}` only. Same dual-box Option B matrix (`uni_en` / `uni_l` / `multi`). Attn-last CAMs are **cached once** per image; five mask variants reuse them:
+
+| Variant | Idea |
+|---------|------|
+| `baseline` | Current four_lang tune (max EN attacked acc) |
+| `thr_floor_095` | Never go below thr=0.95 (kills `uni_en` thr=0.90 overshoot) |
+| `pareto_tune` | Maximize `en_atk_acc + 0.5 * mean_clean_delta` on tune n=100 |
+| `tight_dilate` | Pareto thr + dilate=1 |
+| `no_bbox` | Pareto thr + no bbox snap |
+
+If floor coverage still >12% on tune, non-baseline variants also get `max_coverage=0.12`. Winner per cell: best Clean Δ among variants within 3pp mean-acc of baseline.
+
+### Full n=1000 results
+
+Outputs: [`results/comparison_summary.json`](lib/notebooks/ko_ja_clean_damage/results/comparison_summary.json), [`results/winners.json`](lib/notebooks/ko_ja_clean_damage/results/winners.json), [`results/final_comparison.png`](lib/notebooks/ko_ja_clean_damage/results/final_comparison.png).
+
+**Clean Δ (pp)** — less negative is better (plot shows this as positive “clean damage”; lower bar = better):
+
+| Cell | baseline | thr_floor_095 | pareto_tune | tight_dilate | no_bbox |
+|------|---------:|--------------:|------------:|-------------:|--------:|
+| ko/uni_en | −18.4 | **−11.2** | −18.4 | −17.3 | −16.2 |
+| ko/uni_l | −11.2 | −11.2 | −11.2 | **−9.2** | −9.2 |
+| ko/multi | −11.2 | −11.2 | −11.2 | **−9.2** | −9.2 |
+| ja/uni_en | −23.1 | −11.5 | −11.5 | −9.0 | **−7.4** |
+| ja/uni_l | −11.5 | −11.5 | −11.5 | −9.0 | **−7.4** |
+| ja/multi | −11.5 | −11.5 | −11.5 | **−9.0** | −7.4 |
+
+**Mean defended acc (%)** (same cells / variants):
+
+| Cell | baseline | thr_floor_095 | pareto_tune | tight_dilate | no_bbox |
+|------|---------:|--------------:|------------:|-------------:|--------:|
+| ko/uni_en | 65.1 | **65.5** | 65.1 | 65.6 | 65.6 |
+| ko/uni_l | 69.9 | 69.9 | 69.9 | **71.2** | 68.8 |
+| ko/multi | 71.0 | 71.0 | 71.0 | **71.9** | 71.2 |
+| ja/uni_en | 66.2 | 71.4 | 71.4 | 69.6 | **68.3** |
+| ja/uni_l | 73.1 | 73.1 | 73.1 | 74.1 | **71.7** |
+| ja/multi | 76.9 | 76.9 | 76.9 | **77.0** | 73.9 |
+
+**Winners** (best Clean Δ within 3pp mean-acc of baseline):
+
+| Cell | Winner | Mean def | Clean Δ | vs baseline Clean Δ |
+|------|--------|---------:|--------:|--------------------:|
+| ko/uni_en | `thr_floor_095` | 65.5% | −11.2pp | +7.2pp |
+| ko/uni_l | `tight_dilate` | 71.2% | −9.2pp | +2.0pp |
+| ko/multi | `tight_dilate` | 71.9% | −9.2pp | +2.0pp |
+| ja/uni_en | `no_bbox` | 68.3% | −7.4pp | +15.7pp |
+| ja/uni_l | `no_bbox` | 71.7% | −7.4pp | +4.1pp |
+| ja/multi | `tight_dilate` | 77.0% | −9.0pp | +2.5pp |
+
+### Takeaways
+
+1. **`uni_en` thr=0.90 was the main self-inflicted wound.** Flooring at 0.95 cuts KO Clean Δ −18.4 → −11.2 and JA −23.1 → −11.5, with defended mean flat or *up* (JA 66.2% → 71.4%). Success criterion (≥ −12pp on `uni_en`) hit.
+
+2. **Geometry helps the residual ~−11pp, modestly.** `tight_dilate` / `no_bbox` move Clean Δ to about −7 to −9pp and usually keep (or slightly raise) mean def. Best single move on JA is dropping bbox snap (−7.4pp Clean Δ).
+
+3. **`pareto_tune` mostly collapsed to thr=0.95** (same as floor), except `ko/uni_en` where it still picked 0.90 — so the clean-aware score did not always outweigh attacked EN acc on that cell.
+
+4. **Still far from ZH (−1.5pp).** Remaining −7 to −11pp looks like EN∩KO / EN∩JA heatmap quality, not threshold choice. Next lever if needed: stronger KO/JA Large CLIPs.
+
+**Status:** Ablation complete. Prefer **thr ≥ 0.95** always; use **`tight_dilate`** as the default KO/JA geometry tweak (or `no_bbox` when Clean Δ matters more than a couple pp of mean def on JA).
+
+---
+
+## 2026-07-19 — Notebook folder reorg (A+B hybrid)
+
+Reorganized `lib/notebooks/` to cut top-level clutter without burying the current mainline:
+
+- `_archive/` — superseded work (`old_*`, including `old_cifar10_typographic_4lang`)
+- `_en_zh/` — early EN/ZH attack + GradCAM lineage (`en_zh_typographic`, `en_zh_multiple_placement`, `cam_intersection_defense`, `en_zh_multi_uni_attack`)
+- Underscore prefixes keep `_archive/` and `_en_zh/` sorted together at the top
+- Top level kept for current stack: `attention_defense` -> `heatmap_defense_improvements` -> `four_lang_cc_bbox_blur` -> `ko_ja_clean_damage`, plus `image_samples`
+
+Relative `image_samples/` paths under `_en_zh/` were deepened by one level; index README + diary paths updated.

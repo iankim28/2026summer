@@ -4,7 +4,7 @@
 in the CAM-intersection defense against multilingual typographic attacks — dropping the
 inference cost from 6 to 4 forward passes per image while matching or beating accuracy?
 
-Spun out of `en_zh_multi_uni_attack/` (`_test_attention_defense/`) into its own folder once the
+Spun out of `_en_zh/en_zh_multi_uni_attack/` (`_test_attention_defense/`) into its own folder once the
 full 1000-image results confirmed attention-based saliency is a clear win, not just a cheaper
 alternative.
 
@@ -12,7 +12,7 @@ alternative.
 
 [`attention_defense_test.ipynb`](attention_defense_test.ipynb) — loads the same balanced
 1000-image CIFAR-10 sample (`../image_samples/CIFAR10_BALANCED_1000_SAMPLE.json`) and multilingual
-typographic attack used throughout `en_zh_multi_uni_attack/`, then compares three saliency
+typographic attack used throughout `_en_zh/en_zh_multi_uni_attack/`, then compares three saliency
 methods feeding the same 2-model CAM-intersection masking defense:
 
 | Method | Passes/image | Mechanism |
@@ -42,3 +42,9 @@ charts. Full narrative and plain-language explanation in `docs/research_diary.md
 - `results/threshold_sweep_comparison.png` — accuracy/ASR vs mask threshold, per method
 - `results/final_comparison.png` — summary bar chart, all methods vs production GradCAM baseline
 - `results/confusion_results_{gradcam,attn_last,attn_rollout}.json` — full per-method metrics
+
+## Unilingual follow-up
+
+[`unilingual/`](unilingual/) repeats the same GradCAM vs Attn-last / Attn-rollout protocol on
+**sole two-box** EN-only and ZH-only attacks (both boxes the same language). Tune on 100 per
+attack lang, then full 1000 if promising. See [`unilingual/README.md`](unilingual/README.md).

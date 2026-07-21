@@ -1,0 +1,54 @@
+{
+  "n_images": 1000,
+  "attack": "multilingual",
+  "rows": [
+    {
+      "method": "C_2p_confdrop_blur",
+      "n": 1000,
+      "acc_en": 0.481,
+      "asr_en": 0.446,
+      "acc_zh": 0.489,
+      "asr_zh": 0.45,
+      "acc_mean": 0.485,
+      "asr_mean": 0.448,
+      "cost": 62.0,
+      "time_s": 197.99396562576294
+    },
+    {
+      "method": "B_2p_confdrop_mean",
+      "n": 1000,
+      "acc_en": 0.457,
+      "asr_en": 0.474,
+      "acc_zh": 0.463,
+      "asr_zh": 0.484,
+      "acc_mean": 0.46,
+      "asr_mean": 0.479,
+      "cost": 62.0,
+      "time_s": 128.04988408088684
+    },
+    {
+      "method": "base_2p_maxconf_mean",
+      "n": 1000,
+      "acc_en": 0.063,
+      "asr_en": 0.934,
+      "acc_zh": 0.17,
+      "asr_zh": 0.825,
+      "acc_mean": 0.1165,
+      "asr_mean": 0.8795,
+      "cost": 62.0,
+      "time_s": 131.10556292533875
+    },
+    {
+      "method": "no_defense",
+      "n": 1000,
+      "acc_en": 0.043,
+      "asr_en": 0.955,
+      "acc_zh": 0.073,
+      "asr_zh": 0.927,
+      "acc_mean": 0.057999999999999996,
+      "asr_mean": 0.9410000000000001,
+      "cost": 2.0,
+      "time_s": 0.0
+    }
+  ]
+}
