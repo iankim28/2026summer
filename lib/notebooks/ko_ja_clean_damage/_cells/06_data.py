@@ -11,6 +11,9 @@ rows = hf.select(idx)
 true = np.array(rows[label_key])
 assert len(idx) == 1000 and np.array_equal(true, np.array(_saved['true']))
 
+attack_pos = _saved['attack_pos']
+assert len(attack_pos['en']) == len(idx) and len(attack_pos['l']) == len(idx)
+
 rng    = random.Random(0)
 target = np.array([rng.choice([c for c in range(10) if c != int(true[k])])
                    for k in range(len(idx))])
@@ -21,6 +24,7 @@ clean_224 = [im.convert('RGB').resize((DISPLAY_SIZE, DISPLAY_SIZE), Image.BICUBI
 all_idx  = np.arange(len(clean_224))
 tune_idx = np.concatenate([np.where(true == c)[0][:10] for c in range(10)])
 print(f'Loaded {len(clean_224)} images; tune subset = {len(tune_idx)}')
+print(f"Attack positions: frozen from sample JSON (ref {attack_pos['ref_bw']}x{attack_pos['ref_bh']})")
 
 _FONT_CACHE = {}
 
@@ -57,38 +61,28 @@ def _get_font(fp, size=FONT_SIZE):
             _FONT_CACHE[key] = ImageFont.load_default()
     return _FONT_CACHE[key]
 
-def _rects_overlap(a, b):
-    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
-
-def _random_nonoverlapping_rect(rng_, bw, bh, placed):
-    x_hi = max(0, DISPLAY_SIZE - bw)
-    y_hi = max(0, DISPLAY_SIZE - bh)
-    rx = ry = 0
-    for _ in range(64):
-        rx = rng_.randint(0, x_hi) if x_hi > 0 else 0
-        ry = rng_.randint(0, y_hi) if y_hi > 0 else 0
-        rect = (rx, ry, rx + bw, ry + bh)
-        if all(not _rects_overlap(rect, p) for p in placed):
-            return rect
-    return (rx, ry, rx + bw, ry + bh)
+def _clamp_xy(xy, bw, bh):
+    x, y = int(xy[0]), int(xy[1])
+    x = max(0, min(x, max(0, DISPLAY_SIZE - bw)))
+    y = max(0, min(y, max(0, DISPLAY_SIZE - bh)))
+    return x, y
 
 def draw_dual_box(img, word0, lang0, word1, lang1, img_idx, already_224=False):
+    """Place boxes at frozen EN/L anchors from the sample JSON."""
     if not already_224:
         img = img.convert('RGB').resize((DISPLAY_SIZE, DISPLAY_SIZE), Image.BICUBIC)
     else:
         img = img.copy()
     draw = ImageDraw.Draw(img)
-    placed = []
-    for box_i, (word, lang) in enumerate([(word0, lang0), (word1, lang1)]):
+    xy0 = attack_pos['en'][int(img_idx)]
+    xy1 = attack_pos['l'][int(img_idx)]
+    for word, lang, xy in [(word0, lang0, xy0), (word1, lang1, xy1)]:
         font = _get_font(_font_for_lang(lang))
         bb   = draw.textbbox((0, 0), word, font=font)
         bw   = (bb[2] - bb[0]) + 2 * PAD
         bh   = (bb[3] - bb[1]) + PAD + 12
-        rng_ = random.Random(int(img_idx) * NUM_BOXES + box_i)
-        rect = _random_nonoverlapping_rect(rng_, bw, bh, placed)
-        placed.append(rect)
-        rx, ry, rx2, ry2 = rect
-        draw.rectangle([rx, ry, rx2, ry2], fill='white')
+        rx, ry = _clamp_xy(xy, bw, bh)
+        draw.rectangle([rx, ry, rx + bw, ry + bh], fill='white')
         draw.text((rx + PAD - bb[0], ry + PAD - bb[1]), word, fill='black', font=font)
     return img
 

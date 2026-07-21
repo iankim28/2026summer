@@ -109,6 +109,7 @@ def _font_paths():
 
 _FONT_CACHE = {}
 _CJK_FONT, _LAT_FONT = _font_paths()
+attack_pos = None
 
 
 def _get_font(fp, size=FONT_SIZE):
@@ -122,37 +123,25 @@ def _get_font(fp, size=FONT_SIZE):
     return _FONT_CACHE[key]
 
 
-def _rects_overlap(a, b):
-    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
-
-
-def _random_nonoverlapping_rect(rng_, bw, bh, placed):
-    x_hi = max(0, DISPLAY_SIZE - bw)
-    y_hi = max(0, DISPLAY_SIZE - bh)
-    rx = ry = 0
-    for _ in range(64):
-        rx = rng_.randint(0, x_hi) if x_hi > 0 else 0
-        ry = rng_.randint(0, y_hi) if y_hi > 0 else 0
-        rect = (rx, ry, rx + bw, ry + bh)
-        if all(not _rects_overlap(rect, p) for p in placed):
-            return rect
-    return (rx, ry, rx + bw, ry + bh)
+def _clamp_xy(xy, bw, bh):
+    x, y = int(xy[0]), int(xy[1])
+    x = max(0, min(x, max(0, DISPLAY_SIZE - bw)))
+    y = max(0, min(y, max(0, DISPLAY_SIZE - bh)))
+    return x, y
 
 
 def draw_multilingual_attack(img, en_word, zh_word, img_idx):
     img = img.convert('RGB').resize((DISPLAY_SIZE, DISPLAY_SIZE), Image.BICUBIC)
     draw = ImageDraw.Draw(img)
-    placed = []
-    for box_i, (word, fp) in enumerate([(en_word, _LAT_FONT), (zh_word, _CJK_FONT)]):
+    xy0 = attack_pos['en'][int(img_idx)]
+    xy1 = attack_pos['l'][int(img_idx)]
+    for (word, fp), xy in zip([(en_word, _LAT_FONT), (zh_word, _CJK_FONT)], [xy0, xy1]):
         font = _get_font(fp)
         bb = draw.textbbox((0, 0), word, font=font)
         bw = (bb[2] - bb[0]) + 2 * PAD
         bh = (bb[3] - bb[1]) + PAD + 12
-        rng_ = random.Random(int(img_idx) * NUM_BOXES + box_i)
-        rect = _random_nonoverlapping_rect(rng_, bw, bh, placed)
-        placed.append(rect)
-        rx, ry, rx2, ry2 = rect
-        draw.rectangle([rx, ry, rx2, ry2], fill='white')
+        rx, ry = _clamp_xy(xy, bw, bh)
+        draw.rectangle([rx, ry, rx + bw, ry + bh], fill='white')
         draw.text((rx + PAD - bb[0], ry + PAD - bb[1]), word, fill='black', font=font)
     return img
 
@@ -336,6 +325,8 @@ def main():
     with open(sample_path, encoding='utf-8') as f:
         saved = json.load(f)
     idx = saved['idx']
+    global attack_pos
+    attack_pos = saved['attack_pos']
     rows = hf.select(idx)
     true = np.array(rows[label_key])
     rng = random.Random(0)

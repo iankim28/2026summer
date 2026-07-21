@@ -15,7 +15,7 @@ Companion to the multilingual experiment one level up
 | ZH sole | ZH target word | ZH target word |
 
 Geometry matches the rest of the suite: `NUM_BOXES=2`, `FONT_SIZE=24`, `PAD=8`,
-non-overlapping random placement seeded by `img_idx * NUM_BOXES + box_i`.
+frozen `attack_pos` from the sample JSON (see [`../../PROTOCOL.md`](../../PROTOCOL.md)).
 
 ## Protocol
 

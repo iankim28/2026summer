@@ -30,13 +30,13 @@ lib/notebooks/
 | [`heatmap_defense_improvements/`](heatmap_defense_improvements/) | 2026-07-20 | **Done for now.** Ablations to close the Attn-last gap; keep [`cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) (**74.9%** mean, clean Δ −1.5pp). See [`README.md`](heatmap_defense_improvements/README.md). | per-subfolder `results/` |
 | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | 2026-07-20 | Initial trial: does EN/ZH winner **`cc_bbox_blur`** transfer to KO/JA? For each partner L∈{zh,ko,ja}: uni-EN / uni-L / multi EN+L dual-box attacks; defend with EN∩L Attn-last → CC+bbox+blur. Also holds qualitative pipeline figs (`results/pipeline_*.png`). See [`README.md`](four_lang_cc_bbox_blur/README.md). | `results/{L}/{attack}/`, `comparison_summary.json`, `pipeline_*.png` |
 | [`ko_ja_clean_damage/`](ko_ja_clean_damage/) | 2026-07-19 | Ablation to cut KO/JA Clean Δ under EN∩L `cc_bbox_blur` (ZH skipped). Variants: baseline thr tune, thr floor 0.95, pareto clean-aware tune, tight dilate, no bbox. See [`README.md`](ko_ja_clean_damage/README.md). | `results/{L}/{attack}/{variant}.json`, `comparison_summary.json`, `winners.json` |
-| [`image_samples/`](image_samples/) | 2026-07-10 | Fixed image subsets shared across experiments. | `CIFAR10_4LANG_1000_SAMPLE.json`, `CIFAR10_BALANCED_1000_SAMPLE.json` |
+| [`image_samples/`](image_samples/) | 2026-07-20 | Fixed image subsets + frozen dual-box `attack_pos` shared across experiments. | `CIFAR10_BALANCED_1000_SAMPLE.json` (`attack_pos`), `attack_placement.py`, `CIFAR10_4LANG_1000_SAMPLE.json` |
 
 ## Early EN/ZH lineage — [`_en_zh/`](_en_zh/)
 
 | Folder | Last used | Research question | Main outputs |
 |--------|-----------|-------------------|--------------|
-| [`_en_zh/en_zh_multi_uni_attack/`](_en_zh/en_zh_multi_uni_attack/) | 2026-07-16 | Does attacking with **both** EN+ZH text (multilingual) beat a repeated EN-only attack (unilingual), and which defense is worth its inference cost? See [`PROTOCOL.md`](_en_zh/en_zh_multi_uni_attack/PROTOCOL.md). Attention-vs-GradCAM saliency test promoted to [`attention_defense/`](attention_defense/). | `cost_vs_performance.png`; per-setup `results/…`; `_test_grid/results/` |
+| [`_en_zh/en_zh_multi_uni_attack/`](_en_zh/en_zh_multi_uni_attack/) | 2026-07-16 | Does attacking with **both** EN+ZH text (multilingual) beat a repeated EN-only attack (unilingual), and which defense is worth its inference cost? Shared geometry/defense conventions: [`PROTOCOL.md`](PROTOCOL.md). Attention-vs-GradCAM saliency test promoted to [`attention_defense/`](attention_defense/). | `cost_vs_performance.png`; per-setup `results/…`; `_test_grid/results/` |
 | [`_en_zh/en_zh_typographic/`](_en_zh/en_zh_typographic/) | 2026-07-13 | How does a typographic attack on EN text affect a Chinese CLIP model, and vice-versa? | `results/…`, `results/balanced/` |
 | [`_en_zh/en_zh_multiple_placement/`](_en_zh/en_zh_multiple_placement/) | 2026-07-13 | EN/ZH typographic attacks at **random positions** (dual box) on balanced CIFAR-10 + CAM defense. | `results/…`, `results/cam_defense/` |
 | [`_en_zh/cam_intersection_defense/`](_en_zh/cam_intersection_defense/) | 2026-07-10 | Original EN∩ZH GradCAM intersection masking defense (single-box); later reused in multiple-placement and multi/uni. | `results/confusion_results_cam_defense.json`, `results/threshold_sweep.png` |
@@ -54,6 +54,6 @@ lib/notebooks/
 
 ## Related docs
 
-- [`_en_zh/en_zh_multi_uni_attack/PROTOCOL.md`](_en_zh/en_zh_multi_uni_attack/PROTOCOL.md) — full reproducible spec for the multi/uni-lingual attack study.
 - [`_archive/old_ko_ja_model_screening/README.md`](_archive/old_ko_ja_model_screening/README.md) — KO/JA model candidates and screening results.
 - `docs/research_diary.md` — chronological narrative of every experiment above.
+- [`PROTOCOL.md`](PROTOCOL.md) — shared reproducible spec: frozen `attack_pos`, Option B attacks, Attn-last / `cc_bbox_blur`, 4-lang + KO/JA stack.

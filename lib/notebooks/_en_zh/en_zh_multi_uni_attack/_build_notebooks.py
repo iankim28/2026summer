@@ -213,19 +213,11 @@ def _get_font(fp, size=FONT_SIZE):
         except: _FONT_CACHE[key] = ImageFont.load_default()
     return _FONT_CACHE[key]
 
-def _rects_overlap(a, b):
-    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
-
-def _random_nonoverlapping_rect(rng, box_w, box_h, placed):
-    x_hi = max(0, DISPLAY_SIZE - box_w)
-    y_hi = max(0, DISPLAY_SIZE - box_h)
-    rect_x, rect_y = 0, 0
-    for _ in range(64):
-        rect_x = rng.randint(0, x_hi) if x_hi > 0 else 0
-        rect_y = rng.randint(0, y_hi) if y_hi > 0 else 0
-        rect = (rect_x, rect_y, rect_x + box_w, rect_y + box_h)
-        if all(not _rects_overlap(rect, p) for p in placed): return rect
-    return (rect_x, rect_y, rect_x + box_w, rect_y + box_h)
+def _clamp_xy(xy, bw, bh):
+    x, y = int(xy[0]), int(xy[1])
+    x = max(0, min(x, max(0, DISPLAY_SIZE - bw)))
+    y = max(0, min(y, max(0, DISPLAY_SIZE - bh)))
+    return x, y
 
 def _draw_text_box(draw, word, rect, font):
     rx, ry, rx2, ry2 = rect
@@ -239,22 +231,21 @@ print('Font paths:', _CJK_FONT, _LAT_FONT)
 # ── multilingual attack: Box-0 = EN word, Box-1 = ZH word ─────────────────────
 MULTI_ATTACK_CODE = """\
 def draw_multilingual_attack(img, en_word, zh_word, img_idx, already_224=False):
-    \"\"\"Place English text at box-0 position, Chinese text at box-1 position.\"\"\"
+    \"\"\"Place EN at frozen slot-0, ZH at frozen slot-1 from sample JSON.\"\"\"
     if not already_224:
         img = img.convert('RGB').resize((DISPLAY_SIZE, DISPLAY_SIZE), Image.BICUBIC)
     else:
         img = img.copy()
     draw = ImageDraw.Draw(img)
-    placed = []
-    for box_i, (word, fp) in enumerate([(en_word, _LAT_FONT), (zh_word, _CJK_FONT)]):
+    xy0 = attack_pos['en'][int(img_idx)]
+    xy1 = attack_pos['l'][int(img_idx)]
+    for (word, fp), xy in zip([(en_word, _LAT_FONT), (zh_word, _CJK_FONT)], [xy0, xy1]):
         font = _get_font(fp)
         bb   = draw.textbbox((0, 0), word, font=font)
         bw   = (bb[2] - bb[0]) + 2 * PAD
         bh   = (bb[3] - bb[1]) + PAD + 12
-        rng  = random.Random(int(img_idx) * NUM_BOXES + box_i)
-        rect = _random_nonoverlapping_rect(rng, bw, bh, placed)
-        placed.append(rect)
-        _draw_text_box(draw, word, rect, font)
+        rx, ry = _clamp_xy(xy, bw, bh)
+        _draw_text_box(draw, word, (rx, ry, rx + bw, ry + bh), font)
     return img
 
 def build_multilingual_attacked_images(base_imgs, img_indices, n_workers=None):
@@ -270,13 +261,13 @@ def build_multilingual_attacked_images(base_imgs, img_indices, n_workers=None):
     with ThreadPoolExecutor(max_workers=n_workers) as pool:
         return list(pool.map(_one, tasks))
 
-print(f'Multilingual attack helper ready: {NUM_BOXES} boxes @ size {FONT_SIZE} (box-0=EN, box-1=ZH)')
+print(f'Multilingual attack helper ready: {NUM_BOXES} boxes @ size {FONT_SIZE} (frozen EN/L anchors)')
 """
 
 # ── unilingual attack: Box-0 = EN word, Box-1 = EN word (same) ────────────────
 UNI_ATTACK_CODE = """\
 def draw_word(img, word, img_idx, already_224=False):
-    \"\"\"Place the same word in NUM_BOXES non-overlapping positions (all English).\"\"\"
+    \"\"\"Place the same word at frozen EN/L slot anchors from sample JSON.\"\"\"
     fp = _font_for(word)
     if not already_224:
         img = img.convert('RGB').resize((DISPLAY_SIZE, DISPLAY_SIZE), Image.BICUBIC)
@@ -287,12 +278,9 @@ def draw_word(img, word, img_idx, already_224=False):
     bb    = draw.textbbox((0, 0), word, font=font)
     bw    = (bb[2] - bb[0]) + 2 * PAD
     bh    = (bb[3] - bb[1]) + PAD + 12
-    placed = []
-    for box_i in range(NUM_BOXES):
-        rng  = random.Random(int(img_idx) * NUM_BOXES + box_i)
-        rect = _random_nonoverlapping_rect(rng, bw, bh, placed)
-        placed.append(rect)
-        _draw_text_box(draw, word, rect, font)
+    for xy in (attack_pos['en'][int(img_idx)], attack_pos['l'][int(img_idx)]):
+        rx, ry = _clamp_xy(xy, bw, bh)
+        _draw_text_box(draw, word, (rx, ry, rx + bw, ry + bh), font)
     return img
 
 def build_attacked_images(base_imgs, img_indices, attack_lang, n_workers=None):
@@ -305,7 +293,7 @@ def build_attacked_images(base_imgs, img_indices, attack_lang, n_workers=None):
     with ThreadPoolExecutor(max_workers=n_workers) as pool:
         return list(pool.map(_one, zip(base_imgs, words, img_indices)))
 
-print(f'Unilingual attack helper ready: {NUM_BOXES} boxes @ size {FONT_SIZE} (both EN)')
+print(f'Unilingual attack helper ready: {NUM_BOXES} boxes @ size {FONT_SIZE} (frozen EN/L anchors)')
 """
 
 DATA_LOAD_CODE = """\
@@ -324,6 +312,9 @@ assert len(idx) == 1000
 assert np.array_equal(true, np.array(_saved['true']))
 assert all((true == c).sum() == 100 for c in range(10))
 
+attack_pos = _saved['attack_pos']
+assert len(attack_pos['en']) == len(idx) and len(attack_pos['l']) == len(idx)
+
 rng    = random.Random(0)
 target = np.array([rng.choice([c for c in range(10) if c != int(true[k])])
                    for k in range(len(idx))])
@@ -337,6 +328,7 @@ print(f'{time.time()-t0:.1f}s')
 all_idx  = np.arange(len(clean))
 tune_idx = np.concatenate([np.where(true == c)[0][:10] for c in range(10)])
 print(f'Loaded {len(clean)} images; tune subset = {len(tune_idx)}')
+print(f"Attack positions: frozen from sample JSON (ref {attack_pos['ref_bw']}x{attack_pos['ref_bh']})")
 """
 
 LOAD_MODELS_CODE = """\

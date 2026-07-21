@@ -9,8 +9,8 @@ under the same dual-box typographic geometry?
 
 - **Models:** EN OpenAI ViT-B/32, ZH Chinese-CLIP B/16, KO `Bingsu/clip-vit-base-patch32-ko`,
   JA `llm-jp/llm-jp-clip-vit-base-patch16`
-- **Geometry:** `NUM_BOXES=2`, `FONT_SIZE=24`, random non-overlapping placement, CIFAR-10
-  balanced 1000 (`../image_samples/CIFAR10_BALANCED_1000_SAMPLE.json`)
+- **Geometry:** `NUM_BOXES=2`, `FONT_SIZE=24`, frozen `attack_pos` from
+  `../image_samples/CIFAR10_BALANCED_1000_SAMPLE.json` (see [`../PROTOCOL.md`](../PROTOCOL.md))
 - **Defense:** EN ∩ L Attn-last → percentile mask → dilate → top-2 CC + bbox snap → blur fill
   (`BLUR_RADIUS=12`). Cost = 4 passes / image.
 - **Sample sizes:** tune threshold on n=100 (10/class), then always full n=1000.
