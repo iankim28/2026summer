@@ -2001,11 +2001,19 @@ thr column shows what the n=100 tune set picked before → after.
 | ja/uni_l | 0.95→0.95 | −11.5 | −11.5 | 0.0 |
 | ja/multi | 0.95→**0.90** | −11.5 | **−23.1** | **−11.5** |
 
-**No defense vs defense (new protocol only).** Atk = accuracy on attacked images before any mask;
-Def mean = after `cc_bbox_blur`. Clean = unattacked accuracy (same for all cells per language).
+**No defense vs defense (new protocol only).**
 
-| Cell | Atk EN | Atk L | Atk mean | Def mean | Clean EN / L |
-|------|-------:|------:|---------:|---------:|-------------:|
+How to read a row (e.g. `zh/multi`):
+
+- **Cell** = partner language + attack type. Partner `L` is ZH/KO/JA. Attack is `uni_en` (two EN words), `uni_l` (two L words), or `multi` (one EN + one L word). Defense always scores **EN ∩ L**.
+- **Atk EN** = accuracy of the **English CLIP** on the attacked images, **before** any defense.
+- **Atk L** = accuracy of the **partner CLIP** (ZH, KO, or JA for that row) on the same attacked images, **before** defense.
+- **Atk mean** = average of Atk EN and Atk L (how bad the attack is overall).
+- **Def mean** = average of EN and L accuracy **after** `cc_bbox_blur` (how good the defense is).
+- **Clean EN / L** = accuracy of EN / partner CLIP on **unattacked** images (upper bound; same for every cell that shares those models).
+
+| Cell | Atk EN (EN CLIP, no def) | Atk L (partner CLIP, no def) | Atk mean | Def mean (after `cc_bbox_blur`) | Clean EN / L |
+|------|-------------------------:|-----------------------------:|---------:|--------------------------------:|-------------:|
 | zh/uni_en | 3.8% | 24.8% | 14.3% | **60.2%** | 85.9 / 91.4 |
 | zh/uni_l | 72.0% | 40.3% | 56.1% | **67.1%** | 85.9 / 91.4 |
 | zh/multi | 4.5% | 6.4% | 5.5% | **71.7%** | 85.9 / 91.4 |
