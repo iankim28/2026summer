@@ -2001,6 +2001,25 @@ thr column shows what the n=100 tune set picked before → after.
 | ja/uni_l | 0.95→0.95 | −11.5 | −11.5 | 0.0 |
 | ja/multi | 0.95→**0.90** | −11.5 | **−23.1** | **−11.5** |
 
+**No defense vs defense (new protocol only).** Atk = accuracy on attacked images before any mask;
+Def mean = after `cc_bbox_blur`. Clean = unattacked accuracy (same for all cells per language).
+
+| Cell | Atk EN | Atk L | Atk mean | Def mean | Clean EN / L |
+|------|-------:|------:|---------:|---------:|-------------:|
+| zh/uni_en | 3.8% | 24.8% | 14.3% | **60.2%** | 85.9 / 91.4 |
+| zh/uni_l | 72.0% | 40.3% | 56.1% | **67.1%** | 85.9 / 91.4 |
+| zh/multi | 4.5% | 6.4% | 5.5% | **71.7%** | 85.9 / 91.4 |
+| ko/uni_en | 3.8% | 12.9% | 8.3% | **63.3%** | 85.9 / 89.6 |
+| ko/uni_l | 70.0% | 78.2% | 74.1% | **68.4%** | 85.9 / 89.6 |
+| ko/multi | 3.5% | 12.3% | 7.9% | **64.0%** | 85.9 / 89.6 |
+| ja/uni_en | 3.8% | 3.2% | 3.5% | **66.1%** | 85.9 / 92.5 |
+| ja/uni_l | 71.3% | 84.6% | 78.0% | **72.8%** | 85.9 / 92.5 |
+| ja/multi | 4.1% | 5.4% | 4.8% | **73.6%** | 85.9 / 92.5 |
+
+Hard attacks (`uni_en`, `multi`) fall to ~4–14% mean without defense and recover to the mid-60s–70s
+with `cc_bbox_blur`. Native-only `uni_l` on KO/JA is already weak as an attack (~74–78% mean), so
+defense barely helps (or slightly hurts).
+
 ### Results (what changed and why)
 
 Quick glossary for this section:
