@@ -1,0 +1,30 @@
+---
+description: Require CUDA GPU for ML runs; alert user if CPU fallback
+alwaysApply: true
+---
+
+# Require CUDA GPU for experiments
+
+This machine has an NVIDIA GPU (RTX 5070 Ti). All torch / CLIP / notebook experiment runs must use **CUDA**, not CPU.
+
+## Before any ML run
+
+1. Check: `python -c "import torch; print(torch.__version__, torch.cuda.is_available())"`
+2. Proceed only if `torch.cuda.is_available()` is True and the build is a CUDA wheel (e.g. `+cu128`), not `+cpu`.
+3. Notebooks may keep `DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'`, but **do not start long runs on CPU**.
+
+## If CUDA is unavailable
+
+**Stop and tell the user immediately** — do not silently fall back to CPU for training, evaluation, grid search, or defense sweeps. Say clearly that the run would be CPU and ask before continuing.
+
+Typical fix (Windows):
+
+```bash
+pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu128
+```
+
+Do not install the PyPI default / `whl/cpu` torch into the Windows experiment environment unless the user explicitly wants a CPU-only install.
+
+## During / after runs
+
+If logs or `print('Device:', DEVICE)` show `cpu`, alert the user right away.

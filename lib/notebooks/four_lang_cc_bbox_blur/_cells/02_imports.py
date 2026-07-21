@@ -16,8 +16,9 @@ from scipy import ndimage
 
 os.makedirs('results', exist_ok=True)
 
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-print('Device:', DEVICE)
+assert torch.cuda.is_available(), 'CUDA required — install a CUDA build of PyTorch'
+DEVICE = 'cuda'
+print('Device:', DEVICE, torch.cuda.get_device_name(0))
 
 DISPLAY_SIZE = 224
 NUM_BOXES    = 2

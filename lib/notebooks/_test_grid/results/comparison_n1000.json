@@ -1,0 +1,54 @@
+{
+  "n_images": 1000,
+  "attack": "multilingual",
+  "rows": [
+    {
+      "method": "C_2p_confdrop_blur",
+      "n": 1000,
+      "acc_en": 0.478,
+      "asr_en": 0.445,
+      "acc_zh": 0.492,
+      "asr_zh": 0.451,
+      "acc_mean": 0.485,
+      "asr_mean": 0.448,
+      "cost": 62.0,
+      "time_s": 143.32873058319092
+    },
+    {
+      "method": "B_2p_confdrop_mean",
+      "n": 1000,
+      "acc_en": 0.449,
+      "asr_en": 0.469,
+      "acc_zh": 0.465,
+      "asr_zh": 0.48,
+      "acc_mean": 0.457,
+      "asr_mean": 0.4745,
+      "cost": 62.0,
+      "time_s": 134.58465147018433
+    },
+    {
+      "method": "base_2p_maxconf_mean",
+      "n": 1000,
+      "acc_en": 0.054,
+      "asr_en": 0.944,
+      "acc_zh": 0.148,
+      "asr_zh": 0.847,
+      "acc_mean": 0.10099999999999999,
+      "asr_mean": 0.8955,
+      "cost": 62.0,
+      "time_s": 134.85826063156128
+    },
+    {
+      "method": "no_defense",
+      "n": 1000,
+      "acc_en": 0.045,
+      "asr_en": 0.953,
+      "acc_zh": 0.064,
+      "asr_zh": 0.936,
+      "acc_mean": 0.0545,
+      "asr_mean": 0.9445,
+      "cost": 2.0,
+      "time_s": 0.0
+    }
+  ]
+}

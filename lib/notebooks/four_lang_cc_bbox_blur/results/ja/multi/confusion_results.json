@@ -1,9 +1,7 @@
 {
   "L": "ja",
   "attack": "multi",
-  "threshold": 0.95,
-  "tune_mean_acc": 0.7250000000000001,
-  "sane": true,
+  "threshold": 0.9,
   "ran_full": true,
   "clean_acc": {
     "en": 0.859,
@@ -11,41 +9,41 @@
   },
   "baseline_acc": {
     "en": 0.041,
-    "ja": 0.066
+    "ja": 0.054
   },
   "baseline_asr": {
     "en": 0.957,
-    "ja": 0.934
+    "ja": 0.945
   },
-  "cost": 4,
   "defense": {
     "en": {
-      "acc": 0.699,
-      "asr": 0.025,
+      "acc": 0.652,
+      "asr": 0.032,
       "baseline_acc": 0.041,
       "baseline_asr": 0.957
     },
     "ja": {
-      "acc": 0.839,
+      "acc": 0.82,
       "asr": 0.021,
-      "baseline_acc": 0.066,
-      "baseline_asr": 0.934
+      "baseline_acc": 0.054,
+      "baseline_asr": 0.945
     },
-    "mean_acc": 0.7689999999999999
+    "mean_acc": 0.736
   },
   "clean_deg": {
     "en": {
       "baseline_acc": 0.859,
-      "masked_acc": 0.723,
-      "delta_acc": -0.136
+      "masked_acc": 0.614,
+      "delta_acc": -0.245
     },
     "ja": {
       "baseline_acc": 0.925,
-      "masked_acc": 0.831,
-      "delta_acc": -0.09400000000000008
+      "masked_acc": 0.709,
+      "delta_acc": -0.21600000000000008
     }
   },
-  "coverage": 0.0831390306122449,
-  "mean_acc": 0.7689999999999999,
-  "mean_clean_delta": -0.11500000000000005
+  "coverage": 0.15367655851403061,
+  "mean_acc": 0.736,
+  "mean_clean_delta": -0.23050000000000004,
+  "cost": 4
 }

@@ -244,7 +244,8 @@ heatmap_defense_improvements/
   cc_bbox_blur/                       ← current EN/ZH winner
 four_lang_cc_bbox_blur/               ← ZH/KO/JA transfer + pipeline figs
 ko_ja_clean_damage/                   ← KO/JA Clean Δ ablations
-_en_zh/en_zh_multi_uni_attack/        ← early multi/uni + grid/CAM cost study
+_test_grid/                           ← improved conf-drop grid (frozen attack_pos)
+_en_zh/en_zh_multi_uni_attack/        ← early multi/uni + CAM cost study
 ```
 
 Typical 4-lang cell builder path: `_cells/06_data.py` loads the sample, asserts

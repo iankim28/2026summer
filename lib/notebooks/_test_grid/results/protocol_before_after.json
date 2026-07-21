@@ -1,0 +1,44 @@
+{
+  "test_grid_n1000": [
+    {
+      "method": "C_2p_confdrop_blur",
+      "mean_acc_before": 0.485,
+      "mean_acc_after": 0.485,
+      "mean_acc_delta": 0.0,
+      "acc_en_before": 0.481,
+      "acc_en_after": 0.478,
+      "acc_zh_before": 0.489,
+      "acc_zh_after": 0.492
+    },
+    {
+      "method": "B_2p_confdrop_mean",
+      "mean_acc_before": 0.46,
+      "mean_acc_after": 0.457,
+      "mean_acc_delta": -0.0030000000000000027,
+      "acc_en_before": 0.457,
+      "acc_en_after": 0.449,
+      "acc_zh_before": 0.463,
+      "acc_zh_after": 0.465
+    },
+    {
+      "method": "base_2p_maxconf_mean",
+      "mean_acc_before": 0.1165,
+      "mean_acc_after": 0.10099999999999999,
+      "mean_acc_delta": -0.015500000000000014,
+      "acc_en_before": 0.063,
+      "acc_en_after": 0.054,
+      "acc_zh_before": 0.17,
+      "acc_zh_after": 0.148
+    },
+    {
+      "method": "no_defense",
+      "mean_acc_before": 0.057999999999999996,
+      "mean_acc_after": 0.0545,
+      "mean_acc_delta": -0.003499999999999996,
+      "acc_en_before": 0.043,
+      "acc_en_after": 0.045,
+      "acc_zh_before": 0.073,
+      "acc_zh_after": 0.064
+    }
+  ]
+}

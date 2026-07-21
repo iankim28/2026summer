@@ -1935,3 +1935,101 @@ Relative `image_samples/` paths under `_en_zh/` were deepened by one level; inde
 Generator: [`make_pipeline_viz.py`](../lib/notebooks/four_lang_cc_bbox_blur/make_pipeline_viz.py). Stages shown: attacked → Attn EN → Attn ZH → ∩ → threshold+dilate → top-2 CC → bbox snap → blur fill.
 
 Also merged feature branch `attention-based-method` into `main` (fast-forward) and deleted the branch after push.
+
+---
+
+## 2026-07-20 — Frozen `attack_pos` protocol re-run (four_lang + grid)
+
+**Change:** Box coordinates are no longer re-sampled inside defense notebooks. They are loaded from
+[`image_samples/CIFAR10_BALANCED_1000_SAMPLE.json`](../lib/notebooks/image_samples/CIFAR10_BALANCED_1000_SAMPLE.json)
+(`attack_pos.en` / `attack_pos.l`), baked once against a conservative reference box (`131×44`).
+Runtime still measures the real word, then clamps the frozen top-left into bounds. Spec:
+[`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).
+
+**Also:** promoted improved grid search out of lineage to [`lib/notebooks/_test_grid/`](../lib/notebooks/_test_grid/)
+(was `_en_zh/en_zh_multi_uni_attack/_test_grid/`). Both notebooks now hard-require CUDA.
+
+**Runs (RTX 5070 Ti):**
+- [`four_lang_cc_bbox_blur.ipynb`](../lib/notebooks/four_lang_cc_bbox_blur/four_lang_cc_bbox_blur.ipynb)
+- [`_test_grid/grid_test.ipynb`](../lib/notebooks/_test_grid/grid_test.ipynb)
+
+Before snapshots kept under each folder’s `results/before_protocol/`. Diff JSON:
+[`four_lang…/protocol_before_after.json`](../lib/notebooks/four_lang_cc_bbox_blur/results/protocol_before_after.json).
+
+### Grid search (`_test_grid`, multilingual, n=1000) — before vs after
+
+| Method | Before mean | After mean | Δ |
+|--------|------------:|-----------:|--:|
+| `C_2p_confdrop_blur` | **48.5%** | **48.5%** | 0.0 |
+| `B_2p_confdrop_mean` | 46.0% | 45.7% | −0.3 |
+| `base_2p_maxconf_mean` | 11.7% | 10.1% | −1.6 |
+| `no_defense` | 5.8% | 5.5% | −0.3 |
+
+**Takeaway:** conf-drop winner is unchanged under frozen coords. The bake used the same seeded
+sampler family as the old runtime RNG, so EN/ZH multilingual geometry barely moved. Grid remains
+far behind Attn-last / `cc_bbox_blur` and ~10× more expensive (cost 62 vs 4).
+
+### 4-lang `cc_bbox_blur` — before vs after
+
+**Mean defended accuracy** (average of EN + partner L after `cc_bbox_blur`; higher is better).
+thr column shows what the n=100 tune set picked before → after.
+
+| Cell | thr before→after | Before | After | Δ |
+|------|-----------------:|-------:|------:|--:|
+| zh/uni_en | 0.95→0.95 | 60.2% | 60.2% | 0.0 |
+| zh/uni_l | 0.95→**0.90** | 68.0% | 67.1% | −0.9 |
+| zh/multi | 0.95→**0.90** | **74.9%** | 71.7% | **−3.2** |
+| ko/uni_en | 0.90→0.90 | 65.1% | 63.3% | −1.8 |
+| ko/uni_l | 0.95→0.95 | 69.9% | 68.4% | −1.5 |
+| ko/multi | 0.95→**0.85** | 71.0% | 64.0% | **−7.0** |
+| ja/uni_en | 0.90→0.90 | 66.2% | 66.1% | −0.1 |
+| ja/uni_l | 0.95→0.95 | 73.1% | 72.8% | −0.3 |
+| ja/multi | 0.95→**0.90** | 76.9% | 73.6% | **−3.3** |
+
+**Clean Δ** (defence accuracy on *clean* images minus clean accuracy; ≤0, closer to 0 is better).
+ΔΔ = after − before (negative means clean damage got worse).
+
+| Cell | thr before→after | Before | After | ΔΔ |
+|------|-----------------:|-------:|------:|---:|
+| zh/uni_en | 0.95→0.95 | −1.5 | −1.5 | 0.0 |
+| zh/uni_l | 0.95→**0.90** | −1.5 | **−7.0** | **−5.5** |
+| zh/multi | 0.95→**0.90** | −1.5 | **−7.0** | **−5.5** |
+| ko/uni_en | 0.90→0.90 | −18.4 | −18.4 | 0.0 |
+| ko/uni_l | 0.95→0.95 | −11.2 | −11.2 | 0.0 |
+| ko/multi | 0.95→**0.85** | −11.2 | **−25.5** | **−14.3** |
+| ja/uni_en | 0.90→0.90 | −23.1 | −23.1 | 0.0 |
+| ja/uni_l | 0.95→0.95 | −11.5 | −11.5 | 0.0 |
+| ja/multi | 0.95→**0.90** | −11.5 | **−23.1** | **−11.5** |
+
+### Results (what changed and why)
+
+Quick glossary for this section:
+
+- **Frozen `attack_pos`:** every image has two fixed box corners stored in the sample JSON. Notebooks no longer roll their own RNG for placement.
+- **thr (threshold):** percentile cut on the Attn-last intersection heatmap. Higher thr (e.g. 0.95) keeps only the hottest peaks → smaller masks. Lower thr (e.g. 0.85) masks more of the image.
+- **Mean def:** accuracy after defense, averaged over EN and the partner language.
+- **Clean Δ:** how much the same defense hurts *unattacked* images. A more negative number = more collateral damage.
+- **Tune set:** first 100 images (10/class). The notebook picks thr to maximize EN attacked accuracy on this subset, then freezes that thr for the full 1000.
+
+What we saw:
+
+- **The attacks themselves barely moved.** Pre-defense (“attacked”) accuracy changed by about ±1pp. Freezing coordinates did not suddenly make dual-box attacks much stronger or weaker.
+- **Where thr stayed the same, results stayed the same.** Cells like `zh/uni_en`, `ko/uni_l`, `ja/uni_l` keep their old mean def and Clean Δ. The defense pipeline is stable when the knobs don’t move.
+- **The drops track thr drops.** Every cell that got worse had a lower tuned thr:
+  - `zh/multi` and `zh/uni_l`: 0.95 → 0.90 → mean def −1 to −3pp, Clean Δ −1.5 → −7.0
+  - `ja/multi`: 0.95 → 0.90 → mean def −3.3pp, Clean Δ −11.5 → −23.1
+  - `ko/multi`: 0.95 → **0.85** → mean def −7.0pp, Clean Δ −11.2 → −25.5 (worst swing)
+- **Why thr fell:** bake-time positions use a large reference box (`131×44`), then runtime clamps after measuring the real word. That is a small geometry shift vs the old “sample with the actual word size” RNG. On the 100-image tune set, that shift was enough for the thr search (which only maximizes attacked EN acc) to prefer a more aggressive mask.
+- **Why lower thr hurts Clean Δ more than mean def:** a looser mask covers more of the object on clean images (big Clean Δ hit) while on attacked images it still helps a bit but can also erase useful content, so mean def slips a few pp too.
+- **Headline ZH multi softens, but isn’t “broken”.** 74.9% → 71.7% with Clean Δ −1.5 → −7.0 is almost entirely the thr=0.90 choice, not a failure of Attn-last or CC+bbox+blur.
+- **Grid vs saliency contrast:** `_test_grid`’s conf-drop winner stayed at **48.5%** — no thr knob, so no cascade. The fragile piece under protocol freeze is **percentile thr tuning**, not the frozen boxes themselves.
+
+### Potential solutions
+
+- **Floor thr at 0.95 in the protocol** (already the KO/JA ablation recommendation). Re-run four_lang with `thr = max(tuned, 0.95)` so multi cells can’t fall back to 0.85/0.90 for a small attacked-acc bump.
+- **Clean-aware tune objective** (from `ko_ja_clean_damage`): maximize something like `en_atk_acc + λ * clean_delta` on the tune set instead of attacked EN alone, so thr can’t buy attack recovery by torching clean images.
+- **Bake with actual word sizes** (or per-language refs) so frozen anchors match old runtime geometry more tightly — reduces the thr-retune surprise, though the whole point of freeze is one shared geometry.
+- **Report both “free tune” and “thr≥0.95”** in papers/tables so protocol sensitivity is visible without hiding the safer operating point.
+- **Leave grid alone for now** — it’s stable under freeze and still not competitive with `cc_bbox_blur` on cost or accuracy.
+
+**Status:** Both re-runs complete on CUDA with frozen `attack_pos`. Prefer citing after-protocol numbers plus the two before/after tables above; treat thr floor 0.95 as the next protocol tightening if Clean Δ matters.
