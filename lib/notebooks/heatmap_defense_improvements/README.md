@@ -16,7 +16,7 @@ This folder is the ablation / improvement sandbox (concluded).
 | Path | Ideas | Notes |
 |------|-------|-------|
 | [`heatmap_improvements.ipynb`](heatmap_improvements.ipynb) | 1–4, 7 | Gate, union masks, blur-fill, CC/bbox cleanup, peaked heads |
-| [`cc_bbox_blur/`](cc_bbox_blur/) | combo | Best two ablations together: CC+bbox snap + blur-fill |
+| [`cc_bbox_blur/`](cc_bbox_blur/) | combo | Best two ablations together: CC+bbox snap + blur-fill; pipeline figs in [`../four_lang_cc_bbox_blur/results/pipeline_*.png`](../four_lang_cc_bbox_blur/results/) |
 | [`vit16_en/`](vit16_en/) | 5 | EN CLIP ViT-B/16 instead of B/32 |
 | [`attn_confdrop_hybrid/`](attn_confdrop_hybrid/) | 6 | Attn shortlist + conf-drop scoring |
 

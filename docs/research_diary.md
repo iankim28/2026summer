@@ -1917,3 +1917,21 @@ Reorganized `lib/notebooks/` to cut top-level clutter without burying the curren
 - Top level kept for current stack: `attention_defense` -> `heatmap_defense_improvements` -> `four_lang_cc_bbox_blur` -> `ko_ja_clean_damage`, plus `image_samples`
 
 Relative `image_samples/` paths under `_en_zh/` were deepened by one level; index README + diary paths updated.
+
+---
+
+## 2026-07-20 — Paper draft figures + `cc_bbox_blur` pipeline viz
+
+**Paper outline:** linked existing result PNGs into [`docs/paper_draft.md`](paper_draft.md) under the matching Method/Results subsections (Attn-last, grid, `cc_bbox_blur`, 4-lang, KO/JA clean Δ). Replaceable later at paper DPI.
+
+**New qualitative figures** for how `cc_bbox_blur` works (real Attn-last EN/ZH on multilingual dual-box CIFAR samples) — stored under `four_lang_cc_bbox_blur/results/`:
+
+| Output | Path |
+|--------|------|
+| 8-stage single example | [`lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_steps.png`](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_steps.png) |
+| 5×7 multi-example grid | [`…/pipeline_examples.png`](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_examples.png) |
+| Mean vs blur fill | [`…/pipeline_fill_compare.png`](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_fill_compare.png) |
+
+Generator: [`make_pipeline_viz.py`](../lib/notebooks/four_lang_cc_bbox_blur/make_pipeline_viz.py). Stages shown: attacked → Attn EN → Attn ZH → ∩ → threshold+dilate → top-2 CC → bbox snap → blur fill.
+
+Also merged feature branch `attention-based-method` into `main` (fast-forward) and deleted the branch after push.

@@ -44,3 +44,8 @@ python _build_notebook.py
 | `results/tune_best_cfg.json` | Best threshold per (L, attack) |
 | `results/comparison_summary.json` | Rolled-up table |
 | `results/final_comparison.png` | Bar chart |
+| `results/pipeline_steps.png` | Qualitative: 8-stage `cc_bbox_blur` walkthrough (one example) |
+| `results/pipeline_examples.png` | Qualitative: 5 examples × key stages |
+| `results/pipeline_fill_compare.png` | Mean fill vs blur fill after CC+bbox |
+
+Regenerate pipeline figures with [`make_pipeline_viz.py`](make_pipeline_viz.py).

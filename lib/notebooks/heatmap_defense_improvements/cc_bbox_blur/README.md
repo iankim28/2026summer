@@ -22,3 +22,6 @@ Notebook: [`cc_bbox_blur.ipynb`](cc_bbox_blur.ipynb)
 | **cc_bbox_blur** | **74.9%** | **−1.5pp** |
 
 Combo matches best attacked accuracy and best clean tradeoff. See `results/final_comparison.png`.
+
+Qualitative pipeline figures (how the method works) live under
+[`../../four_lang_cc_bbox_blur/results/pipeline_*.png`](../../four_lang_cc_bbox_blur/results/).
