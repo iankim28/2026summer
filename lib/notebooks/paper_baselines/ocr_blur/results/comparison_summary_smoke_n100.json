@@ -1,0 +1,42 @@
+{
+  "method": "ocr_blur",
+  "status": "smoke",
+  "n": 100,
+  "scope": "en_zh_multi",
+  "ocr": "easyocr_en_ch_sim",
+  "blur_radius": 12,
+  "inference_cost": 3,
+  "detect_img_rate": 1.0,
+  "sticker_hit_rate": 0.88,
+  "sticker_hits": 176,
+  "sticker_total": 200,
+  "defense": {
+    "en": {
+      "acc": 0.66,
+      "asr": 0.05,
+      "baseline_acc": 0.07,
+      "baseline_asr": 0.93
+    },
+    "zh": {
+      "acc": 0.71,
+      "asr": 0.11,
+      "baseline_acc": 0.03,
+      "baseline_asr": 0.97
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.81,
+      "masked_acc": 0.81,
+      "delta_acc": 0.0
+    },
+    "zh": {
+      "baseline_acc": 0.86,
+      "masked_acc": 0.86,
+      "delta_acc": 0.0
+    }
+  },
+  "defense_acc_mean": 0.685,
+  "clean_delta_mean": 0.0,
+  "notes": "EasyOCR detect \u2192 Gaussian blur; scored EN+ZH on multi attack."
+}

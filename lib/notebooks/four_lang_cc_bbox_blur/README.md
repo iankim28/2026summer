@@ -13,7 +13,8 @@ under the same dual-box typographic geometry?
   `../image_samples/CIFAR10_BALANCED_1000_SAMPLE.json` (see [`../PROTOCOL.md`](../PROTOCOL.md))
 - **Defense:** EN ∩ L Attn-last → percentile mask → dilate → top-2 CC + bbox snap → blur fill
   (`BLUR_RADIUS=12`). Cost = 4 passes / image.
-- **Sample sizes:** tune threshold on n=100 (10/class), then always full n=1000.
+- **Sample sizes:** tune threshold on n=100 (10/class), then **enforce thr ≥ 0.95** for full n=1000.
+  Logs both `threshold_free` (raw tune) and `threshold` (floored).
 
 ## Option B matrix
 

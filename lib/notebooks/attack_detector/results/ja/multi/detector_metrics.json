@@ -1,0 +1,142 @@
+{
+  "L": "ja",
+  "attack": "multi",
+  "primary": "linear_svm",
+  "threshold": 0.5405508705530608,
+  "attack_recall_target": 0.99,
+  "feature_names": [
+    "en_entropy",
+    "en_topk05",
+    "en_topk10",
+    "en_max_over_mean",
+    "en_gini",
+    "en_kurtosis",
+    "en_cov95",
+    "en_ncc95",
+    "l_entropy",
+    "l_topk05",
+    "l_topk10",
+    "l_max_over_mean",
+    "l_gini",
+    "l_kurtosis",
+    "l_cov95",
+    "l_ncc95",
+    "inter_entropy",
+    "inter_topk05",
+    "inter_topk10",
+    "inter_max_over_mean",
+    "inter_gini",
+    "inter_kurtosis",
+    "inter_cov95",
+    "inter_ncc95",
+    "en_l_corr",
+    "en_l_iou95"
+  ],
+  "logistic_val_auc_thr05": 0.9994666666666667,
+  "logistic_test_auc_thr05": 1.0,
+  "svm_val_auc_thr05": 0.9997333333333334,
+  "svm_test_auc_thr05": 1.0,
+  "val_at_threshold": {
+    "acc": 0.99,
+    "auc": 0.9997333333333334,
+    "precision": 0.9867549668874173,
+    "recall": 0.9933333333333333,
+    "f1": 0.9900332225913622,
+    "confusion_matrix": [
+      [
+        148,
+        2
+      ],
+      [
+        1,
+        149
+      ]
+    ],
+    "fire_rate_clean": 0.013333333333333334,
+    "fire_rate_attacked": 0.9933333333333333,
+    "threshold": 0.5405508705530608
+  },
+  "test_at_threshold": {
+    "acc": 1.0,
+    "auc": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "confusion_matrix": [
+      [
+        150,
+        0
+      ],
+      [
+        0,
+        150
+      ]
+    ],
+    "fire_rate_clean": 0.0,
+    "fire_rate_attacked": 1.0,
+    "threshold": 0.5405508705530608
+  },
+  "logistic_top_weights": [
+    {
+      "feature": "en_gini",
+      "weight": 1.6001419757357866
+    },
+    {
+      "feature": "en_topk10",
+      "weight": 1.5585034593356226
+    },
+    {
+      "feature": "en_entropy",
+      "weight": -1.4317516087704008
+    },
+    {
+      "feature": "en_max_over_mean",
+      "weight": 1.3174105465803554
+    },
+    {
+      "feature": "en_topk05",
+      "weight": 1.0723694960124168
+    },
+    {
+      "feature": "inter_topk05",
+      "weight": -1.0252865113559444
+    },
+    {
+      "feature": "inter_kurtosis",
+      "weight": -0.8865044225862379
+    },
+    {
+      "feature": "l_topk05",
+      "weight": -0.8141781411623511
+    },
+    {
+      "feature": "l_entropy",
+      "weight": 0.6233660404556529
+    },
+    {
+      "feature": "en_ncc95",
+      "weight": 0.6168209062183344
+    },
+    {
+      "feature": "inter_entropy",
+      "weight": 0.5685225500260274
+    },
+    {
+      "feature": "inter_ncc95",
+      "weight": -0.5141272791419274
+    },
+    {
+      "feature": "inter_gini",
+      "weight": -0.4819372776107045
+    },
+    {
+      "feature": "l_gini",
+      "weight": -0.44919949842945006
+    },
+    {
+      "feature": "l_kurtosis",
+      "weight": 0.38218768759980454
+    }
+  ],
+  "phase_a_pca_nn_cent_acc": 0.9766666666666667
+}

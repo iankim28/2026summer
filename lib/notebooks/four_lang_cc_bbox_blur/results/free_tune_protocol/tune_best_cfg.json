@@ -1,0 +1,65 @@
+{
+  "zh/uni_en": {
+    "threshold": 0.95,
+    "tune_en_acc": 0.48,
+    "tune_cov": 0.07507991868622449,
+    "L": "zh",
+    "attack": "uni_en"
+  },
+  "zh/uni_l": {
+    "threshold": 0.9,
+    "tune_en_acc": 0.64,
+    "tune_cov": 0.11880440848214287,
+    "L": "zh",
+    "attack": "uni_l"
+  },
+  "zh/multi": {
+    "threshold": 0.9,
+    "tune_en_acc": 0.64,
+    "tune_cov": 0.16221819196428572,
+    "L": "zh",
+    "attack": "multi"
+  },
+  "ko/uni_en": {
+    "threshold": 0.9,
+    "tune_en_acc": 0.54,
+    "tune_cov": 0.15143793845663267,
+    "L": "ko",
+    "attack": "uni_en"
+  },
+  "ko/uni_l": {
+    "threshold": 0.95,
+    "tune_en_acc": 0.6,
+    "tune_cov": 0.090455397002551,
+    "L": "ko",
+    "attack": "uni_l"
+  },
+  "ko/multi": {
+    "threshold": 0.85,
+    "tune_en_acc": 0.61,
+    "tune_cov": 0.2314516900510204,
+    "L": "ko",
+    "attack": "multi"
+  },
+  "ja/uni_en": {
+    "threshold": 0.9,
+    "tune_en_acc": 0.58,
+    "tune_cov": 0.14919383769132652,
+    "L": "ja",
+    "attack": "uni_en"
+  },
+  "ja/uni_l": {
+    "threshold": 0.95,
+    "tune_en_acc": 0.59,
+    "tune_cov": 0.06949418048469387,
+    "L": "ja",
+    "attack": "uni_l"
+  },
+  "ja/multi": {
+    "threshold": 0.9,
+    "tune_en_acc": 0.62,
+    "tune_cov": 0.15941705197704084,
+    "L": "ja",
+    "attack": "multi"
+  }
+}

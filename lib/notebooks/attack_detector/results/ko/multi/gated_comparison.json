@@ -1,0 +1,99 @@
+{
+  "L": "ko",
+  "attack": "multi",
+  "defense_threshold": 0.95,
+  "detector": {
+    "primary": "linear_svm",
+    "threshold": 0.39927954953083966,
+    "test_auc": 0.9992,
+    "test_recall": 1.0,
+    "test_fire_rate_clean": 0.06666666666666667,
+    "test_fire_rate_attacked": 1.0
+  },
+  "policies": {
+    "never_defend": {
+      "attacked_acc": {
+        "en": 0.035,
+        "ko": 0.123
+      },
+      "attacked_asr": {
+        "en": 0.964,
+        "ko": 0.874
+      },
+      "clean_acc": {
+        "en": 0.859,
+        "ko": 0.896
+      },
+      "clean_delta": {
+        "en": 0.0,
+        "ko": 0.0
+      },
+      "defend_frac_attacked": 0.0,
+      "defend_frac_clean": 0.0
+    },
+    "always_defend": {
+      "attacked_acc": {
+        "en": 0.654,
+        "ko": 0.744
+      },
+      "attacked_asr": {
+        "en": 0.034,
+        "ko": 0.035
+      },
+      "clean_acc_masked": {
+        "en": 0.738,
+        "ko": 0.792
+      },
+      "clean_acc": {
+        "en": 0.859,
+        "ko": 0.896
+      },
+      "clean_delta": {
+        "en": -0.121,
+        "ko": -0.10399999999999998
+      },
+      "defend_frac_attacked": 1.0,
+      "defend_frac_clean": 1.0,
+      "coverage_attacked": 0.09023112643494899,
+      "coverage_clean": 0.08364799904336735
+    },
+    "gated": {
+      "attacked_acc": {
+        "en": 0.65,
+        "ko": 0.739
+      },
+      "attacked_asr": {
+        "en": 0.04,
+        "ko": 0.041
+      },
+      "clean_acc_masked": {
+        "en": 0.856,
+        "ko": 0.895
+      },
+      "clean_acc": {
+        "en": 0.859,
+        "ko": 0.896
+      },
+      "clean_delta": {
+        "en": -0.0030000000000000027,
+        "ko": -0.0010000000000000009
+      },
+      "defend_frac_attacked": 0.994,
+      "defend_frac_clean": 0.025,
+      "coverage_attacked": 0.08966214923469389,
+      "coverage_clean": 0.002114975286989796
+    }
+  },
+  "summary": {
+    "always_mean_attacked_acc": 0.6990000000000001,
+    "gated_mean_attacked_acc": 0.6945,
+    "always_mean_clean_delta": -0.11249999999999999,
+    "gated_mean_clean_delta": -0.0020000000000000018,
+    "never_mean_attacked_acc": 0.079
+  },
+  "success": {
+    "clean_delta_improved_pp": 11.049999999999999,
+    "attacked_acc_drop_pp": 0.45000000000000595,
+    "meets_success_bar": true
+  }
+}

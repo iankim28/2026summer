@@ -1,0 +1,59 @@
+{
+  "method": "sampling_tar",
+  "status": "final",
+  "n": 1000,
+  "scope": "en_only",
+  "inference_cost": 2,
+  "n_heads_ablated": 7,
+  "heads": [
+    [
+      5,
+      11
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      11,
+      1
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      9,
+      8
+    ],
+    [
+      9,
+      6
+    ],
+    [
+      11,
+      4
+    ]
+  ],
+  "z": 2.0,
+  "score_threshold": 0.41975456416148693,
+  "defense": {
+    "en": {
+      "acc": 0.116,
+      "asr": 0.875,
+      "baseline_acc": 0.045,
+      "baseline_asr": 0.953
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.861,
+      "delta_acc": 0.0020000000000000018
+    }
+  },
+  "defense_acc_en": 0.116,
+  "clean_delta_en": 0.0020000000000000018,
+  "preds_changed_vs_vanilla": 84,
+  "notes": "SamplingTAR-style: attn-to-sticker mining + z-threshold; fix_attn alpha=1. No SAE."
+}

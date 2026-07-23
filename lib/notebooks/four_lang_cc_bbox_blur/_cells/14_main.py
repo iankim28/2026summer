@@ -27,14 +27,27 @@ for L in PARTNER_LANGS:
             if en_acc > best_acc:
                 best_acc, best_thr, best_cov = en_acc, thr, res['coverage']
 
+        free_thr = best_thr
+        best_thr = max(free_thr, 0.95)
+        if best_thr != free_thr:
+            # Recompute tune coverage at the floored thr for logging.
+            floor_res = run_defense(
+                L, attacked, tune_idx, threshold=best_thr, label=f'tune thr={best_thr} (floor)')
+            best_cov = floor_res['coverage']
+            best_acc = float((floor_res['preds']['en'] == floor_res['true']).mean())
+
         tune_best_cfg[cell_key] = {
             'threshold': best_thr,
+            'threshold_free': free_thr,
             'tune_en_acc': best_acc,
             'tune_cov': best_cov,
             'L': L,
             'attack': attack,
         }
-        print(f'  BEST thr={best_thr} tune EN={100*best_acc:.1f}% cov={100*best_cov:.1f}%')
+        print(
+            f'  BEST thr={best_thr} (free={free_thr}) '
+            f'tune EN={100*best_acc:.1f}% cov={100*best_cov:.1f}%'
+        )
 
         # --- full n=1000 ---
         atk = run_defense(L, attacked, all_idx, threshold=best_thr, label='full-atk')
@@ -51,6 +64,7 @@ for L in PARTNER_LANGS:
             'L': L,
             'attack': attack,
             'threshold': best_thr,
+            'threshold_free': free_thr,
             'ran_full': True,
             'clean_acc': {ml: clean_acc[ml] for ml in score_langs},
             'baseline_acc': baseline_acc,

@@ -1,0 +1,5 @@
+{
+  "pca_explained_variance_sum": 0.797834291662324,
+  "pca_nearest_centroid_test_acc": 0.9733333333333334,
+  "n_features": 26
+}

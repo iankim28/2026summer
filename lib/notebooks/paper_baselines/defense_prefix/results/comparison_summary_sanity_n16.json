@@ -1,0 +1,27 @@
+{
+  "method": "defense_prefix",
+  "status": "sanity",
+  "n": 16,
+  "scope": "en_only",
+  "token": "results\\dp_cifar10_vit-b32.pt",
+  "inference_cost": 2,
+  "defense": {
+    "en": {
+      "acc": 0.5625,
+      "asr": 0.1875,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.9375,
+      "masked_acc": 0.875,
+      "delta_acc": -0.0625
+    }
+  },
+  "defense_acc_en": 0.5625,
+  "clean_delta_en": -0.0625,
+  "preds_changed_vs_vanilla": 13,
+  "notes": "Pretrained ImageNet-100 DP token; EN prompts only; multi EN+ZH stickers."
+}

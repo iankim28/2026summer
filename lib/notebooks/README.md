@@ -20,6 +20,7 @@ lib/notebooks/
   heatmap_defense_improvements/  # cc_bbox_blur winner
   four_lang_cc_bbox_blur/        # EN∩L transfer to ZH/KO/JA
   ko_ja_clean_damage/            # KO/JA clean-Δ ablations
+  attack_detector/               # gate cc_bbox_blur via heatmap pattern detector
   image_samples/                 # shared CIFAR-10 index JSONs + frozen attack_pos
 ```
 
@@ -31,6 +32,7 @@ lib/notebooks/
 | [`heatmap_defense_improvements/`](heatmap_defense_improvements/) | 2026-07-20 | **Done for now.** Ablations to close the Attn-last gap; keep [`cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) (**74.9%** mean, clean Δ −1.5pp). See [`README.md`](heatmap_defense_improvements/README.md). | per-subfolder `results/` |
 | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | 2026-07-20 | Initial trial: does EN/ZH winner **`cc_bbox_blur`** transfer to KO/JA? For each partner L∈{zh,ko,ja}: uni-EN / uni-L / multi EN+L dual-box attacks; defend with EN∩L Attn-last → CC+bbox+blur. Also holds qualitative pipeline figs (`results/pipeline_*.png`). See [`README.md`](four_lang_cc_bbox_blur/README.md). | `results/{L}/{attack}/`, `comparison_summary.json`, `pipeline_*.png` |
 | [`ko_ja_clean_damage/`](ko_ja_clean_damage/) | 2026-07-19 | Ablation to cut KO/JA Clean Δ under EN∩L `cc_bbox_blur` (ZH skipped). Variants: baseline thr tune, thr floor 0.95, pareto clean-aware tune, tight dilate, no bbox. See [`README.md`](ko_ja_clean_damage/README.md). | `results/{L}/{attack}/{variant}.json`, `comparison_summary.json`, `winners.json` |
+| [`attack_detector/`](attack_detector/) | 2026-07-23 | Learn Attn-last heatmap features to detect typographic attack vs clean; gate `cc_bbox_blur`. Step 1 EN∩ZH + Step 2 EN∩KO/JA (`multi`). See [`README.md`](attack_detector/README.md). | `results/{L}/multi/`, `comparison_summary.json` |
 | [`_test_grid/`](_test_grid/) | 2026-07-20 | Improved conf-drop grid occlusion (promoted from `_en_zh/…/_test_grid/`). Frozen `attack_pos` protocol. Winner still `C_2p_confdrop_blur` (~48.5% mean @ cost 62). | `results/comparison_n1000.json`, `results/protocol_before_after.json` |
 | [`image_samples/`](image_samples/) | 2026-07-20 | Fixed image subsets + frozen dual-box `attack_pos` shared across experiments. | `CIFAR10_BALANCED_1000_SAMPLE.json` (`attack_pos`), `attack_placement.py`, `CIFAR10_4LANG_1000_SAMPLE.json` |
 

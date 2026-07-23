@@ -8,7 +8,7 @@ Folder index and “last used” dates: [`README.md`](README.md). Narrative: `do
 
 ---
 
-## 1. What is current (2026-07-20)
+## 1. What is current (2026-07-22)
 
 | Stage | Folder | Role |
 |---|---|---|
@@ -16,6 +16,7 @@ Folder index and “last used” dates: [`README.md`](README.md). Narrative: `do
 | Defense winner | [`heatmap_defense_improvements/cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) | Attn-last → CC+bbox+blur (**74.9%** mean, clean Δ −1.5pp) |
 | 4-lang transfer | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | EN∩L `cc_bbox_blur` for L∈{zh,ko,ja}; Option B attack matrix |
 | KO/JA clean Δ | [`ko_ja_clean_damage/`](ko_ja_clean_damage/) | Threshold / dilate / bbox ablations on KO/JA only |
+| Heatmap attack detector | [`attack_detector/`](attack_detector/) | Learn clean vs attack from Attn-last features; gate `cc_bbox_blur` (EN∩ZH/KO/JA) |
 | Shared sample | [`image_samples/`](image_samples/) | Fixed CIFAR-10 indices + **frozen attack coordinates** |
 
 Early EN/ZH GradCAM + grid work lives under [`_en_zh/`](_en_zh/) (archived lineage, not the active defense).
@@ -199,7 +200,8 @@ EN/ZH-only studies historically used the same dual-box geometry with `L=zh`
 Per image, for scoring pair EN ∩ L:
 
 1. Attn-last map per model → intersection (`elementwise min`)
-2. Percentile threshold (tuned on n=100; prefer **thr ≥ 0.95**)
+2. Percentile threshold (tuned on n=100; **enforce thr ≥ 0.95** for full runs —
+   `best_thr = max(free_tuned, 0.95)`; log both `threshold_free` and `threshold`)
 3. Dilate (default 3×3, 3 iterations; KO/JA ablations also try 1)
 4. Keep top-2 connected components; snap each to axis-aligned bbox
 5. Fill masked region with Gaussian blur (`BLUR_RADIUS=12`)
@@ -209,8 +211,9 @@ Per image, for scoring pair EN ∩ L:
 
 ### 7.3 KO/JA clean-damage defaults (from ablation)
 
-Prefer **thr ≥ 0.95** always; use **`tight_dilate`** as the default geometry tweak
-(or `no_bbox` when Clean Δ matters more than a couple pp of mean def on JA).
+**Enforce thr ≥ 0.95** always for production / four_lang full runs; use **`tight_dilate`**
+as the default KO/JA geometry tweak (or `no_bbox` when Clean Δ matters more than a couple
+pp of mean def on JA).
 
 ### 7.4 Historical (lineage only)
 

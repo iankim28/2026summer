@@ -1,0 +1,54 @@
+{
+  "attack": "multi",
+  "defense_threshold": 0.95,
+  "partners": [
+    {
+      "L": "zh",
+      "attack": "multi",
+      "detector_primary": "linear_svm",
+      "test_auc": 1.0,
+      "test_fire_clean": 0.0,
+      "test_fire_attacked": 1.0,
+      "never_mean_atk_acc": 0.0545,
+      "always_mean_atk_acc": 0.74,
+      "gated_mean_atk_acc": 0.739,
+      "always_mean_clean_delta": -0.014500000000000013,
+      "gated_mean_clean_delta": 0.0,
+      "atk_acc_drop_pp": 0.10000000000000009,
+      "clean_delta_improved_pp": 1.4500000000000013,
+      "meets_success_bar": true
+    },
+    {
+      "L": "ko",
+      "attack": "multi",
+      "detector_primary": "linear_svm",
+      "test_auc": 0.9992,
+      "test_fire_clean": 0.06666666666666667,
+      "test_fire_attacked": 1.0,
+      "never_mean_atk_acc": 0.079,
+      "always_mean_atk_acc": 0.6990000000000001,
+      "gated_mean_atk_acc": 0.6945,
+      "always_mean_clean_delta": -0.11249999999999999,
+      "gated_mean_clean_delta": -0.0020000000000000018,
+      "atk_acc_drop_pp": 0.45000000000000595,
+      "clean_delta_improved_pp": 11.049999999999999,
+      "meets_success_bar": true
+    },
+    {
+      "L": "ja",
+      "attack": "multi",
+      "detector_primary": "linear_svm",
+      "test_auc": 1.0,
+      "test_fire_clean": 0.0,
+      "test_fire_attacked": 1.0,
+      "never_mean_atk_acc": 0.0475,
+      "always_mean_atk_acc": 0.759,
+      "gated_mean_atk_acc": 0.757,
+      "always_mean_clean_delta": -0.11500000000000005,
+      "gated_mean_clean_delta": 0.0,
+      "atk_acc_drop_pp": 0.20000000000000018,
+      "clean_delta_improved_pp": 11.500000000000005,
+      "meets_success_bar": true
+    }
+  ]
+}

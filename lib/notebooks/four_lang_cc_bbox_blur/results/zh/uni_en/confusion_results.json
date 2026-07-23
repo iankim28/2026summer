@@ -2,6 +2,7 @@
   "L": "zh",
   "attack": "uni_en",
   "threshold": 0.95,
+  "threshold_free": 0.95,
   "ran_full": true,
   "clean_acc": {
     "en": 0.859,

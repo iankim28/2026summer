@@ -3,6 +3,7 @@
     "L": "zh",
     "attack": "uni_en",
     "threshold": 0.95,
+    "threshold_free": 0.95,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -51,7 +52,8 @@
   "zh/uni_l": {
     "L": "zh",
     "attack": "uni_l",
-    "threshold": 0.9,
+    "threshold": 0.95,
+    "threshold_free": 0.9,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -67,40 +69,41 @@
     },
     "defense": {
       "en": {
-        "acc": 0.685,
-        "asr": 0.03,
+        "acc": 0.721,
+        "asr": 0.026,
         "baseline_acc": 0.72,
         "baseline_asr": 0.017
       },
       "zh": {
-        "acc": 0.656,
-        "asr": 0.245,
+        "acc": 0.624,
+        "asr": 0.273,
         "baseline_acc": 0.403,
         "baseline_asr": 0.584
       },
-      "mean_acc": 0.6705000000000001
+      "mean_acc": 0.6725
     },
     "clean_deg": {
       "en": {
         "baseline_acc": 0.859,
-        "masked_acc": 0.779,
-        "delta_acc": -0.07999999999999996
+        "masked_acc": 0.837,
+        "delta_acc": -0.02200000000000002
       },
       "zh": {
         "baseline_acc": 0.914,
-        "masked_acc": 0.855,
-        "delta_acc": -0.05900000000000005
+        "masked_acc": 0.907,
+        "delta_acc": -0.007000000000000006
       }
     },
-    "coverage": 0.11602598852040816,
-    "mean_acc": 0.6705000000000001,
-    "mean_clean_delta": -0.0695,
+    "coverage": 0.06558663504464286,
+    "mean_acc": 0.6725,
+    "mean_clean_delta": -0.014500000000000013,
     "cost": 4
   },
   "zh/multi": {
     "L": "zh",
     "attack": "multi",
-    "threshold": 0.9,
+    "threshold": 0.95,
+    "threshold_free": 0.9,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -116,40 +119,41 @@
     },
     "defense": {
       "en": {
-        "acc": 0.675,
-        "asr": 0.034,
+        "acc": 0.7,
+        "asr": 0.026,
         "baseline_acc": 0.045,
         "baseline_asr": 0.953
       },
       "zh": {
-        "acc": 0.759,
-        "asr": 0.04,
+        "acc": 0.78,
+        "asr": 0.035,
         "baseline_acc": 0.064,
         "baseline_asr": 0.936
       },
-      "mean_acc": 0.7170000000000001
+      "mean_acc": 0.74
     },
     "clean_deg": {
       "en": {
         "baseline_acc": 0.859,
-        "masked_acc": 0.779,
-        "delta_acc": -0.07999999999999996
+        "masked_acc": 0.837,
+        "delta_acc": -0.02200000000000002
       },
       "zh": {
         "baseline_acc": 0.914,
-        "masked_acc": 0.855,
-        "delta_acc": -0.05900000000000005
+        "masked_acc": 0.907,
+        "delta_acc": -0.007000000000000006
       }
     },
-    "coverage": 0.1618452447385204,
-    "mean_acc": 0.7170000000000001,
-    "mean_clean_delta": -0.0695,
+    "coverage": 0.0880645527742347,
+    "mean_acc": 0.74,
+    "mean_clean_delta": -0.014500000000000013,
     "cost": 4
   },
   "ko/uni_en": {
     "L": "ko",
     "attack": "uni_en",
-    "threshold": 0.9,
+    "threshold": 0.95,
+    "threshold_free": 0.9,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -166,39 +170,40 @@
     "defense": {
       "en": {
         "acc": 0.599,
-        "asr": 0.093,
+        "asr": 0.134,
         "baseline_acc": 0.038,
         "baseline_asr": 0.962
       },
       "ko": {
-        "acc": 0.667,
-        "asr": 0.093,
+        "acc": 0.676,
+        "asr": 0.129,
         "baseline_acc": 0.129,
         "baseline_asr": 0.866
       },
-      "mean_acc": 0.633
+      "mean_acc": 0.6375
     },
     "clean_deg": {
       "en": {
         "baseline_acc": 0.859,
-        "masked_acc": 0.661,
-        "delta_acc": -0.19799999999999995
+        "masked_acc": 0.738,
+        "delta_acc": -0.121
       },
       "ko": {
         "baseline_acc": 0.896,
-        "masked_acc": 0.725,
-        "delta_acc": -0.17100000000000004
+        "masked_acc": 0.792,
+        "delta_acc": -0.10399999999999998
       }
     },
-    "coverage": 0.15412739158163266,
-    "mean_acc": 0.633,
-    "mean_clean_delta": -0.1845,
+    "coverage": 0.09121442522321428,
+    "mean_acc": 0.6375,
+    "mean_clean_delta": -0.11249999999999999,
     "cost": 4
   },
   "ko/uni_l": {
     "L": "ko",
     "attack": "uni_l",
     "threshold": 0.95,
+    "threshold_free": 0.95,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -247,7 +252,8 @@
   "ko/multi": {
     "L": "ko",
     "attack": "multi",
-    "threshold": 0.85,
+    "threshold": 0.95,
+    "threshold_free": 0.85,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -263,40 +269,41 @@
     },
     "defense": {
       "en": {
-        "acc": 0.615,
-        "asr": 0.038,
+        "acc": 0.654,
+        "asr": 0.034,
         "baseline_acc": 0.035,
         "baseline_asr": 0.964
       },
       "ko": {
-        "acc": 0.665,
-        "asr": 0.043,
+        "acc": 0.744,
+        "asr": 0.035,
         "baseline_acc": 0.123,
         "baseline_asr": 0.874
       },
-      "mean_acc": 0.64
+      "mean_acc": 0.6990000000000001
     },
     "clean_deg": {
       "en": {
         "baseline_acc": 0.859,
-        "masked_acc": 0.577,
-        "delta_acc": -0.28200000000000003
+        "masked_acc": 0.738,
+        "delta_acc": -0.121
       },
       "ko": {
         "baseline_acc": 0.896,
-        "masked_acc": 0.668,
-        "delta_acc": -0.22799999999999998
+        "masked_acc": 0.792,
+        "delta_acc": -0.10399999999999998
       }
     },
-    "coverage": 0.2335880301339286,
-    "mean_acc": 0.64,
-    "mean_clean_delta": -0.255,
+    "coverage": 0.09023112643494899,
+    "mean_acc": 0.6990000000000001,
+    "mean_clean_delta": -0.11249999999999999,
     "cost": 4
   },
   "ja/uni_en": {
     "L": "ja",
     "attack": "uni_en",
-    "threshold": 0.9,
+    "threshold": 0.95,
+    "threshold_free": 0.9,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -312,40 +319,41 @@
     },
     "defense": {
       "en": {
-        "acc": 0.595,
-        "asr": 0.12,
+        "acc": 0.664,
+        "asr": 0.088,
         "baseline_acc": 0.038,
         "baseline_asr": 0.962
       },
       "ja": {
-        "acc": 0.727,
-        "asr": 0.115,
+        "acc": 0.782,
+        "asr": 0.09,
         "baseline_acc": 0.032,
         "baseline_asr": 0.968
       },
-      "mean_acc": 0.661
+      "mean_acc": 0.7230000000000001
     },
     "clean_deg": {
       "en": {
         "baseline_acc": 0.859,
-        "masked_acc": 0.614,
-        "delta_acc": -0.245
+        "masked_acc": 0.723,
+        "delta_acc": -0.136
       },
       "ja": {
         "baseline_acc": 0.925,
-        "masked_acc": 0.709,
-        "delta_acc": -0.21600000000000008
+        "masked_acc": 0.831,
+        "delta_acc": -0.09400000000000008
       }
     },
-    "coverage": 0.14969068877551017,
-    "mean_acc": 0.661,
-    "mean_clean_delta": -0.23050000000000004,
+    "coverage": 0.07013586176658163,
+    "mean_acc": 0.7230000000000001,
+    "mean_clean_delta": -0.11500000000000005,
     "cost": 4
   },
   "ja/uni_l": {
     "L": "ja",
     "attack": "uni_l",
     "threshold": 0.95,
+    "threshold_free": 0.95,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -394,7 +402,8 @@
   "ja/multi": {
     "L": "ja",
     "attack": "multi",
-    "threshold": 0.9,
+    "threshold": 0.95,
+    "threshold_free": 0.9,
     "ran_full": true,
     "clean_acc": {
       "en": 0.859,
@@ -410,34 +419,34 @@
     },
     "defense": {
       "en": {
-        "acc": 0.652,
-        "asr": 0.032,
+        "acc": 0.686,
+        "asr": 0.037,
         "baseline_acc": 0.041,
         "baseline_asr": 0.957
       },
       "ja": {
-        "acc": 0.82,
+        "acc": 0.832,
         "asr": 0.021,
         "baseline_acc": 0.054,
         "baseline_asr": 0.945
       },
-      "mean_acc": 0.736
+      "mean_acc": 0.759
     },
     "clean_deg": {
       "en": {
         "baseline_acc": 0.859,
-        "masked_acc": 0.614,
-        "delta_acc": -0.245
+        "masked_acc": 0.723,
+        "delta_acc": -0.136
       },
       "ja": {
         "baseline_acc": 0.925,
-        "masked_acc": 0.709,
-        "delta_acc": -0.21600000000000008
+        "masked_acc": 0.831,
+        "delta_acc": -0.09400000000000008
       }
     },
-    "coverage": 0.15367655851403061,
-    "mean_acc": 0.736,
-    "mean_clean_delta": -0.23050000000000004,
+    "coverage": 0.0825610052614796,
+    "mean_acc": 0.759,
+    "mean_clean_delta": -0.11500000000000005,
     "cost": 4
   }
 }
