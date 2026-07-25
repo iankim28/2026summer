@@ -4058,3 +4058,31 @@ CLS-attn mass mining (no SAE) + z-threshold (best z=2.0, 7 heads) + `fix_attn`. 
 - Keep updating [`baseline_comparison.md`](baseline_comparison.md) on any re-run.
 
 **Status:** All four baselines finished Gate C; `cc_bbox_blur` remains the EN∩ZH winner.
+
+---
+
+## 2026-07-24 — Mixed 2000-image score (always vs gated)
+
+**Question:** If we score each policy on **all 2000** images (1000 clean + 1000 `multi` attacked, equal weight), does gated beat always?
+
+**Method:** No re-run. Recombine Phase C fields already in `attack_detector/results/{L}/multi/gated_comparison.json`:
+
+```
+mixed_2000 = 0.5 * mean(EN,L attacked_acc) + 0.5 * mean(EN,L clean_acc_masked)
+```
+
+Script: [`lib/notebooks/attack_detector/compute_mixed_2000.py`](../lib/notebooks/attack_detector/compute_mixed_2000.py)  
+Output: [`…/results/mixed_2000_summary.json`](../lib/notebooks/attack_detector/results/mixed_2000_summary.json)  
+Handoff: [`docs/handoff_gated_mixed_2000.md`](handoff_gated_mixed_2000.md)
+
+### Mixed 2000 mean acc (EN+L)
+
+| L | never | always | gated | gated − always |
+|---|------:|-------:|------:|---------------:|
+| zh | 47.05% | 80.60% | 81.28% | **+0.68 pp** |
+| ko | 47.82% | 73.20% | 78.50% | **+5.30 pp** |
+| ja | 46.98% | 76.80% | 82.45% | **+5.65 pp** |
+
+**Takeaway:** On the pooled set, **gated wins** for all three partners. The old “always > gated” gap was attacked-only; always’s clean half (esp. KO/JA, Clean Δ ≈ −11pp) pulls the mixed score down.
+
+**Status:** Mixed-2000 table logged; no GPU re-run required.
