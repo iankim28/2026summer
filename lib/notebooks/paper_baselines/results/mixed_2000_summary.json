@@ -1,0 +1,125 @@
+{
+  "definition": "mixed_2000_mean_acc = 0.5 * attacked_mean_acc + 0.5 * clean_policy_mean_acc on the same 1000 CIFAR indices (1000 clean + 1000 multi-attacked = 2000 equal-weight eval). Lang mean is over keys present in each JSON (EN+ZH for ocr_blur / cc_bbox_blur; EN-only otherwise).",
+  "sample": "CIFAR10_BALANCED_1000_SAMPLE",
+  "sample_note": "Identical pool to attack_detector / cc_bbox_blur: frozen idx + attack_pos from lib/notebooks/image_samples/CIFAR10_BALANCED_1000_SAMPLE.json. No re-sampling; post-process of final_n1000 JSONs only.",
+  "methods": [
+    {
+      "method": "ocr_blur",
+      "display": "OCR + blur",
+      "scope": "EN+ZH",
+      "source": "paper_baselines\\ocr_blur\\results\\comparison_summary_final_n1000.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.0545,
+          "clean_policy_mean_acc": 0.8865000000000001,
+          "mixed_2000_mean_acc": 0.47050000000000003,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.7375,
+          "clean_policy_mean_acc": 0.88,
+          "mixed_2000_mean_acc": 0.8087500000000001,
+          "clean_delta_mean": -0.006500000000000006
+        }
+      }
+    },
+    {
+      "method": "defense_prefix",
+      "display": "Defense-Prefix",
+      "scope": "EN",
+      "source": "paper_baselines\\defense_prefix\\results\\comparison_summary_final_n1000.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.055,
+          "clean_policy_mean_acc": 0.89,
+          "mixed_2000_mean_acc": 0.47250000000000003,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.738,
+          "clean_policy_mean_acc": 0.895,
+          "mixed_2000_mean_acc": 0.8165,
+          "clean_delta_mean": 0.0050000000000000044
+        }
+      }
+    },
+    {
+      "method": "dyslexify",
+      "display": "Dyslexify",
+      "scope": "EN",
+      "source": "paper_baselines\\dyslexify\\results\\comparison_summary_final_n1000.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.045,
+          "clean_policy_mean_acc": 0.859,
+          "mixed_2000_mean_acc": 0.452,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.2,
+          "clean_policy_mean_acc": 0.859,
+          "mixed_2000_mean_acc": 0.5295,
+          "clean_delta_mean": 0.0
+        }
+      }
+    },
+    {
+      "method": "sampling_tar",
+      "display": "SamplingTAR",
+      "scope": "EN",
+      "source": "paper_baselines\\sampling_tar\\results\\comparison_summary_final_n1000.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.045,
+          "clean_policy_mean_acc": 0.859,
+          "mixed_2000_mean_acc": 0.452,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.116,
+          "clean_policy_mean_acc": 0.861,
+          "mixed_2000_mean_acc": 0.4885,
+          "clean_delta_mean": 0.0020000000000000018
+        }
+      }
+    },
+    {
+      "method": "cc_bbox_blur",
+      "display": "cc_bbox_blur (ref)",
+      "scope": "EN+ZH",
+      "source": "heatmap_defense_improvements\\cc_bbox_blur\\results\\confusion_results_cc_bbox_blur.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.057999999999999996,
+          "clean_policy_mean_acc": 0.8865000000000001,
+          "mixed_2000_mean_acc": 0.47225000000000006,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.749,
+          "clean_policy_mean_acc": 0.872,
+          "mixed_2000_mean_acc": 0.8105,
+          "clean_delta_mean": -0.014500000000000013
+        }
+      },
+      "reference": true
+    },
+    {
+      "method": "gated_zh",
+      "display": "gated ZH (ref)",
+      "scope": "EN+ZH",
+      "source": "attack_detector\\results\\mixed_2000_summary.json",
+      "policies": {
+        "gated": {
+          "attacked_mean_acc": 0.739,
+          "clean_policy_mean_acc": 0.8865000000000001,
+          "mixed_2000_mean_acc": 0.8127500000000001,
+          "clean_delta_mean": 0.0,
+          "defend_frac_attacked": 0.998,
+          "defend_frac_clean": 0.004
+        }
+      },
+      "reference": true
+    }
+  ]
+}

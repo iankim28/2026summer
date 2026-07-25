@@ -4097,6 +4097,73 @@ Handoff: [`docs/handoff_gated_mixed_2000.md`](handoff_gated_mixed_2000.md)
 | ja | always | 75.90% | 77.70% | 76.80% | −11.50 pp | 1.000 / 1.000 |
 | ja | gated | 75.70% | 89.20% | **82.45%** | 0.00 pp | 0.998 / 0.003 |
 
+**Column legend**
+
+- **policy:** `never` = no blur; `always` = blur every image; `gated` = blur only if detector says attack.
+- **atk:** mean(EN, L) accuracy on the 1000 `multi`-attacked images *after* that policy.
+- **clean_pol:** mean(EN, L) accuracy on the 1000 *clean* images *after* that policy’s masking (`clean_acc_masked` for always/gated; plain clean for never). This is “how well do we still classify clean images under this defense,” not vanilla clean alone.
+- **MIXED2000:** `0.5 * atk + 0.5 * clean_pol` — equal-weight score on the pooled 2000 (same 1000 CIFAR indices, once clean + once attacked).
+- **Clean Δ:** `clean_pol − vanilla_clean` (pp). Negative = defense hurt clean accuracy.
+- **defend frac atk/cln:** fraction of images the policy actually blurred, on the attacked half / clean half (always = 1.0/1.0; gated should be ~1.0 / ~0).
+
 **Takeaway:** On the pooled set, **gated wins** for all three partners. The old “always > gated” gap was attacked-only; always’s clean half (esp. KO/JA, Clean Δ ≈ −11pp) pulls the mixed score down.
 
 **Status:** Mixed-2000 table logged; no GPU re-run required.
+
+---
+
+## 2026-07-24 — Mixed 2000 for four paper baselines
+
+**Question:** Same equal-weight 2000-image score (1000 clean + 1000 `multi` attacked) for the four paper baselines — on the **identical** frozen pool as our model?
+
+**Sample identity:** `CIFAR10_BALANCED_1000_SAMPLE` — same 1000 CIFAR indices + frozen dual-box `attack_pos`. Baselines already scored this pool at final n=1000; no re-bake / no GPU.
+
+**Method:** Recombine fields in each `comparison_summary_final_n1000.json`:
+
+```
+mixed_2000 = 0.5 * atk_mean + 0.5 * clean_pol_mean
+```
+
+- `never`: vanilla attacked / vanilla clean  
+- `always`: defense on every image (baselines have no gated policy)  
+- Lang mean = EN+ZH for OCR (+ our refs); EN-only for DP / Dyslexify / SamplingTAR  
+
+Script: [`lib/notebooks/paper_baselines/compute_mixed_2000.py`](../lib/notebooks/paper_baselines/compute_mixed_2000.py)  
+Output: [`…/paper_baselines/results/mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json)
+
+### MIXED2000 by policy
+
+| Method | scope | never | always | always − never |
+|--------|-------|------:|-------:|---------------:|
+| OCR + blur | EN+ZH | 47.05% | 80.88% | +33.83 pp |
+| Defense-Prefix | EN | 47.25% | 81.65% | +34.40 pp |
+| Dyslexify | EN | 45.20% | 52.95% | +7.75 pp |
+| SamplingTAR | EN | 45.20% | 48.85% | +3.65 pp |
+| cc_bbox_blur (ref) | EN+ZH | 47.23% | 81.05% | +33.82 pp |
+| gated ZH (ref) | EN+ZH | — | **81.28%** (gated) | — |
+
+### Per-policy breakdown (atk / clean_pol / mixed / Clean Δ)
+
+| Method | scope | policy | atk | clean_pol | MIXED2000 | Clean Δ |
+|--------|-------|--------|----:|----------:|----------:|--------:|
+| OCR + blur | EN+ZH | never | 5.45% | 88.65% | 47.05% | 0.00 pp |
+| OCR + blur | EN+ZH | always | 73.75% | 88.00% | **80.88%** | −0.65 pp |
+| Defense-Prefix | EN | never | 5.50% | 89.00% | 47.25% | 0.00 pp |
+| Defense-Prefix | EN | always | 73.80% | 89.50% | **81.65%** | +0.50 pp |
+| Dyslexify | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
+| Dyslexify | EN | always | 20.00% | 85.90% | 52.95% | 0.00 pp |
+| SamplingTAR | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
+| SamplingTAR | EN | always | 11.60% | 86.10% | 48.85% | +0.20 pp |
+| cc_bbox_blur (ref) | EN+ZH | never | 5.80% | 88.65% | 47.23% | 0.00 pp |
+| cc_bbox_blur (ref) | EN+ZH | always | 74.90% | 87.20% | **81.05%** | −1.45 pp |
+| gated ZH (ref) | EN+ZH | gated | 73.90% | 88.65% | **81.28%** | 0.00 pp |
+
+**Column legend**
+
+- **policy:** `never` = no defense; `always` = apply the method to every image; `gated` = ours only (blur if detector says attack).
+- **atk / clean_pol / MIXED2000 / Clean Δ:** same definitions as the gated mixed-2000 entry above.
+- **scope:** EN+ZH = mean of the two models; EN = English CLIP only (DP / head ablations do not treat ZH).
+
+**Takeaway:** On the pooled 2000, spatial / prompt peers land near ours (OCR **80.88%**, DP EN-only **81.65%**, always `cc_bbox_blur` **81.05%**, gated ZH **81.28%**). Head-ablation ports stay near chance-on-attack (Dyslexify **52.95%**, SamplingTAR **48.85%**) because the attacked half barely recovers. DP’s high mixed score is EN-only and still leaves high residual ASR on the attacked half (see baseline comparison).
+
+**Status:** Baseline mixed-2000 table logged; no GPU re-run required.
