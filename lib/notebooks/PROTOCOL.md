@@ -3,23 +3,34 @@
 > **Purpose:** Reproducible shared conventions for every dual-box typographic-attack
 > notebook under `lib/notebooks/`. Geometry, sample indices, targets, and defense
 > defaults live here so new experiments do not silently diverge.
+>
+> **Last updated:** 2026-07-23 — frozen `attack_pos`, thr ≥ 0.95 production floor,
+> gated `attack_detector`, paper baselines.
 
-Folder index and “last used” dates: [`README.md`](README.md). Narrative: `docs/research_diary.md`.
+Folder index and “last used” dates: [`README.md`](README.md).  
+Narrative: `docs/research_diary.md`.  
+Meeting briefing: `docs/homework_summary.md`.  
+Baseline leaderboard: `docs/baseline_comparison.md`.
 
 ---
 
-## 1. What is current (2026-07-22)
+## 1. What is current (2026-07-23)
 
 | Stage | Folder | Role |
 |---|---|---|
 | Baseline saliency | [`attention_defense/`](attention_defense/) | Attn-last beats GradCAM (72.6% mean, cost 4) |
-| Defense winner | [`heatmap_defense_improvements/cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) | Attn-last → CC+bbox+blur (**74.9%** mean, clean Δ −1.5pp) |
-| 4-lang transfer | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | EN∩L `cc_bbox_blur` for L∈{zh,ko,ja}; Option B attack matrix |
+| Defense winner | [`heatmap_defense_improvements/cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) | Attn-last → CC+bbox+blur (**74.9%** mean case-study, clean Δ −1.5pp) |
+| 4-lang + thr floor | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | EN∩L under frozen `attack_pos`; production thr ≥ 0.95 |
 | KO/JA clean Δ | [`ko_ja_clean_damage/`](ko_ja_clean_damage/) | Threshold / dilate / bbox ablations on KO/JA only |
-| Heatmap attack detector | [`attack_detector/`](attack_detector/) | Learn clean vs attack from Attn-last features; gate `cc_bbox_blur` (EN∩ZH/KO/JA) |
+| Heatmap attack detector | [`attack_detector/`](attack_detector/) | Learn clean vs attack from Attn-last features; gate `cc_bbox_blur` |
+| Published baselines | [`paper_baselines/`](paper_baselines/) | Defense-Prefix, OCR+blur, Dyslexify, SamplingTAR |
 | Shared sample | [`image_samples/`](image_samples/) | Fixed CIFAR-10 indices + **frozen attack coordinates** |
+| Grid baseline | [`_test_grid/`](_test_grid/) | Conf-drop 4×4 occlusion (negative / cost baseline) |
 
-Early EN/ZH GradCAM + grid work lives under [`_en_zh/`](_en_zh/) (archived lineage, not the active defense).
+Early EN/ZH GradCAM + grid lineage: [`_en_zh/`](_en_zh/).
+
+**Cite for transfer / gated / baseline claims:** thr-floor four_lang + detector + `docs/baseline_comparison.md`.  
+**Cite for EN∩ZH ablation winner detail:** `cc_bbox_blur` **74.9% / −1.5pp** (same recipe; pre-freeze RNG geometry).
 
 ---
 
@@ -33,7 +44,10 @@ open_clip_torch, transformers, datasets, matplotlib, Pillow, torch, numpy
 pip install -q open_clip_torch transformers datasets matplotlib Pillow
 ```
 
+Baselines may also need: `easyocr` (OCR+blur), `scikit-learn` (attack detector).
+
 - `DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'`
+- **Do not start long runs on CPU** (see workspace CUDA rule).
 - All models `.eval()`
 
 ---
@@ -91,8 +105,9 @@ tune_idx = np.concatenate([np.where(true == c)[0][:10] for c in range(10)])
 
 ## 5. Frozen attack coordinates (`attack_pos`)
 
-Box positions are **not** re-sampled inside defense notebooks. They are baked once into
-the sample JSON and loaded at runtime.
+Box positions are **not** re-sampled inside defense / baseline notebooks. They are baked once into
+the sample JSON and loaded at runtime so grid, attention, detector, and published baselines
+share identical typographic geometry.
 
 ### 5.1 Where and how to regenerate
 
@@ -149,9 +164,10 @@ xy1 = attack_pos['l'][img_idx]    # slot 1
 
 Shared helper (optional): `attack_placement.draw_dual_box_at(...)`.
 
-Active notebooks that already load `attack_pos`:
+Notebooks that must load `attack_pos`:
 `attention_defense/`, `heatmap_defense_improvements/`, `four_lang_cc_bbox_blur/`,
-`ko_ja_clean_damage/`, and `_en_zh/en_zh_multi_uni_attack/`.
+`ko_ja_clean_damage/`, `attack_detector/`, `paper_baselines/`, `_test_grid/`,
+and `_en_zh/en_zh_multi_uni_attack/`.
 
 ---
 
@@ -170,20 +186,19 @@ Active notebooks that already load `attack_pos`:
 
 **Fonts:** EN → Latin (`arial` / DejaVu); ZH/JA → CJK (`msyh` / Noto CJK); KO → Malgun (fallback CJK).
 
-### 6.2 Option B matrix (current 4-lang / KO-JA work)
+### 6.2 Option B matrix (current 4-lang / KO-JA / detector work)
 
 For partner language `L ∈ {zh, ko, ja}`:
 
 | Attack | Slot 0 (`en`) | Slot 1 (`l`) | Score models |
 |---|---|---|---|
-| `uni_en` | EN word | EN word | EN + L |
-| `uni_l` | L word | L word | EN + L |
-| `multi` | EN word | L word | EN + L |
+| `uni_en` (Pure E) | EN word | EN word | EN + L |
+| `uni_l` (Pure L) | L word | L word | EN + L |
+| `multi` (E + L) | EN word | L word | EN + L |
 
 Words are translations of the **same target class** for that image.
 
-EN/ZH-only studies historically used the same dual-box geometry with `L=zh`
-(multilingual = `multi`, unilingual = `uni_en`).
+EN/ZH-only studies historically used the same dual-box geometry with `L=zh`.
 
 ---
 
@@ -207,27 +222,76 @@ Per image, for scoring pair EN ∩ L:
 5. Fill masked region with Gaussian blur (`BLUR_RADIUS=12`)
 6. Re-classify
 
-**EN/ZH multilingual reference:** mean defended acc **74.9%**, clean Δ **−1.5pp**, cost 4.
+**EN/ZH multilingual references:**
 
-### 7.3 KO/JA clean-damage defaults (from ablation)
+| Setting | Mean def | Clean Δ | Notes |
+|---|---:|---:|---|
+| Case-study (`heatmap_defense_improvements`) | **74.9%** | **−1.5pp** | pre-freeze RNG geometry |
+| Thr-floor four_lang (frozen `attack_pos`) | **74.0%** | **−1.5pp** | production transfer number |
 
-**Enforce thr ≥ 0.95** always for production / four_lang full runs; use **`tight_dilate`**
-as the default KO/JA geometry tweak (or `no_bbox` when Clean Δ matters more than a couple
-pp of mean def on JA).
+### 7.3 Threshold floor (required after protocol freeze)
 
-### 7.4 Historical (lineage only)
+Free thr-tune under frozen coords can drop multi cells to 0.85–0.90 and inflate Clean Δ
+(e.g. KO multi −25.5pp). **Always** set:
+
+```python
+threshold = max(threshold_free, 0.95)
+```
+
+for full n=1000 runs. Prefer **`tight_dilate`** as the default KO/JA geometry tweak
+(or `no_bbox` when Clean Δ matters more than a couple pp of mean def on JA).
+
+### 7.4 Gated defense — `attack_detector`
+
+Always-on blur still hurts clean KO/JA (~−11pp). Gate with Attn-last **heatmap shape**:
+
+| Phase | What |
+|---|---|
+| A | PCA + t-SNE on 26 Attn-last scalars (EN / L / ∩) — evidence clusters separate |
+| B | Logistic + calibrated linear SVM; image-level 70/15/15; attack-recall ≥ **0.99** |
+| C | Apply `cc_bbox_blur` iff detector says attack |
+
+**Production gated results (`multi`, n=1000):**
+
+| L | Always atk | Gated atk | Always Clean Δ | Gated Clean Δ |
+|---|---:|---:|---:|---:|
+| zh | 74.0% | 73.9% | −1.45 | **0.00** |
+| ko | 69.9% | 69.45% | −11.25 | **−0.20** |
+| ja | 75.9% | 75.7% | −11.50 | **0.00** |
+
+Code: [`attack_detector/`](attack_detector/). Open: Pure E / Pure L gating.
+
+### 7.5 Historical (lineage only)
 
 Under `_en_zh/en_zh_multi_uni_attack/`: GradCAM intersection (`cam_2mod` / `cam_4mod`)
-and 4×4 grid occlusion (`grid_1patch` / `grid_2patch`). Superseded by Attn-last +
-`cc_bbox_blur` for new work; still useful for cost baselines.
+and early grid. Superseded by Attn-last + `cc_bbox_blur` for new work; grid retained
+as a cost baseline in [`_test_grid/`](_test_grid/).
 
 ---
 
-## 8. Evaluation metrics
+## 8. Published baselines (same protocol)
+
+Code: [`paper_baselines/`](paper_baselines/). Living numbers: `docs/baseline_comparison.md`.
+
+| Method | Folder | Scope | Cost | Final n=1000 |
+|---|---|---|---:|---|
+| Defense-Prefix (CIFAR-retrained) | `defense_prefix/` | EN-only | 2 | 73.8% EN, Clean Δ +0.5pp |
+| OCR + blur | `ocr_blur/` | EN+ZH | 3 | 73.8% mean, Clean Δ −0.7pp |
+| Dyslexify-style | `dyslexify/` | EN-only | 2 | 20.0% EN |
+| SamplingTAR-style | `sampling_tar/` | EN-only | 2 | 11.6% EN |
+
+Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**. CUDA required.
+
+Grid conf-drop (negative baseline): **~48.5%** mean @ cost 62 (`_test_grid/`).
+
+---
+
+## 9. Evaluation metrics
 
 | Metric | Definition |
 |---|---|
 | Clean / attacked / defence accuracy | `mean(pred == true)` |
+| **Atk EN / Atk L** | Accuracy of the **EN CLIP** / **partner CLIP** on attacked images **before** defense (table columns) |
 | ASR | `mean(pred == target)` on attacked or defended images |
 | Recovery rate | fraction of attacked-wrong images corrected by defence |
 | Coverage | mean fraction of pixels masked |
@@ -236,17 +300,22 @@ and 4×4 grid occlusion (`grid_1patch` / `grid_2patch`). Superseded by Attn-last
 
 Reported as fractions in JSON (×100 for %).
 
+When reporting no-defense vs defense tables, label columns **Atk EN (EN CLIP)** /
+**Atk L (partner CLIP)** so “atk” is clearly model accuracy under attack, not a free variable.
+
 ---
 
-## 9. Notebook map
+## 10. Notebook map
 
 ```
 image_samples/attack_placement.py     ← bake / load attack_pos
 attention_defense/                    ← Attn-last vs GradCAM
 heatmap_defense_improvements/
-  cc_bbox_blur/                       ← current EN/ZH winner
-four_lang_cc_bbox_blur/               ← ZH/KO/JA transfer + pipeline figs
+  cc_bbox_blur/                       ← EN/ZH case-study winner (74.9%)
+four_lang_cc_bbox_blur/               ← ZH/KO/JA transfer + thr floor + pipeline figs
 ko_ja_clean_damage/                   ← KO/JA Clean Δ ablations
+attack_detector/                      ← heatmap-shape gate for cc_bbox_blur
+paper_baselines/                      ← DP / OCR / Dyslexify / SamplingTAR
 _test_grid/                           ← improved conf-drop grid (frozen attack_pos)
 _en_zh/en_zh_multi_uni_attack/        ← early multi/uni + CAM cost study
 ```
@@ -256,16 +325,21 @@ Typical 4-lang cell builder path: `_cells/06_data.py` loads the sample, asserts
 
 ---
 
-## 10. Key design decisions
+## 11. Key design decisions
 
 ### Why freeze coordinates in the sample JSON?
 Fair comparison across defenses requires identical typographic geometry per image.
 Storing `attack_pos.en` / `attack_pos.l` once prevents silent drift from font metrics
-or copy-pasted RNG code.
+or copy-pasted RNG code. Position is **not** another free variable between methods.
 
 ### Why reference box size at bake time?
 Positions were sampled against a conservative max box (`131×44`) so both slots stay
 in-bounds for every language word; runtime clamps again after measuring the real word.
+
+### Why thr ≥ 0.95 after freeze?
+Free tune on the 100-image subset can prefer looser masks after the small geometry
+shift from bake-time reference boxes. Flooring restores defended accuracy and Clean Δ
+without changing frozen coordinates.
 
 ### Why Attn-last over GradCAM?
 Cheaper (4 vs 6), higher defended accuracy, much lower clean-image damage.
@@ -274,6 +348,17 @@ Cheaper (4 vs 6), higher defended accuracy, much lower clean-image damage.
 Top-2 CC + bbox focuses the mask on text-like blobs; blur fill is kinder to clean
 images than mean fill while matching best attacked accuracy.
 
+### Why gate with a heatmap detector?
+Always-on KO/JA Clean Δ (~−11pp) is mostly false blurs on clean images. Attn-last
+shape (spiky vs spread) separates clean vs attacked almost perfectly; gating collapses
+Clean Δ to ~0 with ≤0.45pp attacked-acc drop on `multi`.
+
 ### Why Option B (always score EN+L)?
 Tests whether the EN∩L defense transfers when the partner language changes, under
 uni-EN, uni-L, and multi attacks with the same frozen boxes.
+
+### Why these published baselines?
+Grid alone is a weak sanity check. OCR is the closest spatial peer; Defense-Prefix is
+a strong prompt baseline (needs CIFAR train data); Dyslexify / SamplingTAR are
+training-free attention-head peers related to our saliency story but fail on dual-box
+stickers here.
