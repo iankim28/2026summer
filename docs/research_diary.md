@@ -4232,3 +4232,50 @@ Same table as above; OCR and our ZH ref (the EN+ZH rows) are split into separate
 **EN compare (always MIXED2000):** DP **81.65%** > OCR **79.05%** > gated `cc_bbox_blur` **77.90%** > always `cc_bbox_blur` **76.85%** ≫ Dyslexify / SamplingTAR. (OCR/ours ZH halves are higher; mean tables above mix the two.)
 
 **Status:** Baseline mixed-2000 table logged; our ref aligned to Phase C ZH always (74.00% → 80.60%); EN/ZH-split copies added for fair EN-only comparison; no GPU re-run required.
+
+---
+
+## 2026-07-24 — Defense-Prefix CIFAR retrain protocol (exact)
+
+**Why logged:** Published ImageNet `dp_vit-b32.pt` failed Gate A on our dual-box CIFAR (0/16 preds changed). The numbers in [`baseline_comparison.md`](baseline_comparison.md) / mixed-2000 use the CIFAR-retrained token below — not the ImageNet checkpoint.
+
+**Code:** [`lib/notebooks/paper_baselines/defense_prefix/train_cifar_dp.py`](../lib/notebooks/paper_baselines/defense_prefix/train_cifar_dp.py)  
+**Artifact:** [`…/defense_prefix/results/dp_cifar10_vit-b32.pt`](../lib/notebooks/paper_baselines/defense_prefix/results/dp_cifar10_vit-b32.pt)  
+**Eval:** EN-only on frozen `CIFAR10_BALANCED_1000_SAMPLE` (train never touches that sample).
+
+### What is trained
+
+| Piece | Detail |
+|-------|--------|
+| Backbone | OpenAI CLIP `ViT-B/32`, **frozen** (CUDA) |
+| Trainable | One learned prefix embedding (token-emb dim), init `Normal(0, 0.02)` |
+| Prompt | `a photo of a * {class}.` — `*` swapped for the learned token at encode time |
+| Vendor hook | `_vendor/Defense-Prefix` → `encode_text_with_learnt_tokens` |
+
+### Data
+
+| Piece | Detail |
+|-------|--------|
+| Source | HuggingFace `uoft-cs/cifar10`, **train** split only |
+| Size | `max_n=20000`, seed `0` (first 20k train rows) |
+| Per item | **clean** + **typo** pair, both CLIP-preprocessed |
+| Clean | RGB resize → 224×224 |
+| Typo | Same image; wrong-class **English** name (uniform among 9 ≠ true); **two** non-overlapping white boxes, black text (Arial / DejaVu, size 24, pad 8) |
+| Held out | Frozen eval 1000 (`CIFAR10_BALANCED_1000_SAMPLE`) **never** used |
+
+### Optimization
+
+| Piece | Detail |
+|-------|--------|
+| Optimizer | SGD on prefix embedding only, `lr=0.002` |
+| Schedule | CosineAnnealingLR over epochs, `eta_min=5e-5` |
+| Epochs / batch | **10** / **128** (`shuffle=True`, `drop_last=True`, `num_workers=0`) |
+| Loss | `1.0 * CE(typo → DP prompts, true y) + 3.0 * KL(clean → DP ‖ clean → vanilla)` (`seta=1`, `gamma=3`) |
+| Checkpoints | `dp_cifar10_ep{1..10}.pt` each epoch; final → `dp_cifar10_vit-b32.pt` |
+
+### Eval numbers this token produced (reminders)
+
+- Final n=1000: EN acc **73.8%**, Clean Δ **+0.5pp**, ASR **16.4%**, cost 2  
+- MIXED2000 (EN): never 47.25% → always **81.65%**
+
+**Status:** Protocol written down for paper methods; no re-run.
