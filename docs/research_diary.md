@@ -4083,6 +4083,20 @@ Handoff: [`docs/handoff_gated_mixed_2000.md`](handoff_gated_mixed_2000.md)
 | ko | 47.82% | 73.20% | 78.50% | **+5.30 pp** |
 | ja | 46.98% | 76.80% | 82.45% | **+5.65 pp** |
 
+### Per-policy breakdown (atk / clean_pol / mixed / Clean Δ / defend fracs)
+
+| L | policy | atk | clean_pol | MIXED2000 | Clean Δ | defend frac atk/cln |
+|---|--------|----:|----------:|----------:|--------:|---------------------|
+| zh | never | 5.45% | 88.65% | 47.05% | 0.00 pp | 0.000 / 0.000 |
+| zh | always | 74.00% | 87.20% | 80.60% | −1.45 pp | 1.000 / 1.000 |
+| zh | gated | 73.90% | 88.65% | **81.28%** | 0.00 pp | 0.998 / 0.004 |
+| ko | never | 7.90% | 87.75% | 47.82% | 0.00 pp | 0.000 / 0.000 |
+| ko | always | 69.90% | 76.50% | 73.20% | −11.25 pp | 1.000 / 1.000 |
+| ko | gated | 69.45% | 87.55% | **78.50%** | −0.20 pp | 0.994 / 0.025 |
+| ja | never | 4.75% | 89.20% | 46.98% | 0.00 pp | 0.000 / 0.000 |
+| ja | always | 75.90% | 77.70% | 76.80% | −11.50 pp | 1.000 / 1.000 |
+| ja | gated | 75.70% | 89.20% | **82.45%** | 0.00 pp | 0.998 / 0.003 |
+
 **Takeaway:** On the pooled set, **gated wins** for all three partners. The old “always > gated” gap was attacked-only; always’s clean half (esp. KO/JA, Clean Δ ≈ −11pp) pulls the mixed score down.
 
 **Status:** Mixed-2000 table logged; no GPU re-run required.
