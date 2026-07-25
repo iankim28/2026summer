@@ -19,13 +19,8 @@ BASELINES = [
     ("sampling_tar", "SamplingTAR", HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000.json"),
 ]
 
-OURS_ALWAYS = (
-    NOTEBOOKS
-    / "heatmap_defense_improvements"
-    / "cc_bbox_blur"
-    / "results"
-    / "confusion_results_cc_bbox_blur.json"
-)
+# Ours refs: Phase C gated mixed-2000 for partner ZH (same table as diary §2026-07-24).
+# Do NOT use older heatmap confusion_results (atk 74.9%); Phase C always is atk 74.0%.
 GATED_MIXED = NOTEBOOKS / "attack_detector" / "results" / "mixed_2000_summary.json"
 
 SAMPLE_ID = "CIFAR10_BALANCED_1000_SAMPLE"
@@ -112,43 +107,34 @@ def main() -> None:
             }
         )
 
-    # Reference: always-on cc_bbox_blur (EN∩ZH)
-    ours = json.loads(OURS_ALWAYS.read_text(encoding="utf-8"))
-    ours_policies = policies_from_summary(ours)
-    print_method("cc_bbox_blur (ref)", "EN+ZH", ours_policies, extra=" - always-on")
-    methods.append(
-        {
-            "method": "cc_bbox_blur",
-            "display": "cc_bbox_blur (ref)",
-            "scope": "EN+ZH",
-            "source": str(OURS_ALWAYS.relative_to(NOTEBOOKS)),
-            "policies": ours_policies,
-            "reference": True,
-        }
-    )
-
-    # Reference: gated ZH from attack_detector mixed_2000
+    # Reference: our cc_bbox_blur from attack_detector mixed_2000 (partner ZH)
     gated_doc = json.loads(GATED_MIXED.read_text(encoding="utf-8"))
     zh = next(p for p in gated_doc["partners"] if p["L"] == "zh")
-    gpol = zh["policies"]["gated"]
-    gated_policies = {
-        "gated": {
-            "attacked_mean_acc": gpol["attacked_mean_acc"],
-            "clean_policy_mean_acc": gpol["clean_policy_mean_acc"],
-            "mixed_2000_mean_acc": gpol["mixed_2000_mean_acc"],
-            "clean_delta_mean": gpol["clean_delta_mean"],
-            "defend_frac_attacked": gpol.get("defend_frac_attacked"),
-            "defend_frac_clean": gpol.get("defend_frac_clean"),
-        }
+    pol_map = {
+        "never_defend": "never",
+        "always_defend": "always",
+        "gated": "gated",
     }
-    print_method("gated ZH (ref)", "EN+ZH", gated_policies)
+    ours_policies = {}
+    for src, dst in pol_map.items():
+        p = zh["policies"][src]
+        ours_policies[dst] = {
+            "attacked_mean_acc": p["attacked_mean_acc"],
+            "clean_policy_mean_acc": p["clean_policy_mean_acc"],
+            "mixed_2000_mean_acc": p["mixed_2000_mean_acc"],
+            "clean_delta_mean": p["clean_delta_mean"],
+            "defend_frac_attacked": p.get("defend_frac_attacked"),
+            "defend_frac_clean": p.get("defend_frac_clean"),
+        }
+    print_method("cc_bbox_blur ZH (ref)", "EN+ZH", ours_policies, extra=" - Phase C")
     methods.append(
         {
-            "method": "gated_zh",
-            "display": "gated ZH (ref)",
+            "method": "cc_bbox_blur_zh",
+            "display": "cc_bbox_blur ZH (ref)",
             "scope": "EN+ZH",
             "source": str(GATED_MIXED.relative_to(NOTEBOOKS)),
-            "policies": gated_policies,
+            "partner": "zh",
+            "policies": ours_policies,
             "reference": True,
         }
     )
@@ -165,9 +151,11 @@ def main() -> None:
                 f"| {m['display']} | {m['scope']} | {fmt_pct(n)} | {fmt_pct(a)} | "
                 f"{100 * (a - n):+.2f} pp |"
             )
-        elif "gated" in pols:
+        if "gated" in pols:
             g = pols["gated"]["mixed_2000_mean_acc"]
-            print(f"| {m['display']} | {m['scope']} | - | {fmt_pct(g)} (gated) | - |")
+            print(
+                f"| {m['display']} gated | {m['scope']} | - | {fmt_pct(g)} | - |"
+            )
 
     print("\n### Per-policy breakdown\n")
     print("| Method | scope | policy | atk | clean_pol | MIXED2000 | Clean d |")
@@ -189,7 +177,9 @@ def main() -> None:
             "mixed_2000_mean_acc = 0.5 * attacked_mean_acc + 0.5 * clean_policy_mean_acc "
             "on the same 1000 CIFAR indices (1000 clean + 1000 multi-attacked = 2000 "
             "equal-weight eval). Lang mean is over keys present in each JSON "
-            "(EN+ZH for ocr_blur / cc_bbox_blur; EN-only otherwise)."
+            "(EN+ZH for ocr_blur / our ZH ref; EN-only otherwise). "
+            "Our ref uses attack_detector mixed_2000 ZH (Phase C always atk=74.0%), "
+            "not older heatmap confusion_results (atk=74.9%)."
         ),
         "sample": SAMPLE_ID,
         "sample_note": (

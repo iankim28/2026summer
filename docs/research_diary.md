@@ -4108,6 +4108,31 @@ Handoff: [`docs/handoff_gated_mixed_2000.md`](handoff_gated_mixed_2000.md)
 
 **Takeaway:** On the pooled set, **gated wins** for all three partners. The old “always > gated” gap was attacked-only; always’s clean half (esp. KO/JA, Clean Δ ≈ −11pp) pulls the mixed score down.
 
+### Per-policy breakdown — EN / L split (same numbers, not mean)
+
+Same table as above, but EN and partner-L scored separately (for apples-to-apples EN comparison with EN-only baselines). Defend fracs are image-level (same for both langs).
+
+| L | lang | policy | atk | clean_pol | MIXED2000 | Clean Δ | defend frac atk/cln |
+|---|------|--------|----:|----------:|----------:|--------:|---------------------|
+| zh | en | never | 4.50% | 85.90% | 45.20% | 0.00 pp | 0.000 / 0.000 |
+| zh | en | always | 70.00% | 83.70% | 76.85% | −2.20 pp | 1.000 / 1.000 |
+| zh | en | gated | 69.90% | 85.90% | **77.90%** | 0.00 pp | 0.998 / 0.004 |
+| zh | zh | never | 6.40% | 91.40% | 48.90% | 0.00 pp | 0.000 / 0.000 |
+| zh | zh | always | 78.00% | 90.70% | 84.35% | −0.70 pp | 1.000 / 1.000 |
+| zh | zh | gated | 77.90% | 91.40% | **84.65%** | 0.00 pp | 0.998 / 0.004 |
+| ko | en | never | 3.50% | 85.90% | 44.70% | 0.00 pp | 0.000 / 0.000 |
+| ko | en | always | 65.40% | 73.80% | 69.60% | −12.10 pp | 1.000 / 1.000 |
+| ko | en | gated | 65.00% | 85.60% | **75.30%** | −0.30 pp | 0.994 / 0.025 |
+| ko | ko | never | 12.30% | 89.60% | 50.95% | 0.00 pp | 0.000 / 0.000 |
+| ko | ko | always | 74.40% | 79.20% | 76.80% | −10.40 pp | 1.000 / 1.000 |
+| ko | ko | gated | 73.90% | 89.50% | **81.70%** | −0.10 pp | 0.994 / 0.025 |
+| ja | en | never | 4.10% | 85.90% | 45.00% | 0.00 pp | 0.000 / 0.000 |
+| ja | en | always | 68.60% | 72.30% | 70.45% | −13.60 pp | 1.000 / 1.000 |
+| ja | en | gated | 68.40% | 85.90% | **77.15%** | 0.00 pp | 0.998 / 0.003 |
+| ja | ja | never | 5.40% | 92.50% | 48.95% | 0.00 pp | 0.000 / 0.000 |
+| ja | ja | always | 83.20% | 83.10% | 83.15% | −9.40 pp | 1.000 / 1.000 |
+| ja | ja | gated | 83.00% | 92.50% | **87.75%** | 0.00 pp | 0.998 / 0.003 |
+
 **Status:** Mixed-2000 table logged; no GPU re-run required.
 
 ---
@@ -4126,7 +4151,8 @@ mixed_2000 = 0.5 * atk_mean + 0.5 * clean_pol_mean
 
 - `never`: vanilla attacked / vanilla clean  
 - `always`: defense on every image (baselines have no gated policy)  
-- Lang mean = EN+ZH for OCR (+ our refs); EN-only for DP / Dyslexify / SamplingTAR  
+- Lang mean = EN+ZH for OCR (+ our ZH ref); EN-only for DP / Dyslexify / SamplingTAR  
+- **Our ref** = Phase C partner ZH from [`attack_detector/results/mixed_2000_summary.json`](../lib/notebooks/attack_detector/results/mixed_2000_summary.json) (always atk **74.00%** → MIXED **80.60%**). Not the older heatmap `confusion_results` (atk 74.9%).
 
 Script: [`lib/notebooks/paper_baselines/compute_mixed_2000.py`](../lib/notebooks/paper_baselines/compute_mixed_2000.py)  
 Output: [`…/paper_baselines/results/mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json)
@@ -4139,8 +4165,8 @@ Output: [`…/paper_baselines/results/mixed_2000_summary.json`](../lib/notebooks
 | Defense-Prefix | EN | 47.25% | 81.65% | +34.40 pp |
 | Dyslexify | EN | 45.20% | 52.95% | +7.75 pp |
 | SamplingTAR | EN | 45.20% | 48.85% | +3.65 pp |
-| cc_bbox_blur (ref) | EN+ZH | 47.23% | 81.05% | +33.82 pp |
-| gated ZH (ref) | EN+ZH | — | **81.28%** (gated) | — |
+| cc_bbox_blur ZH (ref) | EN+ZH | 47.05% | 80.60% | +33.55 pp |
+| cc_bbox_blur ZH gated (ref) | EN+ZH | — | **81.28%** | — |
 
 ### Per-policy breakdown (atk / clean_pol / mixed / Clean Δ)
 
@@ -4154,16 +4180,55 @@ Output: [`…/paper_baselines/results/mixed_2000_summary.json`](../lib/notebooks
 | Dyslexify | EN | always | 20.00% | 85.90% | 52.95% | 0.00 pp |
 | SamplingTAR | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
 | SamplingTAR | EN | always | 11.60% | 86.10% | 48.85% | +0.20 pp |
-| cc_bbox_blur (ref) | EN+ZH | never | 5.80% | 88.65% | 47.23% | 0.00 pp |
-| cc_bbox_blur (ref) | EN+ZH | always | 74.90% | 87.20% | **81.05%** | −1.45 pp |
-| gated ZH (ref) | EN+ZH | gated | 73.90% | 88.65% | **81.28%** | 0.00 pp |
+| cc_bbox_blur ZH (ref) | EN+ZH | never | 5.45% | 88.65% | 47.05% | 0.00 pp |
+| cc_bbox_blur ZH (ref) | EN+ZH | always | 74.00% | 87.20% | **80.60%** | −1.45 pp |
+| cc_bbox_blur ZH (ref) | EN+ZH | gated | 73.90% | 88.65% | **81.28%** | 0.00 pp |
 
 **Column legend**
 
 - **policy:** `never` = no defense; `always` = apply the method to every image; `gated` = ours only (blur if detector says attack).
-- **atk / clean_pol / MIXED2000 / Clean Δ:** same definitions as the gated mixed-2000 entry above.
+- **atk / clean_pol / MIXED2000 / Clean Δ:** same definitions as the gated mixed-2000 entry above (ZH always row = 74.00% / 87.20% / 80.60%).
 - **scope:** EN+ZH = mean of the two models; EN = English CLIP only (DP / head ablations do not treat ZH).
 
-**Takeaway:** On the pooled 2000, spatial / prompt peers land near ours (OCR **80.88%**, DP EN-only **81.65%**, always `cc_bbox_blur` **81.05%**, gated ZH **81.28%**). Head-ablation ports stay near chance-on-attack (Dyslexify **52.95%**, SamplingTAR **48.85%**) because the attacked half barely recovers. DP’s high mixed score is EN-only and still leaves high residual ASR on the attacked half (see baseline comparison).
+**Takeaway:** On the pooled 2000, spatial / prompt peers land near ours (OCR **80.88%**, DP EN-only **81.65%**, always `cc_bbox_blur` ZH **80.60%**, gated ZH **81.28%**). Head-ablation ports stay near chance-on-attack (Dyslexify **52.95%**, SamplingTAR **48.85%**) because the attacked half barely recovers. DP’s high mixed score is EN-only and still leaves high residual ASR on the attacked half (see baseline comparison).
 
-**Status:** Baseline mixed-2000 table logged; no GPU re-run required.
+### MIXED2000 by policy — EN / ZH split (easy EN compare)
+
+Same table as above; OCR and our ZH ref (the EN+ZH rows) are split into separate EN and ZH entries. DP / Dyslexify / SamplingTAR unchanged (EN-only).
+
+| Method | scope | never | always | always − never |
+|--------|-------|------:|-------:|---------------:|
+| OCR + blur | EN | 45.20% | 79.05% | +33.85 pp |
+| OCR + blur | ZH | 48.90% | 82.70% | +33.80 pp |
+| Defense-Prefix | EN | 47.25% | 81.65% | +34.40 pp |
+| Dyslexify | EN | 45.20% | 52.95% | +7.75 pp |
+| SamplingTAR | EN | 45.20% | 48.85% | +3.65 pp |
+| cc_bbox_blur ZH (ref) | EN | 45.20% | 76.85% | +31.65 pp |
+| cc_bbox_blur ZH (ref) | ZH | 48.90% | 84.35% | +35.45 pp |
+| cc_bbox_blur ZH gated (ref) | EN | — | **77.90%** | — |
+| cc_bbox_blur ZH gated (ref) | ZH | — | **84.65%** | — |
+
+### Per-policy breakdown — EN / ZH split
+
+| Method | scope | policy | atk | clean_pol | MIXED2000 | Clean Δ |
+|--------|-------|--------|----:|----------:|----------:|--------:|
+| OCR + blur | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
+| OCR + blur | EN | always | 72.80% | 85.30% | **79.05%** | −0.60 pp |
+| OCR + blur | ZH | never | 6.40% | 91.40% | 48.90% | 0.00 pp |
+| OCR + blur | ZH | always | 74.70% | 90.70% | **82.70%** | −0.70 pp |
+| Defense-Prefix | EN | never | 5.50% | 89.00% | 47.25% | 0.00 pp |
+| Defense-Prefix | EN | always | 73.80% | 89.50% | **81.65%** | +0.50 pp |
+| Dyslexify | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
+| Dyslexify | EN | always | 20.00% | 85.90% | 52.95% | 0.00 pp |
+| SamplingTAR | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
+| SamplingTAR | EN | always | 11.60% | 86.10% | 48.85% | +0.20 pp |
+| cc_bbox_blur ZH (ref) | EN | never | 4.50% | 85.90% | 45.20% | 0.00 pp |
+| cc_bbox_blur ZH (ref) | EN | always | 70.00% | 83.70% | 76.85% | −2.20 pp |
+| cc_bbox_blur ZH (ref) | EN | gated | 69.90% | 85.90% | **77.90%** | 0.00 pp |
+| cc_bbox_blur ZH (ref) | ZH | never | 6.40% | 91.40% | 48.90% | 0.00 pp |
+| cc_bbox_blur ZH (ref) | ZH | always | 78.00% | 90.70% | 84.35% | −0.70 pp |
+| cc_bbox_blur ZH (ref) | ZH | gated | 77.90% | 91.40% | **84.65%** | 0.00 pp |
+
+**EN compare (always MIXED2000):** DP **81.65%** > OCR **79.05%** > gated `cc_bbox_blur` **77.90%** > always `cc_bbox_blur` **76.85%** ≫ Dyslexify / SamplingTAR. (OCR/ours ZH halves are higher; mean tables above mix the two.)
+
+**Status:** Baseline mixed-2000 table logged; our ref aligned to Phase C ZH always (74.00% → 80.60%); EN/ZH-split copies added for fair EN-only comparison; no GPU re-run required.
