@@ -243,13 +243,9 @@ EN attack fooling non-EN languages).
 
 
 | ε   | KO retention | ES   | FR    | JA   |
-
 | --- | ------------ | ---- | ----- | ---- |
-
 | 0.5 | 2.1%         | 4.9% | 5.1%  | 3.0% |
-
 | 4   | 11.9%        | 6.7% | 12.4% | 6.4% |
-
 | 8   | 8.7%         | 5.7% | 8.4%  | 5.3% |
 
 
@@ -287,15 +283,10 @@ Same training setup.
 
 
 | ε   | KO retention | ES    | FR    | JA    |
-
 | --- | ------------ | ----- | ----- | ----- |
-
 | 0.5 | 0.3%         | 0.3%  | 0.3%  | 0.3%  |
-
 | 2   | 10.5%        | 9.9%  | 11.1% | 7.8%  |
-
 | 4   | 24.5%        | 17.0% | 23.4% | 17.5% |
-
 | 8   | **29.0%**    | 14.4% | 24.8% | 16.5% |
 
 
@@ -425,9 +416,7 @@ The per-language fine-tuning dramatically improved zero-shot accuracy, especiall
 
 
 | ε     | KO  | ES  | FR  | JA  |
-
 | ----- | --- | --- | --- | --- |
-
 | 0.5–8 | 0%  | 0%  | 0%  | 0%  |
 
 
@@ -479,17 +468,11 @@ threat model realistic (attacker knows the defence is deployed).
 
 
 | ε   | EN fooled | KO    | ES   | FR   | JA   |
-
 | --- | --------- | ----- | ---- | ---- | ---- |
-
 | 0.5 | 287       | 0.0%  | 0.0% | 0.0% | 0.0% |
-
 | 1   | 287       | 0.0%  | 0.0% | 0.0% | 0.0% |
-
 | 2   | 287       | 1.7%  | 0.0% | 0.0% | 0.0% |
-
 | 4   | 287       | 2.8%  | 0.0% | 0.0% | 0.0% |
-
 | 8   | 287       | 12.5% | 0.0% | 6.3% | 4.2% |
 
 
@@ -615,23 +598,14 @@ not diverge enough.
 
 
 | Method                    | KO retention         | Status                          |
-
 | ------------------------- | -------------------- | ------------------------------- |
-
 | No defence (baseline)     | ~86% (full transfer) | —                               |
-
 | Rank-8 output-proj LoRA   | 8.7%                 | undertrained direction          |
-
 | TXTORTH isolated          | 12.5%                | text-only ceiling               |
-
 | Combined C+D (confounded) | ~14%                 | not reliable                    |
-
 | Rank-64 output-proj LoRA  | **29.0%**            | best clean result               |
-
 | Multi-layer LoRA r16      | 0%                   | training diverged (LR too high) |
-
 | Per-language ViT (5 ep)   | 0%                   | undertrained                    |
-
 | **Target**                | **> 50%**            |                                 |
 
 
@@ -739,17 +713,11 @@ degradation vs. the pretrained baseline.
 
 
 | ε   | EN fooled | KO        | ES        | FR        | JA        |
-
 | --- | --------- | --------- | --------- | --------- | --------- |
-
 | 0.5 | 276       | 72.8%     | 68.8%     | 72.8%     | 73.9%     |
-
 | 1   | 279       | 75.6%     | 73.5%     | 69.9%     | 77.8%     |
-
 | 2   | 279       | **79.6%** | **80.3%** | **74.6%** | **82.1%** |
-
 | 4   | 279       | 69.5%     | 73.1%     | 69.9%     | 70.6%     |
-
 | 8   | 279       | 44.8%     | 35.8%     | 44.8%     | 39.8%     |
 
 
@@ -821,25 +789,15 @@ makes both sides language-specific simultaneously, so the two losses cooperate.
 
 
 | Method                      | KO retention         | Notes                           |
-
 | --------------------------- | -------------------- | ------------------------------- |
-
 | No defence (baseline)       | ~86% (full transfer) | —                               |
-
 | Rank-8 output-proj LoRA     | 8.7%                 | too low capacity                |
-
 | TXTORTH isolated            | 12.5%                | text-only ceiling               |
-
 | Combined C+D (confounded)   | ~14%                 | collapsed image adapters        |
-
 | Rank-64 output-proj LoRA    | 29.0%                | previous best                   |
-
 | Multi-layer LoRA r16        | 0%                   | training diverged (LR too high) |
-
 | Per-language ViT (5 ep)     | 0%                   | undertrained                    |
-
 | **Dual enc. G (train ε=2)** | **44.8%**            | **new best; >50% at ε≤4**       |
-
 | **Target**                  | **> 50%**            |                                 |
 
 
@@ -905,15 +863,10 @@ Four **independently pretrained** per-language CLIP models (not a shared encoder
 
 
 | lang | model                                                           |
-
 | ---- | --------------------------------------------------------------- |
-
 | en   | OpenAI ViT-B/32 (`open_clip`)                                   |
-
 | zh   | `OFA-Sys/chinese-clip-vit-base-patch16`                         |
-
 | ko   | `Bingsu/clip-vit-base-patch32-ko`                               |
-
 | ja   | `line-corporation/clip-japanese-base` (CLYP, trust_remote_code) |
 
 
@@ -935,15 +888,10 @@ image. Metrics: **accuracy** (pred == true), **ASR** (pred == written target cla
 
 
 | model | clean accuracy |
-
 | ----- | -------------- |
-
 | en    | 98.5%          |
-
 | zh    | 97.0%          |
-
 | ko    | 98.5%          |
-
 | ja    | **14.0%**      |
 
 
@@ -965,15 +913,10 @@ be treated as provisional until JA loading is fixed and the notebook re-run.
 
 
 |               | model_en | model_zh | model_ko | model_ja |
-
 | ------------- | -------- | -------- | -------- | -------- |
-
 | **attack_en** | 21.0%    | 59.5%    | 29.0%    | 16.5%    |
-
 | **attack_zh** | 97.5%    | 84.0%    | 98.5%    | 18.5%    |
-
 | **attack_ko** | 96.5%    | 97.5%    | 97.5%    | 16.5%    |
-
 | **attack_ja** | 97.0%    | 89.5%    | 97.5%    | 17.0%    |
 
 
@@ -991,15 +934,10 @@ be treated as provisional until JA loading is fixed and the notebook re-run.
 
 
 |               | model_en  | model_zh  | model_ko  | model_ja |
-
 | ------------- | --------- | --------- | --------- | -------- |
-
 | **attack_en** | **79.0%** | **39.5%** | **70.5%** | 5.0%     |
-
 | **attack_zh** | 0.0%      | 14.5%     | 0.0%      | 4.5%     |
-
 | **attack_ko** | 0.5%      | 0.0%      | 0.0%      | 5.0%     |
-
 | **attack_ja** | 0.5%      | 7.5%      | 0.5%      | 5.0%     |
 
 
@@ -1071,13 +1009,9 @@ artefact of bottom-crop preprocessing alone.
 
 
 | prior result                                             | typographic result (this run)                                                             |
-
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-
 | Q1 shared encoder + PGD: all languages collapse together | separate encoders + EN typographic: models disagree                                       |
-
 | Experiment G dual encoder + PGD: >50% retention at ε≤4   | typographic: EN word fools multiple models but not all equally                            |
-
 | Consensus defence fails on shared architecture           | disagreement-based **detection** may work with separate encoders under typographic threat |
 
 
@@ -1249,17 +1183,11 @@ Results — adversarial retention (PGD 20 steps vs EN pair):
 
 
 | ε   | KO        | ES        | FR        | JA        |
-
 | --- | --------- | --------- | --------- | --------- |
-
 | 0.5 | 72.8%     | 68.8%     | 72.8%     | 73.9%     |
-
 | 1   | 75.6%     | 73.5%     | 69.9%     | 77.8%     |
-
 | 2   | **79.6%** | **80.3%** | **74.6%** | **82.1%** |
-
 | 4   | 69.5%     | 73.1%     | 69.9%     | 70.6%     |
-
 | 8   | 44.8%     | 35.8%     | 44.8%     | 39.8%     |
 
 
@@ -1315,25 +1243,15 @@ A 4×4 grid: four attack languages (EN, ZH, KO, JA) × four independent classifi
 
 
 | Method                            | KO retention @ ε=8         | Notes                     |
-
 | --------------------------------- | -------------------------- | ------------------------- |
-
 | No defence (baseline)             | ~86% transfer (all fooled) | —                         |
-
 | Rank-8 output-proj LoRA (Exp A)   | 8.7%                       | low capacity              |
-
 | TXT_ORTH isolated (Exp F)         | 12.5%                      | text-only ceiling         |
-
 | Combined C+D (Exp D confounded)   | ~14%                       | image side was broken     |
-
 | Rank-64 output-proj LoRA (Exp B)  | 29.0%                      | previous best             |
-
 | Multi-layer LoRA r16 (Exp C)      | 0%                         | training diverged         |
-
 | Per-language ViT 5 epochs (Exp E) | 0%                         | undertrained              |
-
 | **Dual encoder G (train ε=2)**    | **44.8%**                  | **new best; >50% at ε≤4** |
-
 | Target                            | **> 50%**                  |                           |
 
 
@@ -1347,15 +1265,10 @@ A 4×4 grid: four attack languages (EN, ZH, KO, JA) × four independent classifi
 
 
 | Model    | Accuracy under EN attack | ASR (EN word)          |
-
 | -------- | ------------------------ | ---------------------- |
-
 | model_en | 21.0%                    | 79.0%                  |
-
 | model_zh | 59.5%                    | 39.5%                  |
-
 | model_ko | 29.0%                    | 70.5%                  |
-
 | model_ja | 16.5%                    | 5.0% (broken baseline) |
 
 
@@ -1589,11 +1502,8 @@ Test: given 10 dog images and 10 cat images from STL-10, ask CLYP to choose betw
 
 
 | Images     | Correct label | Score |
-
 | ---------- | ------------- | ----- |
-
 | Cat images | 猫             | 10/10 |
-
 | Dog images | 犬             | 0/10  |
 
 
@@ -1671,15 +1581,10 @@ Created `lib/notebooks/cifar10_typographic_attack_confusion.ipynb` from the STL-
 
 
 | Model                | STL-10 | CIFAR-10  |
-
 | -------------------- | ------ | --------- |
-
 | EN (OpenAI ViT-B/32) | 98.5%  | 85.0%     |
-
 | ZH (Chinese CLIP)    | 97.0%  | 90.5%     |
-
 | KO (Bingsu KO CLIP)  | 98.5%  | 87.0%     |
-
 | JA (CLYP)            | 14.0%  | **19.0%** |
 
 
@@ -1697,17 +1602,11 @@ CIFAR-10 is harder than STL-10 for all models (lower resolution, more confusable
 
 
 | Attack language | model_en | model_zh  | model_ko  | model_ja |
-
 | --------------- | -------- | --------- | --------- | -------- |
-
 | None (clean)    | 85.0%    | 90.5%     | 87.0%     | 19.0%    |
-
 | attack_en       | **5.5%** | **33.0%** | **14.0%** | 19.5%    |
-
 | attack_zh       | 79.5%    | 58.0%     | 85.5%     | 18.5%    |
-
 | attack_ko       | 83.5%    | 88.0%     | 86.0%     | 20.0%    |
-
 | attack_ja       | 80.5%    | 67.5%     | 85.0%     | 18.0%    |
 
 
@@ -1721,15 +1620,10 @@ CIFAR-10 is harder than STL-10 for all models (lower resolution, more confusable
 
 
 | Attack language | model_en  | model_zh  | model_ko  | model_ja |
-
 | --------------- | --------- | --------- | --------- | -------- |
-
 | attack_en       | **94.5%** | **65.0%** | **86.0%** | 9.0%     |
-
 | attack_zh       | 3.0%      | 37.5%     | 2.5%      | 9.5%     |
-
 | attack_ko       | 2.5%      | 1.0%      | 3.0%      | 9.0%     |
-
 | attack_ja       | 3.0%      | 24.0%     | 2.0%      | 9.5%     |
 
 
@@ -1809,13 +1703,9 @@ Under the EN typographic attack, the three working models produce very different
 
 
 | Model | Accuracy under EN attack | ASR                                                      |
-
 | ----- | ------------------------ | -------------------------------------------------------- |
-
 | EN    | 5.5%                     | 94.5% — nearly all images predicted as the written class |
-
 | KO    | 14.0%                    | 86.0% — strong attack but not as complete as EN          |
-
 | ZH    | 33.0%                    | 65.0% — moderately fooled                                |
 
 
@@ -1923,15 +1813,10 @@ self.tok = open_clip.get_tokenizer('hf-hub:llm-jp/llm-jp-clip-vit-base-patch16')
 
 
 | Model                    | Clean accuracy |
-
 | ------------------------ | -------------- |
-
 | EN (OpenAI ViT-B/32)     | 85.0%          |
-
 | ZH (Chinese CLIP)        | 90.5%          |
-
 | KO (Bingsu KO CLIP)      | 87.0%          |
-
 | **JA (llm-jp ViT-B/16)** | **93.0%**      |
 
 
@@ -1949,17 +1834,11 @@ JA is now the strongest classifier in the ensemble. The previous CLYP model scor
 
 
 |                | model_en | model_zh  | model_ko  | model_ja |
-
 | -------------- | -------- | --------- | --------- | -------- |
-
 | Clean baseline | 85.0%    | 90.5%     | 87.0%     | 93.0%    |
-
 | attack_en      | **5.5%** | **33.0%** | **14.0%** | **9.5%** |
-
 | attack_zh      | 79.5%    | 58.0%     | 85.5%     | 93.0%    |
-
 | attack_ko      | 83.5%    | 88.0%     | 86.0%     | 93.0%    |
-
 | attack_ja      | 80.5%    | 67.5%     | 85.0%     | 92.5%    |
 
 
@@ -1973,15 +1852,10 @@ JA is now the strongest classifier in the ensemble. The previous CLYP model scor
 
 
 |           | model_en  | model_zh  | model_ko  | model_ja  |
-
 | --------- | --------- | --------- | --------- | --------- |
-
 | attack_en | **94.5%** | **65.0%** | **86.0%** | **90.0%** |
-
 | attack_zh | 3.0%      | 37.5%     | 2.5%      | 1.5%      |
-
 | attack_ko | 2.5%      | 1.0%      | 3.0%      | 1.5%      |
-
 | attack_ja | 3.0%      | 24.0%     | 2.0%      | 2.0%      |
 
 
@@ -2015,15 +1889,10 @@ Best attack per model: **EN attack dominates all four models.**
 
 
 | Model | Clean acc | Under EN attack | Drop     | EN ASR |
-
 | ----- | --------- | --------------- | -------- | ------ |
-
 | EN    | 85.0%     | 5.5%            | −79.5 pp | 94.5%  |
-
 | ZH    | 90.5%     | 33.0%           | −57.5 pp | 65.0%  |
-
 | KO    | 87.0%     | 14.0%           | −73.0 pp | 86.0%  |
-
 | JA    | 93.0%     | 9.5%            | −83.5 pp | 90.0%  |
 
 
@@ -2045,15 +1914,10 @@ The JA model is actually the most vulnerable to EN attack in terms of the absolu
 
 
 | Model | Accuracy under EN attack |
-
 | ----- | ------------------------ |
-
 | EN    | 5.5%                     |
-
 | JA    | 9.5%                     |
-
 | KO    | 14.0%                    |
-
 | ZH    | 33.0%                    |
 
 
@@ -2071,11 +1935,8 @@ All four models are fooled, but ZH is substantially more robust than the others 
 
 
 | Setting                                      | Attack         | Defence signal                                        |
-
 | -------------------------------------------- | -------------- | ----------------------------------------------------- |
-
 | Thread A: shared `xlm-roberta-base-ViT-B-32` | PGD ε=8        | All 5 languages collapse together — zero disagreement |
-
 | Thread B: 4 separate CLIPs                   | EN typographic | Models disagree substantially (ZH 33% vs EN 5.5%)     |
 
 
@@ -2137,11 +1998,8 @@ Thread B's separate-encoder design produces the disagreement that Thread A's sha
 
 
 | Condition     | All-agree (score = 1) | Score ≥ 2 |
-
 | ------------- | --------------------- | --------- |
-
 | Clean         | 77.5%                 | 22.5%     |
-
 | Attacked (EN) | 61.5%                 | 38.5%     |
 
 
@@ -2195,17 +2053,11 @@ Numbers stabilised relative to the 200-image run — the broad picture is confir
 
 
 |                | model_EN | model_ZH  | model_KO | model_JA  |
-
 | -------------- | -------- | --------- | -------- | --------- |
-
 | Clean baseline | 84.2%    | 92.7%     | 87.7%    | **93.2%** |
-
 | attack_EN      | 4.6%     | **36.5%** | 15.6%    | 8.3%      |
-
 | attack_ZH      | 79.2%    | 58.3%     | 84.5%    | 90.2%     |
-
 | attack_KO      | 81.9%    | 89.4%     | 86.1%    | 91.1%     |
-
 | attack_JA      | 78.2%    | 69.8%     | 83.5%    | 89.9%     |
 
 
@@ -2243,27 +2095,16 @@ Under EN attack, the 10 CIFAR-10 classes are not equally vulnerable. Key finding
 
 
 | Class      | EN model | ZH model | KO model | JA model | Notable                                                                                                                           |
-
 | ---------- | -------- | -------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-
 | airplane   | 1%       | 46%      | 14%      | 9%       | EN almost fully fooled                                                                                                            |
-
 | automobile | 0%       | 44%      | 39%      | 2%       | KO retains some accuracy                                                                                                          |
-
 | bird       | 9%       | 46%      | 26%      | 14%      | ZH best here                                                                                                                      |
-
 | cat        | 0%       | 35%      | 1%       | 2%       | Near-total collapse for EN/KO/JA                                                                                                  |
-
 | deer       | 8%       | 27%      | 25%      | 16%      | All models hurt                                                                                                                   |
-
 | **dog**    | **0%**   | **13%**  | **0%**   | **0%**   | Most vulnerable class — EN "dog" label is the only clean one-syllable common word that overlaps perfectly with the visual feature |
-
 | frog       | 5%       | 27%      | 15%      | 20%      | Moderate                                                                                                                          |
-
 | horse      | 20%      | 41%      | 26%      | 20%      | Most resistant across models                                                                                                      |
-
 | ship       | 4%       | 38%      | 4%       | 0%       | EN/KO/JA collapse                                                                                                                 |
-
 | truck      | 4%       | 50%      | 11%      | 4%       | ZH most robust                                                                                                                    |
 
 
@@ -2281,17 +2122,11 @@ Under EN attack, the 10 CIFAR-10 classes are not equally vulnerable. Key finding
 
 
 | Attack language | All-agree rate (attacked) | AUC       |
-
 | --------------- | ------------------------- | --------- |
-
 | Clean           | 78.2%                     | —         |
-
 | **EN**          | 59.3%                     | **0.588** |
-
 | **ZH**          | 50.4%                     | **0.646** |
-
 | **KO**          | 73.4%                     | 0.525     |
-
 | **JA**          | 58.6%                     | 0.604     |
 
 
@@ -2383,15 +2218,10 @@ A web search for Japanese CLIP models benchmarked on CIFAR-10 led to `llm-jp-cli
 
 
 | Model  | Clean acc | Under EN attack | Under ZH attack | Under KO attack | Under JA attack |
-
 | ------ | --------- | --------------- | --------------- | --------------- | --------------- |
-
 | EN     | 85.0%     | 5.5%            | 79.5%           | 83.5%           | 80.5%           |
-
 | ZH     | 90.5%     | 33.0%           | 58.0%           | 88.0%           | 67.5%           |
-
 | KO     | 87.0%     | 14.0%           | 85.5%           | 86.0%           | 85.0%           |
-
 | **JA** | **93.0%** | **9.5%**        | **93.0%**       | **93.0%**       | **92.5%**       |
 
 
@@ -2455,27 +2285,16 @@ The original 1000-image CIFAR-10 sample (`CIFAR10_4LANG_1000_SAMPLE.json`) is a 
 
 
 | Class      | Count |
-
 | ---------- | ----- |
-
 | airplane   | 102   |
-
 | automobile | 104   |
-
 | bird       | 92    |
-
 | cat        | 123   |
-
 | deer       | 112   |
-
 | dog        | 101   |
-
 | frog       | 88    |
-
 | horse      | 80    |
-
 | ship       | 104   |
-
 | truck      | 94    |
 
 
@@ -2523,13 +2342,9 @@ EN vs ZH typographic attack experiment on the balanced 1000-image CIFAR-10 sampl
 
 
 |                | model_EN | model_ZH |
-
 | -------------- | -------- | -------- |
-
 | Clean baseline | 85.9%    | 91.4%    |
-
 | attack_EN      | 4.6%     | 37.1%    |
-
 | attack_ZH      | 80.9%    | 57.8%    |
 
 
@@ -2543,11 +2358,8 @@ Attack Success Rate (pred == written adversarial class):
 
 
 |           | model_EN | model_ZH |
-
 | --------- | -------- | -------- |
-
 | attack_EN | 95.3%    | 61.2%    |
-
 | attack_ZH | 1.9%     | 38.7%    |
 
 
@@ -2561,11 +2373,8 @@ Disagreement detector (unique predictions across EN + ZH):
 
 
 | Attack | All-agree (attacked) | AUC   |
-
 | ------ | -------------------- | ----- |
-
 | EN     | 62.1%                | 0.614 |
-
 | ZH     | 54.4%                | 0.652 |
 
 
@@ -2629,11 +2438,8 @@ Screened Korean and Japanese CLIP candidates against EN/ZH baselines on the same
 
 
 | Role | HuggingFace id                         | Architecture                       |
-
 | ---- | -------------------------------------- | ---------------------------------- |
-
 | KO   | `Bingsu/clip-vit-large-patch14-ko`     | ViT-L/14, Korean distillation CLIP |
-
 | JA   | `llm-jp/llm-jp-clip-vit-large-patch14` | ViT-L/14, Japanese OpenCLIP        |
 
 
@@ -2651,23 +2457,14 @@ Both use the same loading pattern as the current models (HF `AutoModel` for KO, 
 
 
 | Model                    | Lang   | Clean acc | vs ZH (91.4%) | Status                        |
-
 | ------------------------ | ------ | --------- | ------------- | ----------------------------- |
-
 | OpenAI ViT-B/32          | EN     | 85.9%     | —             | baseline                      |
-
 | Chinese CLIP ViT-B/16    | ZH     | 91.4%     | —             | baseline                      |
-
 | Bingsu ViT-B/32          | KO     | 89.7%     | −1.7pp        | current in 4-lang notebook    |
-
 | **Bingsu ViT-L/14**      | **KO** | **96.5%** | **+5.1pp**    | **recommended KO upgrade**    |
-
 | llm-jp ViT-B/16          | JA     | 92.5%     | +1.1pp        | current in 4-lang notebook    |
-
 | **llm-jp ViT-L/14**      | **JA** | **97.0%** | **+5.6pp**    | **recommended JA upgrade**    |
-
 | LY clip-japanese-base-v2 | JA     | —         | —             | load error (transformers 5.x) |
-
 | Stability JA ViT-L/16    | JA     | —         | —             | gated HuggingFace repo        |
 
 
@@ -2681,27 +2478,16 @@ Both use the same loading pattern as the current models (HF `AutoModel` for KO, 
 
 
 | Class      | EN  | ZH  | KO B/32 | **KO L/14** | JA B/16 | **JA L/14** |
-
 | ---------- | --- | --- | ------- | ----------- | ------- | ----------- |
-
 | airplane   | 87% | 89% | 93%     | 96%         | 95%     | 95%         |
-
 | automobile | 78% | 99% | 97%     | 97%         | 99%     | 98%         |
-
 | bird       | 93% | 92% | 92%     | 97%         | 93%     | 98%         |
-
 | cat        | 77% | 91% | 89%     | 96%         | 80%     | 96%         |
-
 | deer       | 82% | 84% | 86%     | 97%         | 88%     | 95%         |
-
 | dog        | 88% | 87% | 83%     | 95%         | 96%     | 97%         |
-
 | frog       | 62% | 88% | 74%     | 91%         | 84%     | 94%         |
-
 | horse      | 95% | 89% | 97%     | 98%         | 95%     | 99%         |
-
 | ship       | 98% | 96% | 97%     | 98%         | 97%     | 99%         |
-
 | truck      | 99% | 99% | 89%     | 100%        | 98%     | 99%         |
 
 
@@ -2745,11 +2531,8 @@ Key findings:
 
 
 | Model | Baseline acc | After masking | ASR before → after | Recovery |
-
 |-------|-------------|---------------|-------------------|----------|
-
 | EN | 4.6% | **51.4%** | 95.3% → 31.7% | 50.0% |
-
 | ZH | 37.1% | **67.9%** | 61.2% → 19.8% | 55.0% |
 
 
@@ -2793,11 +2576,8 @@ The existing `en_zh_multiple_placement` experiment uses two random EN text boxes
 
 
 | Setup | Box-0 | Box-1 |
-
 |---|---|---|
-
 | Multilingual | EN attack word | ZH attack word |
-
 | Unilingual | EN attack word | EN attack word (repeated) |
 
 
@@ -2811,19 +2591,12 @@ Both setups evaluated on EN CLIP (ViT-B/32 OpenAI) and ZH CLIP (ChineseCLIP ViT-
 
 
 | Method | Description | Forward passes / image |
-
 |---|---|---|
-
 | no_defense | baseline (classify only) | 2 |
-
 | cam_2mod (multilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,ZH) | 6 |
-
 | cam_4mod (multilingual) | all 4 cross-combos: EN-EN ∩ EN-ZH ∩ ZH-EN ∩ ZH-ZH | 10 |
-
 | cam_2mod (unilingual) | GradCAM(EN,EN) ∩ GradCAM(ZH,EN-via-ZH-encoder) | 6 |
-
 | grid_1patch | 4×4 grid, best single occlusion by max mean confidence | 32 |
-
 | grid_2patch | greedy best 2nd patch given 1st | 62 |
 
 
@@ -2923,25 +2696,15 @@ Clean accuracy: **EN CLIP 85.9%, ZH CLIP 91.4%** (identical across all condition
 
 
 | Setup | Method | Cost (fwd/img) | EN acc | EN ASR | ZH acc | ZH ASR | Mean acc |
-
 |---|---|---:|---:|---:|---:|---:|---:|
-
 | multilingual | no_defense | 2 | 4.3% | 95.5% | 7.3% | 92.7% | 5.8% |
-
 | multilingual | cam_2mod | 6 | 32.0% | 34.0% | 34.3% | 44.4% | **33.2%** |
-
 | multilingual | cam_4mod | 10 | 29.8% | 40.6% | 31.9% | 50.9% | 30.9% |
-
 | multilingual | grid_1patch | 32 | 5.4% | 94.4% | 16.3% | 83.3% | 10.9% |
-
 | multilingual | grid_2patch | 62 | 6.5% | 93.2% | 16.9% | 82.6% | 11.7% |
-
 | unilingual | no_defense | 2 | 3.4% | 96.5% | 27.1% | 71.8% | 15.3% |
-
 | unilingual | cam_2mod | 6 | 25.7% | 46.0% | 39.2% | 35.7% | **32.5%** |
-
 | unilingual | grid_1patch | 32 | 2.9% | 97.0% | 24.1% | 75.0% | 13.5% |
-
 | unilingual | grid_2patch | 62 | 4.0% | 95.7% | 21.6% | 77.3% | 12.8% |
 
 
@@ -2951,13 +2714,9 @@ Clean accuracy: **EN CLIP 85.9%, ZH CLIP 91.4%** (identical across all condition
 
 
 | Setup | Method | EN clean→masked | ZH clean→masked |
-
 |---|---|---:|---:|
-
 | multilingual | cam_2mod | 85.9% → 50.5% (−35.4pp) | 91.4% → 64.9% (−26.5pp) |
-
 | multilingual | cam_4mod | 85.9% → 52.8% (−33.1pp) | 91.4% → 68.6% (−22.8pp) |
-
 | unilingual | cam_2mod | 85.9% → 48.7% (−37.2pp) | 91.4% → 63.0% (−28.4pp) |
 
 
@@ -3001,15 +2760,10 @@ Tested whether replacing the greedy 2-patch search with an exhaustive search ove
 
 
 | Method | acc_en | acc_zh | acc_mean | asr_mean | Runtime (100 imgs) |
-
 |---|---:|---:|---:|---:|---:|
-
 | no_defense | 6.0% | 4.0% | 5.0% | 95.0% | — |
-
 | grid_1patch | 5.0% | 14.0% | 9.5% | 90.5% | 9.5 s |
-
 | grid_2patch_greedy | 6.0% | 16.0% | 11.0% | 89.0% | 8.2 s |
-
 | grid_2patch_exhaustive | 6.0% | 17.0% | 11.5% | 88.5% | 51.3 s |
 
 
@@ -3035,11 +2789,8 @@ Greedy was suboptimal for 22 of 100 images (22%), but the performance gap is neg
 
 
 | Method | Operations | Total passes |
-
 |---|---|---:|
-
 | GradCAM cam_2mod | 2 × (fwd + back) + 2 × fwd | **6** |
-
 | Attn cam_2mod | 2 × fwd + 2 × fwd | **4** |
 
 
@@ -3073,13 +2824,9 @@ The key identity: `2 × (fwd + back) = 4 ops` vs `2 × fwd = 2 ops` — attentio
 
 
 | Method | Cost | Mean acc | Coverage | Clean-acc drop |
-
 |---|---:|---:|---:|---:|
-
 | GradCAM | 6 | 33.1% | 26.6% | −35.4pp EN / −26.5pp ZH |
-
 | Attn-rollout | 4 | 62.9% | 21.4% | −25.6pp EN / −16.8pp ZH |
-
 | Attn-last | 4 | **72.6%** | **7.7%** | **−8.8pp EN / −2.6pp ZH** |
 
 
@@ -3171,19 +2918,12 @@ Grid search is a completely different, much dumber approach — it doesn't look 
 
 
 | Method | Cost (passes/image) | Mean accuracy after defense |
-
 |---|---:|---:|
-
 | No defense (do nothing) | 2 | 5.8% |
-
 | Grid search, 1 chunk blacked out | 32 | 10.9% |
-
 | Grid search, 2 chunks blacked out (smart/greedy) | 62 | 11.7% |
-
 | Grid search, 2 chunks (tried literally every possible pair) | 240 | ~11.5% |
-
 | GradCAM | 6 | 33.1% |
-
 | Attn-last (best) | 4 | 72.6% |
 
 
@@ -3269,21 +3009,13 @@ So **`B_2p_confdrop_mean`** = greedy 2-patch search, conf-drop scoring, mean-fil
 
 
 | Method | Cost | Mean acc |
-
 |---|---:|---:|
-
 | no_defense | 2 | 5.0% |
-
 | base_2p maxconf mean (old) | 62 | 11.0% |
-
 | B_2p confdrop mean | 62 | **43.5%** |
-
 | C_2p confdrop blur | 62 | **44.0%** |
-
 | D_2p beam2+dist confdrop | 92 | 45.0% |
-
 | A_2p 6×6 confdrop | 142 | 44.5% |
-
 | combo 6×6 blur beam2 | 212 | 47.5% |
 
 
@@ -3297,15 +3029,10 @@ Finer grids / beam / blur help a little; **conf-drop alone is the leap** (~11% �
 
 
 | Method | Cost | EN acc | ZH acc | Mean acc |
-
 |---|---:|---:|---:|---:|
-
 | no_defense | 2 | 4.3% | 7.3% | 5.8% |
-
 | base_2p maxconf mean | 62 | 6.3% | 17.0% | **11.7%** |
-
 | B_2p confdrop mean | 62 | 45.7% | 46.3% | **46.0%** |
-
 | C_2p confdrop blur | 62 | 48.1% | 48.9% | **48.5%** |
 
 
@@ -3323,15 +3050,10 @@ On the multilingual attack (one EN box + one ZH box), we checked which text boxe
 
 
 | Hit pattern | n | freq | EN acc | ZH acc | Mean acc |
-
 |---|---:|---:|---:|---:|---:|
-
 | hit both EN+ZH | 587 | 58.7% | 67.6% | 69.3% | **68.5%** |
-
 | hit EN only | 287 | 28.7% | 28.9% | 28.2% | **28.6%** |
-
 | hit ZH only | 45 | 4.5% | 0.0% | 0.0% | **0.0%** |
-
 | hit neither | 81 | 8.1% | 1.2% | 1.2% | **1.2%** |
 
 
@@ -3383,25 +3105,15 @@ The last three columns are less obvious:
 
 
 | Attack | Method | Cost | EN acc | ZH acc | Mean acc | Cov | Best thr | Clean drop (EN / ZH) |
-
 |---|---|---:|---:|---:|---:|---:|---:|---|
-
 | Multilingual (EN+ZH) | GradCAM | 6 | 32.0% | 34.3% | 33.1% | 26.6% | 0.85 | −35.4pp / −26.5pp |
-
 | Multilingual (EN+ZH) | Attn-rollout | 4 | 56.3% | 69.6% | 62.9% | 21.4% | 0.85 | −25.6pp / −16.8pp |
-
 | Multilingual (EN+ZH) | **Attn-last** | **4** | **68.7%** | **76.5%** | **72.6%** | **7.7%** | **0.95** | **−8.8pp / −2.6pp** |
-
 | Unilingual EN+EN | GradCAM | 6 | 22.1% | 35.4% | 28.7% | 35.8% | 0.80 | −44.2pp / −36.2pp |
-
 | Unilingual EN+EN | Attn-rollout | 4 | 48.2% | 64.1% | 56.1% | 21.6% | 0.85 | −25.6pp / −16.8pp |
-
 | Unilingual EN+EN | **Attn-last** | **4** | **63.2%** | **72.0%** | **67.6%** | **8.5%** | **0.95** | **−8.8pp / −2.6pp** |
-
 | Unilingual ZH+ZH | GradCAM | 6 | 58.4% | 43.5% | 50.9% | 9.4% | 0.95 | −17.5pp / −10.4pp |
-
 | Unilingual ZH+ZH | Attn-rollout | 4 | 57.5% | 67.8% | 62.7% | 15.0% | 0.90 | −19.4pp / −11.3pp |
-
 | Unilingual ZH+ZH | **Attn-last** | **4** | **56.5%** | **68.5%** | **62.5%** | **23.1%** | **0.85** | −29.6pp / −22.7pp |
 
 
@@ -3455,23 +3167,14 @@ We compared three saliency signals (GradCAM @ cost 6, Attn-rollout @ cost 4, Att
 
 
 | Trial | What changed (vs Attn-last) | Mean acc | Clean Δ |
-
 |-------|----------------------------|--------:|--------:|
-
 | attn_last_baseline | Control: EN∩ZH attention mask, mean-fill | 72.6% | −5.7pp |
-
 | gated_peakiness | Only mask if saliency looks “spiky” (skip spread maps) | 72.6% | −5.7pp |
-
 | gated_disagree | Only mask if EN/ZH predictions disagree | 9.3% | −1.1pp |
-
 | union_masks | Mask where *either* model is hot (OR), not intersection | 65.1% | −29.3pp |
-
 | blur_fill | Blur masked pixels instead of flat mean color | 73.5% | −1.6pp |
-
 | cc_filter | Keep only the 2 largest mask blobs | 72.5% | −2.7pp |
-
 | cc_bbox | Top-2 blobs, then snap each to a rectangle | **74.9%** | −2.7pp |
-
 | peaked_heads | Average only the sharpest attention heads | 72.5% | −5.0pp |
 
 
@@ -3485,11 +3188,8 @@ Peakiness gating never fired (`gated_off=0%`). Disagreement gating almost never 
 
 
 | Trial | What changed | Mean acc | Clean Δ EN / ZH |
-
 |-------|--------------|--------:|----------------:|
-
 | B/32 (published) | Control EN model | **72.6%** | −8.8 / −2.6 |
-
 | B/16 | Finer EN patches (14×14 vs 7×7) | 71.8% | −20.5 / −12.9 |
 
 
@@ -3503,13 +3203,9 @@ No gain; larger masks and worse clean damage.
 
 
 | Trial | What changed | Cost | Mean acc |
-
 |-------|--------------|-----:|--------:|
-
 | attn_last | Control | 4 | **72.6%** |
-
 | hybrid k=4 | Shortlist 4×4 cells by attention, pick with conf-drop + blur | 18 | 56.3% |
-
 | full grid conf-drop (ref) | Search all 4×4 cells (prior experiment) | 62 | 48.5% |
 
 
@@ -3539,15 +3235,10 @@ Both start from the same Attn-last pipeline: EN∩ZH heatmap → percentile thre
 
 
 | Trial | What changed | Mean acc | Clean Δ |
-
 |-------|--------------|--------:|--------:|
-
 | attn_last_baseline | Control | 72.6% | −5.7pp |
-
 | blur_fill | Blur fill only | 73.4% | −1.6pp |
-
 | cc_bbox | Rectangle snap only | 74.9% | −2.7pp |
-
 | **cc_bbox_blur** | Rectangle snap **and** blur fill | **74.9%** | **−1.5pp** |
 
 
@@ -3591,13 +3282,9 @@ For each partner language `L ∈ {zh, ko, ja}`:
 
 
 | Attack | Boxes | Score |
-
 |--------|-------|-------|
-
 | `uni_en` | EN + EN | EN + L |
-
 | `uni_l` | L + L | EN + L |
-
 | `multi` | EN + L | EN + L |
 
 
@@ -3619,25 +3306,15 @@ Defense: **EN ∩ L** Attn-last → percentile mask → dilate → top-2 CC + bb
 
 
 | Cell | thr | Atk EN | Def EN | Atk L | Def L | Mean def | Clean Δ (mean) | Cov |
-
 |------|----:|-------:|-------:|------:|------:|---------:|---------------:|----:|
-
 | zh/uni_en | 0.95 | 3.4% | 54.7% | 27.1% | 65.6% | **60.2%** | −1.5pp | 7.6% |
-
 | zh/uni_l | 0.95 | 72.3% | 72.5% | 39.6% | 63.5% | **68.0%** | −1.5pp | 6.6% |
-
 | zh/multi | 0.95 | 4.3% | 71.6% | 7.3% | 78.2% | **74.9%** | −1.5pp | 8.8% |
-
 | ko/uni_en | 0.90 | 3.4% | 61.3% | 12.4% | 68.9% | **65.1%** | −18.5pp | 15.6% |
-
 | ko/uni_l | 0.95 | 70.5% | 66.5% | 78.4% | 73.3% | **69.9%** | −11.2pp | 9.1% |
-
 | ko/multi | 0.95 | 4.2% | 67.6% | 12.6% | 74.3% | **71.0%** | −11.2pp | 9.0% |
-
 | ja/uni_en | 0.90 | 3.4% | 60.1% | 4.1% | 72.4% | **66.3%** | −23.1pp | 15.2% |
-
 | ja/uni_l | 0.95 | 70.8% | 66.9% | 83.0% | 79.3% | **73.1%** | −11.5pp | 6.7% |
-
 | ja/multi | 0.95 | 4.1% | 69.9% | 6.6% | 83.9% | **76.9%** | −11.5pp | 8.3% |
 
 
@@ -3695,17 +3372,11 @@ Partners `L ∈ {ko, ja}` only. Same dual-box Option B matrix (`uni_en` / `uni_l
 
 
 | Variant | Idea |
-
 |---------|------|
-
 | `baseline` | Current four_lang tune (max EN attacked acc) |
-
 | `thr_floor_095` | Never go below thr=0.95 (kills `uni_en` thr=0.90 overshoot) |
-
 | `pareto_tune` | Maximize `en_atk_acc + 0.5 * mean_clean_delta` on tune n=100 |
-
 | `tight_dilate` | Pareto thr + dilate=1 |
-
 | `no_bbox` | Pareto thr + no bbox snap |
 
 
@@ -3727,19 +3398,12 @@ Outputs: [`results/comparison_summary.json`](lib/notebooks/ko_ja_clean_damage/re
 
 
 | Cell | baseline | thr_floor_095 | pareto_tune | tight_dilate | no_bbox |
-
 |------|---------:|--------------:|------------:|-------------:|--------:|
-
 | ko/uni_en | −18.4 | **−11.2** | −18.4 | −17.3 | −16.2 |
-
 | ko/uni_l | −11.2 | −11.2 | −11.2 | **−9.2** | −9.2 |
-
 | ko/multi | −11.2 | −11.2 | −11.2 | **−9.2** | −9.2 |
-
 | ja/uni_en | −23.1 | −11.5 | −11.5 | −9.0 | **−7.4** |
-
 | ja/uni_l | −11.5 | −11.5 | −11.5 | −9.0 | **−7.4** |
-
 | ja/multi | −11.5 | −11.5 | −11.5 | **−9.0** | −7.4 |
 
 
@@ -3749,19 +3413,12 @@ Outputs: [`results/comparison_summary.json`](lib/notebooks/ko_ja_clean_damage/re
 
 
 | Cell | baseline | thr_floor_095 | pareto_tune | tight_dilate | no_bbox |
-
 |------|---------:|--------------:|------------:|-------------:|--------:|
-
 | ko/uni_en | 65.1 | **65.5** | 65.1 | 65.6 | 65.6 |
-
 | ko/uni_l | 69.9 | 69.9 | 69.9 | **71.2** | 68.8 |
-
 | ko/multi | 71.0 | 71.0 | 71.0 | **71.9** | 71.2 |
-
 | ja/uni_en | 66.2 | 71.4 | 71.4 | 69.6 | **68.3** |
-
 | ja/uni_l | 73.1 | 73.1 | 73.1 | 74.1 | **71.7** |
-
 | ja/multi | 76.9 | 76.9 | 76.9 | **77.0** | 73.9 |
 
 
@@ -3771,19 +3428,12 @@ Outputs: [`results/comparison_summary.json`](lib/notebooks/ko_ja_clean_damage/re
 
 
 | Cell | Winner | Mean def | Clean Δ | vs baseline Clean Δ |
-
 |------|--------|---------:|--------:|--------------------:|
-
 | ko/uni_en | `thr_floor_095` | 65.5% | −11.2pp | +7.2pp |
-
 | ko/uni_l | `tight_dilate` | 71.2% | −9.2pp | +2.0pp |
-
 | ko/multi | `tight_dilate` | 71.9% | −9.2pp | +2.0pp |
-
 | ja/uni_en | `no_bbox` | 68.3% | −7.4pp | +15.7pp |
-
 | ja/uni_l | `no_bbox` | 71.7% | −7.4pp | +4.1pp |
-
 | ja/multi | `tight_dilate` | 77.0% | −9.0pp | +2.5pp |
 
 
@@ -3855,13 +3505,9 @@ Relative `image_samples/` paths under `_en_zh/` were deepened by one level; inde
 
 
 | Output | Path |
-
 |--------|------|
-
 | 8-stage single example | [`lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_steps.png`](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_steps.png) |
-
 | 5×7 multi-example grid | [`…/pipeline_examples.png`](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_examples.png) |
-
 | Mean vs blur fill | [`…/pipeline_fill_compare.png`](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_fill_compare.png) |
 
 
@@ -3919,15 +3565,10 @@ Before snapshots kept under each folder’s `results/before_protocol/`. Diff JSO
 
 
 | Method | Before mean | After mean | Δ |
-
 |--------|------------:|-----------:|--:|
-
 | `C_2p_confdrop_blur` | **48.5%** | **48.5%** | 0.0 |
-
 | `B_2p_confdrop_mean` | 46.0% | 45.7% | −0.3 |
-
 | `base_2p_maxconf_mean` | 11.7% | 10.1% | −1.6 |
-
 | `no_defense` | 5.8% | 5.5% | −0.3 |
 
 
@@ -3951,25 +3592,15 @@ thr column shows what the n=100 tune set picked before → after.
 
 
 | Cell | thr before→after | Before | After | Δ |
-
 |------|-----------------:|-------:|------:|--:|
-
 | zh/uni_en | 0.95→0.95 | 60.2% | 60.2% | 0.0 |
-
 | zh/uni_l | 0.95→**0.90** | 68.0% | 67.1% | −0.9 |
-
 | zh/multi | 0.95→**0.90** | **74.9%** | 71.7% | **−3.2** |
-
 | ko/uni_en | 0.90→0.90 | 65.1% | 63.3% | −1.8 |
-
 | ko/uni_l | 0.95→0.95 | 69.9% | 68.4% | −1.5 |
-
 | ko/multi | 0.95→**0.85** | 71.0% | 64.0% | **−7.0** |
-
 | ja/uni_en | 0.90→0.90 | 66.2% | 66.1% | −0.1 |
-
 | ja/uni_l | 0.95→0.95 | 73.1% | 72.8% | −0.3 |
-
 | ja/multi | 0.95→**0.90** | 76.9% | 73.6% | **−3.3** |
 
 
@@ -3981,25 +3612,15 @@ thr column shows what the n=100 tune set picked before → after.
 
 
 | Cell | thr before→after | Before | After | ΔΔ |
-
 |------|-----------------:|-------:|------:|---:|
-
 | zh/uni_en | 0.95→0.95 | −1.5 | −1.5 | 0.0 |
-
 | zh/uni_l | 0.95→**0.90** | −1.5 | **−7.0** | **−5.5** |
-
 | zh/multi | 0.95→**0.90** | −1.5 | **−7.0** | **−5.5** |
-
 | ko/uni_en | 0.90→0.90 | −18.4 | −18.4 | 0.0 |
-
 | ko/uni_l | 0.95→0.95 | −11.2 | −11.2 | 0.0 |
-
 | ko/multi | 0.95→**0.85** | −11.2 | **−25.5** | **−14.3** |
-
 | ja/uni_en | 0.90→0.90 | −23.1 | −23.1 | 0.0 |
-
 | ja/uni_l | 0.95→0.95 | −11.5 | −11.5 | 0.0 |
-
 | ja/multi | 0.95→**0.90** | −11.5 | **−23.1** | **−11.5** |
 
 
@@ -4027,25 +3648,15 @@ How to read a row (e.g. `zh/multi`):
 
 
 | Cell | Atk EN (EN CLIP, no def) | Atk L (partner CLIP, no def) | Atk mean | Def mean (after `cc_bbox_blur`) | Clean EN / L |
-
 |------|-------------------------:|-----------------------------:|---------:|--------------------------------:|-------------:|
-
 | zh/uni_en | 3.8% | 24.8% | 14.3% | **60.2%** | 85.9 / 91.4 |
-
 | zh/uni_l | 72.0% | 40.3% | 56.1% | **67.1%** | 85.9 / 91.4 |
-
 | zh/multi | 4.5% | 6.4% | 5.5% | **71.7%** | 85.9 / 91.4 |
-
 | ko/uni_en | 3.8% | 12.9% | 8.3% | **63.3%** | 85.9 / 89.6 |
-
 | ko/uni_l | 70.0% | 78.2% | 74.1% | **68.4%** | 85.9 / 89.6 |
-
 | ko/multi | 3.5% | 12.3% | 7.9% | **64.0%** | 85.9 / 89.6 |
-
 | ja/uni_en | 3.8% | 3.2% | 3.5% | **66.1%** | 85.9 / 92.5 |
-
 | ja/uni_l | 71.3% | 84.6% | 78.0% | **72.8%** | 85.9 / 92.5 |
-
 | ja/multi | 4.1% | 5.4% | 4.8% | **73.6%** | 85.9 / 92.5 |
 
 
@@ -4163,25 +3774,15 @@ All nine cells ran at **thr = 0.95** on CUDA (RTX 5070 Ti).
 
 
 | Cell | free thr → floor | Free-tune | Thr-floor | Δ |
-
 |------|-----------------:|----------:|----------:|--:|
-
 | zh/uni_en | 0.95→0.95 | 60.2% | 60.2% | 0.0 |
-
 | zh/uni_l | 0.90→0.95 | 67.1% | 67.2% | +0.2 |
-
 | zh/multi | 0.90→0.95 | 71.7% | **74.0%** | **+2.3** |
-
 | ko/uni_en | 0.90→0.95 | 63.3% | 63.7% | +0.4 |
-
 | ko/uni_l | 0.95→0.95 | 68.4% | 68.4% | 0.0 |
-
 | ko/multi | 0.85→0.95 | 64.0% | **69.9%** | **+5.9** |
-
 | ja/uni_en | 0.90→0.95 | 66.1% | **72.3%** | **+6.2** |
-
 | ja/uni_l | 0.95→0.95 | 72.8% | 72.8% | 0.0 |
-
 | ja/multi | 0.90→0.95 | 73.6% | **75.9%** | **+2.3** |
 
 
@@ -4195,25 +3796,15 @@ All nine cells ran at **thr = 0.95** on CUDA (RTX 5070 Ti).
 
 
 | Cell | free thr → floor | Free-tune | Thr-floor | ΔΔ |
-
 |------|-----------------:|----------:|----------:|---:|
-
 | zh/uni_en | 0.95→0.95 | −1.5 | −1.5 | 0.0 |
-
 | zh/uni_l | 0.90→0.95 | −7.0 | **−1.5** | **+5.5** |
-
 | zh/multi | 0.90→0.95 | −7.0 | **−1.5** | **+5.5** |
-
 | ko/uni_en | 0.90→0.95 | −18.4 | **−11.2** | **+7.2** |
-
 | ko/uni_l | 0.95→0.95 | −11.2 | −11.2 | 0.0 |
-
 | ko/multi | 0.85→0.95 | −25.5 | **−11.2** | **+14.3** |
-
 | ja/uni_en | 0.90→0.95 | −23.1 | **−11.5** | **+11.5** |
-
 | ja/uni_l | 0.95→0.95 | −11.5 | −11.5 | 0.0 |
-
 | ja/multi | 0.90→0.95 | −23.1 | **−11.5** | **+11.5** |
 
 
@@ -4241,25 +3832,15 @@ How to read a row (e.g. `zh/multi`):
 
 
 | Cell | Atk EN (EN CLIP, no def) | Atk L (partner CLIP, no def) | Atk mean | Def mean (thr-floor) | Clean EN / L |
-
 |------|-------------------------:|-----------------------------:|---------:|---------------------:|-------------:|
-
 | zh/uni_en | 3.8% | 24.8% | 14.3% | **60.2%** | 85.9 / 91.4 |
-
 | zh/uni_l | 72.0% | 40.3% | 56.1% | **67.2%** | 85.9 / 91.4 |
-
 | zh/multi | 4.5% | 6.4% | 5.5% | **74.0%** | 85.9 / 91.4 |
-
 | ko/uni_en | 3.8% | 12.9% | 8.3% | **63.7%** | 85.9 / 89.6 |
-
 | ko/uni_l | 70.0% | 78.2% | 74.1% | **68.4%** | 85.9 / 89.6 |
-
 | ko/multi | 3.5% | 12.3% | 7.9% | **69.9%** | 85.9 / 89.6 |
-
 | ja/uni_en | 3.8% | 3.2% | 3.5% | **72.3%** | 85.9 / 92.5 |
-
 | ja/uni_l | 71.3% | 84.6% | 78.0% | **72.8%** | 85.9 / 92.5 |
-
 | ja/multi | 4.1% | 5.4% | 4.8% | **75.9%** | 85.9 / 92.5 |
 
 
@@ -4325,25 +3906,15 @@ Outputs: `results/zh/multi/`.
 
 
 | Phase | Finding |
-
 |-------|---------|
-
 | A | PCA nearest-centroid test acc **99.0%** (explained var sum 0.667). |
-
 | B | Primary **linear SVM**, test **AUC = 1.000**, thr≈0.47 (recall target 0.99): test fire **0%** clean / **100%** attacked. |
-
 | C | **Success bar met.** |
 
-
-
 | Policy | Mean atk acc (EN+ZH) | EN atk | ZH atk | Clean Δ mean | Defend frac clean / atk |
-
 |--------|---------------------:|-------:|-------:|-------------:|------------------------:|
-
 | never | 5.5% | 4.5% | 6.4% | 0 | 0 / 0 |
-
 | always | **74.0%** | 70.0% | 78.0% | **−1.45 pp** | 100% / 100% |
-
 | gated | **73.9%** (−0.10 pp) | 69.9% | 77.9% | **0.0 pp** | 0.4% / 99.8% |
 
 
@@ -4365,25 +3936,15 @@ Folder renamed to `attack_detector/`. Same pipeline; separate detector per partn
 
 
 | Phase | Finding |
-
 |-------|---------|
-
 | A | PCA nearest-centroid test acc **97.3%** (explained var sum 0.798). |
-
 | B | Primary **linear SVM**, test **AUC = 0.999**, thr≈0.40: test fire **6.7%** clean / **100%** attacked. Full-set defend frac clean **2.5%** / atk **99.4%**. |
-
 | C | **Success bar met** after recall-target bump (was −1.30 pp at recall≥0.95). |
 
-
-
 | Policy | Mean atk acc (EN+KO) | EN atk | KO atk | Clean Δ mean | Notes |
-
 |--------|---------------------:|-------:|-------:|-------------:|-------|
-
 | never | 7.9% | 3.5% | 12.3% | 0 | |
-
 | always | **69.9%** | 65.4% | 74.4% | **−11.25 pp** | EN −12.1 / KO −10.4 |
-
 | gated | **69.45%** (−0.45 pp) | 65.0% | 73.9% | **−0.20 pp** | Clean damage essentially gone |
 
 
@@ -4393,25 +3954,15 @@ Folder renamed to `attack_detector/`. Same pipeline; separate detector per partn
 
 
 | Phase | Finding |
-
 |-------|---------|
-
 | A | PCA nearest-centroid test acc **97.7%** (explained var sum 0.689). |
-
 | B | Primary **linear SVM**, test **AUC = 1.000**, thr≈0.54: test fire **0%** clean / **100%** attacked. Full-set defend frac clean **0.3%** / atk **99.8%**. |
-
 | C | **Success bar met.** |
 
-
-
 | Policy | Mean atk acc (EN+JA) | EN atk | JA atk | Clean Δ mean | Notes |
-
 |--------|---------------------:|-------:|-------:|-------------:|-------|
-
 | never | 4.8% | 4.1% | 5.4% | 0 | |
-
 | always | **75.9%** | 68.6% | 83.2% | **−11.50 pp** | EN −13.6 / JA −9.4 |
-
 | gated | **75.7%** (−0.20 pp) | 68.4% | 83.0% | **0.0 pp** | |
 
 
@@ -4425,13 +3976,9 @@ Folder renamed to `attack_detector/`. Same pipeline; separate detector per partn
 
 
 | L | Test AUC | Fire clean / atk (test) | Always atk | Gated atk | Δ atk | Always Clean Δ | Gated Clean Δ | Success bar |
-
 |---|---------:|------------------------:|-----------:|----------:|------:|---------------:|--------------:|:-----------:|
-
 | zh | 1.000 | 0% / 100% | 74.0% | 73.9% | **−0.10** | −1.45 | **0.00** | yes |
-
 | ko | 0.999 | 6.7% / 100% | 69.9% | 69.45% | **−0.45** | −11.25 | **−0.20** | yes |
-
 | ja | 1.000 | 0% / 100% | 75.9% | 75.7% | **−0.20** | −11.50 | **0.00** | yes |
 
 
@@ -4441,13 +3988,9 @@ Folder renamed to `attack_detector/`. Same pipeline; separate detector per partn
 
 
 | Partner | Attacked images defended | Clean images defended | Mean atk drop vs always |
-
 |---------|-------------------------:|----------------------:|------------------------:|
-
 | ZH | 99.8% | 0.4% | −0.10 pp |
-
 | KO | 99.4% | 2.5% | −0.45 pp |
-
 | JA | 99.8% | 0.3% | −0.20 pp |
 
 
