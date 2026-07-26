@@ -2,6 +2,8 @@
 
 Follow EN’s gated fill ranking from [`../en_neglect_vs_blur/`](../en_neglect_vs_blur/): after the same Attn-last EN∩L `cc_bbox` masks + Phase-C detector gate, compare **neglect / blur / mean / black**.
 
+**Production protocol (frozen):** gated **`cc_bbox_black`** for EN and all partners — quote bilingual black MIXED2000 in future tables. Blur/mean/neglect remain ablations only (KO blur +0.15pp bilingual is not a fork). See [`../PROTOCOL.md`](../PROTOCOL.md) §7.2.
+
 - **neglect** (“ignore”) = zero ViT patch tokens with ≥50% mask coverage (CLS kept); grid is backbone-specific (B/32 → 7×7, B/16 → 14×14).
 - **blur / mean / black** = image-space fills inside the mask (blur radius 12).
 

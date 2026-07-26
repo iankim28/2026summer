@@ -36,5 +36,7 @@
       "black_vs_blur_bilingual_pp": 0.075
     }
   ],
-  "note": "Unlike EN (black ≫ blur), partner bilingual ranking is tight: ZH/JA black edges blur; KO blur edges black (−0.15pp). L-only MIXED often prefers blur (ZH/KO) or neglect (JA)."
+  "note": "PRODUCTION quote for partner bilingual MIXED2000. Unlike EN (black ≫ blur), partner ranking is tight: ZH/JA black edges blur; KO blur +0.15pp — protocol still freezes black for all langs (see PROTOCOL.md §7.2). Blur history: mixed_2000_summary.json.",
+  "production_fill": "black",
+  "production_policy": "gated"
 }

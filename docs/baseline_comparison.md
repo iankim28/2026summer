@@ -2,9 +2,10 @@
 
 **Protocol:** [`lib/notebooks/PROTOCOL.md`](../lib/notebooks/PROTOCOL.md)  
 **Sample:** frozen dual-box CIFAR-10 n=1000 (`CIFAR10_BALANCED_1000_SAMPLE.json`), 224×224  
-**Comparison target:** `cc_bbox_blur` (EN∩ZH multi) — mean **74.9%**, Clean Δ **−1.5pp**, cost **4**  
+**Production (ours):** gated **`cc_bbox_black`** — EN MIXED2000 **79.35%** (atk **72.9%** / clean **85.8%**); partner bilingual black ZH/KO/JA **81.65% / 78.35% / 82.53%**  
+**Design-history ref:** always-on `cc_bbox_blur` (EN∩ZH multi) — mean **74.9%**, Clean Δ **−1.5pp**, cost **4**  
 **Scope:** EN OpenAI ViT-B/32; ZH for spatial methods + Defense-Prefix (separate CIFAR-trained ZH token). Dyslexify / SamplingTAR remain EN-only.  
-**Last updated:** 2026-07-25 (Dyslexify / SamplingTAR attn-blur hybrids)
+**Last updated:** 2026-07-25 (black fill frozen for all langs)
 
 Code: [`lib/notebooks/paper_baselines/`](../lib/notebooks/paper_baselines/)
 
@@ -14,11 +15,12 @@ Code: [`lib/notebooks/paper_baselines/`](../lib/notebooks/paper_baselines/)
 
 | Method | Status | Acc (mean or EN) | Clean Δ | Cost | Notes |
 |--------|--------|------------------|---------|------|-------|
-| **cc_bbox_blur** (ours) | final (n=1000) | **74.9%** mean | **−1.5pp** | 4 | EN∩ZH Attn-last → CC+bbox+blur |
+| **Gated `cc_bbox_black` (ours)** | final (n=1000) | **72.9%** EN atk / **79.35%** MIXED | **−0.1pp** | 4 | Production; bilingual ZH black MIXED **81.65%** |
+| Always-on `cc_bbox_blur` (ref) | final (n=1000) | **74.9%** mean | **−1.5pp** | 4 | Design history / localization ablation |
 | OCR + blur | final (n=1000) | **73.8%** mean | **−0.7pp** | 3 | Closest spatial peer; sticker hit 90.3% |
 | SamplingTAR hybrid | final (n=1000) | **67.3%** EN | **−8.3pp** | 3 | Heads + attn-guided blur; MIXED2000 **72.45%** |
 | Dyslexify hybrid | final (n=1000) | **66.9%** EN | **−8.1pp** | 3 | Heads + attn-guided blur; MIXED2000 **72.35%** |
-| Defense-Prefix | final (n=1000) | **59.2%** mean (EN 73.8 / ZH 44.5) | **+0.5pp** | 2 | CIFAR-trained EN+ZH tokens; ZH ASR 52.5% |
+| Defense-Prefix | final (n=1000) | **59.2%** mean (EN 73.8 / ZH 44.5) | **+0.5pp** | 2 | CIFAR-trained EN+ZH tokens; ZH ASR 52.5%; EN MIXED **81.65%** |
 | Dyslexify (heads) | final (n=1000) | **20.0%** EN | **0.0pp** | 2 | Head-only negative; dual-box weak |
 | SamplingTAR (heads) | final (n=1000) | **11.6%** EN | **+0.2pp** | 2 | Circuit-only negative; weakest peer |
 

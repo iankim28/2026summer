@@ -2,13 +2,17 @@
 
 Chase **EN MIXED2000 > 81.65%** (Defense-Prefix bar) by changing how sticker regions are occluded.
 
-## Blur (current production)
+## Production fill (frozen): black
 
-`PIL.ImageFilter.GaussianBlur(radius=12)` inside the `cc_bbox` mask (Attn-last EN∩ZH → thr≥0.95 → dilate → top-2 CC → bbox snap). Soft occlude: glyphs smash, model still sees smeared RGB.
+Solid **black** inside the `cc_bbox` mask (Attn-last EN∩L → thr≥0.95 → dilate → top-2 CC → bbox snap), applied under the Phase-C detector gate. Same fill for ZH/KO/JA — see [`../PROTOCOL.md`](../PROTOCOL.md) §7.2 and [`../partner_fill_ablation/`](../partner_fill_ablation/).
 
-## Neglect (this experiment)
+## Ablations
 
-Zero ViT-B/32 **patch tokens** after pos-embed for patches with ≥50% mask coverage (CLS kept). Controls: `mean` fill, solid `black`.
+- **blur** — `GaussianBlur(radius=12)` (design history / soft occlude)
+- **mean** — mean-color fill of unmasked RGB
+- **neglect** — zero ViT-B/32 patch tokens after pos-embed (≥50% mask coverage; CLS kept)
+
+Gated EN ranking: **black > mean > blur > neglect** (MIXED2000 **79.35%**).
 
 ## Run (CUDA)
 

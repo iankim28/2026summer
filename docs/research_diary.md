@@ -2788,6 +2788,8 @@ Both hybrids clear **EN ≫ 50%** and **MIXED2000 ≫ 50%**. Clean Δ (~−8pp) 
 
 **Status:** Done. Partner black pending cleared.
 
+**Protocol freeze (same day):** production fill = gated **`cc_bbox_black` for EN + ZH/KO/JA**. Future result tables quote black bilingual MIXED above; KO blur +0.15pp stays ablation-only (no per-lang fill fork). Updated [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md) §7.2.
+
 ## 2026-07-25 — Attack-component attention ablation (white box vs letters vs full)
 
 **Question:** Does Attn-last focus on the white pad, the black letters, or the combined sticker? Can it localize each anomaly? Which component hijacks classification?
@@ -2828,3 +2830,44 @@ EN-only Attn-last (full): inbox 4.25, IoU 0.503, peak 89.3%, det@.1 100%. Inters
 3. Best anomaly localizer for our threat model is still the **glyph-bearing sticker** (full or text-only); white rectangles alone are a weak anomaly signal for both attention and classification.
 
 **Status:** Done. Supports claiming the defense localizes typographic *text* anomalies; white pad is secondary.
+
+## 2026-07-25 — Animal-sticker vs text dual-box ablation
+
+**Question:** Is Attn-last / hijack sensitive to generic visual anomalies (CIFAR animal patches in white boxes), or mainly to letters? If anomaly-sensitive, the same defense could cover typographic and sticker attacks.
+
+**Setup:** Frozen dual-box geometry (`ref_bw×ref_bh` = 131×44), CIFAR-10 n=1000, Attn-last thr≥0.95 / dilate 3 / top-2 cc_bbox. Stickers = random CIFAR-10 **train** animal instances (bird/cat/deer/dog/frog/horse), no external art.
+- `all_sticker` — both boxes: animal patch in white box (same wrong animal class, two instances)
+- `mixed` — slot0 animal, slot1 EN class-name text (same wrong animal class)
+- `all_text` — EN+ZH typographic (protocol target)
+
+Code: [lib/notebooks/animal_sticker_ablation/run_ablation.py](../lib/notebooks/animal_sticker_ablation/run_ablation.py). Results: [summary_n1000.json](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json). Gallery: [figures/gallery_attn_overlay.png](../lib/notebooks/animal_sticker_ablation/figures/gallery_attn_overlay.png).
+
+Clean floors: EN **85.9%**, ZH **91.4%**.
+
+### Undefended classification (hijack)
+
+| Mode | EN acc | EN ASR | ZH acc | ZH ASR |
+|------|-------:|-------:|-------:|-------:|
+| all_sticker | **53.6%** | 12.9% | **44.8%** | 20.3% |
+| mixed | 1.9% | **98.1%** | 8.3% | **91.4%** |
+| all_text | 4.5% | **95.3%** | 6.4% | **93.6%** |
+
+Animal-only stickers barely hijack (ASR ~13–20%). One EN text box restores near-full ASR (`mixed` ≈ `all_text`). Hijack is **letter-driven**, not animal-anomaly-driven.
+
+### Localization (EN∩ZH cc_bbox vs GT union)
+
+| Mode | inbox | IoU | peak-in-box | det@IoU≥0.1 | det@IoU≥0.3 |
+|------|------:|----:|------------:|------------:|------------:|
+| all_sticker | 2.03 | 0.143 | 65.2% | 59.1% | 9.1% |
+| mixed | 2.87 | 0.344 | 97.3% | **100%** | 72.2% |
+| all_text | 5.56 | **0.691** | **98.3%** | **100%** | **99.0%** |
+
+EN-only on `all_sticker` is stronger than intersection (det@.1 **96.5%**, IoU 0.308) but ZH barely locks onto animal patches (det@.1 12%), so EN∩ZH collapses — unlike typographic dual-script where both encoders agree.
+
+### Verdict
+
+1. **Sensitive to letters, not CIFAR animal anomalies.** `all_sticker` ASR is low; `mixed` matches `all_text` once one text box appears.
+2. **Do not claim** that Attn∩ occlusion automatically defends animal sticker patches: bilingual intersection localization is weak without glyphs.
+3. EN alone can somewhat notice animal boxes, but the production EN∩L defense is tuned for **text** stickers.
+
+**Status:** Done.

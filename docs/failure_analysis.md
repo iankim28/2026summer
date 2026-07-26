@@ -23,7 +23,7 @@
 ## Bottom line
 
 - **Strong:** hard dual-box attacks; near-perfect detect-when-to-occlude; Clean Δ ≈ 0 under the gate; black fill beats blur/mean/neglect on EN.
-- **Weak:** residual gap from defended-atk to clean (~13pp EN); still below Defense-Prefix’s EN MIXED2000 bar (**81.65%**); Pure E / Pure L under the gate not fully characterized; partner bilingual black≈blur (KO prefers blur by 0.15pp).
+- **Weak:** residual gap from defended-atk to clean (~13pp EN); still below Defense-Prefix’s EN MIXED2000 bar (**81.65%**); Pure E / Pure L under the gate not fully characterized.
 - Quote EN headline as **79.35% MIXED2000** (gated black), not older blur / always-on figures.
 
 | Headline | Number |
@@ -134,7 +134,7 @@ Fill ranking on EN MIXED2000 (gated, same masks):
 
 - **Pure E / Pure L gating** not yet the reporting standard — detector tuned and quoted on **`multi`**.
 - Risk: if the gate fires on weak native-only (Pure L) stickers for KO/JA, black occlusion can erase object evidence and hurt accuracy (historically −5 to −6pp when occlusion was forced). Needs a gated Pure-L measurement.
-- **Partner fill ranking (done):** gated neglect/blur/mean/black for ZH/KO/JA — bilingual MIXED black **81.65% / 78.35% / 82.53%**; winners ZH/JA=black, KO=blur (−0.15pp). See [`partner_fill_ablation/results/`](../lib/notebooks/partner_fill_ablation/results/).
+- **Partner production MIXED (black frozen):** ZH **81.65%**, KO **78.35%**, JA **82.53%** bilingual. Ablation: KO blur +0.15pp — not a protocol fork. See [`partner_fill_ablation/results/`](../lib/notebooks/partner_fill_ablation/results/).
 - **Adaptive placement / higher-res scenes** not tested — frozen dual-box CIFAR-10 only.
 
 ---
@@ -171,7 +171,7 @@ MIXED2000 = 0.5 * attacked_acc + 0.5 * clean_policy_acc
 
 - EN gated black: **72.9%** atk / **85.8%** clean / **79.35%** MIXED2000.
 - Fill ranking: black > mean > blur > neglect (gated EN).
-- Partner bilingual MIXED black: ZH **81.65%**, KO **78.35%**, JA **82.53%** (KO blur still +0.15pp).
+- Partner bilingual MIXED **black (production):** ZH **81.65%**, KO **78.35%**, JA **82.53%**.
 - Gate Clean Δ ≈ 0 on `multi` (ZH/JA 0.0; KO −0.2).
 
 **Do not claim**
