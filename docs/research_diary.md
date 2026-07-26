@@ -2536,6 +2536,21 @@ Same table as above; OCR and our ZH ref (the EN+ZH rows) are split into separate
 
 Gate A (n=16): 9/16 preds changed; mean cos(vanilla, DP text) = 0.78.
 
+### Best DP vs best occlusion — MIXED2000 EN / ZH
+
+MIXED2000 = `0.5 × attacked + 0.5 × clean` on the same n=1000 pool.
+
+| Method | EN | ZH | Mean EN+ZH |
+|--------|---:|---:|-----------:|
+| **Defense-Prefix** (CIFAR-trained EN+ZH tokens) | **81.65%** | 68.15% | 74.90% |
+| **Ours** (gated occlusion) | 79.35% | **84.65%** | **82.00%** |
+
+- **DP:** EN atk/clean 73.8%/89.5%; ZH 44.5%/91.8%.
+- **Ours EN:** gated `cc_bbox_black` — 72.9%/85.8%.
+- **Ours ZH:** gated EN∩ZH Phase-C (`cc_bbox_blur`) — 77.9%/91.4% (partner black re-run still pending).
+
+DP wins EN (−2.30 pp); occlusion wins ZH (+16.50 pp) and the bilingual mean (+7.10 pp).
+
 **Takeaway:** ZH DP is a real method port and lifts ZH from 6.4% → 44.5%, but stays far behind spatial peers (OCR ZH 74.7%, our ZH ~78%). Once ZH is included, DP’s EN+ZH mean (**59.2%**) drops well below OCR / `cc_bbox_blur` (~74%). EN DP remains the strong prompt peer on the EN column only. Dyslexify / SamplingTAR stay EN-only.
 
 Living doc: [`baseline_comparison.md`](baseline_comparison.md). Merged JSON: `comparison_summary_final_n1000_en_zh.json`. Mixed-2000 recomputed.
