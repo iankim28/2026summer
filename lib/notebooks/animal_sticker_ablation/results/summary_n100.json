@@ -9,10 +9,7 @@
     "mixed",
     "all_text"
   ],
-  "box_size": {
-    "ref_bw": 131,
-    "ref_bh": 44
-  },
+  "animal_sticker_side": 96,
   "animal_classes": [
     2,
     3,
@@ -27,65 +24,65 @@
   },
   "modes": {
     "all_sticker": {
-      "en_acc": 0.52,
-      "en_asr": 0.15,
-      "zh_acc": 0.36,
-      "zh_asr": 0.17,
+      "en_acc": 0.06,
+      "en_asr": 0.81,
+      "zh_acc": 0.03,
+      "zh_asr": 0.92,
       "localization": {
         "en": {
-          "inbox_focus_mean": 1.8510735822012907,
-          "iou_mean": 0.30746635157918306,
-          "peak_in_box": 0.85,
-          "detect_iou_ge_0.1": 0.98,
-          "detect_iou_ge_0.3": 0.59
+          "inbox_focus_mean": 1.852783480829166,
+          "iou_mean": 0.2772276473431041,
+          "peak_in_box": 0.95,
+          "detect_iou_ge_0.1": 1.0,
+          "detect_iou_ge_0.3": 0.28
         },
         "zh": {
-          "inbox_focus_mean": 1.5618040697902547,
-          "iou_mean": 0.05047340000692853,
-          "peak_in_box": 0.18,
-          "detect_iou_ge_0.1": 0.18,
+          "inbox_focus_mean": 0.9344207038177905,
+          "iou_mean": 0.0031030422073845287,
+          "peak_in_box": 0.01,
+          "detect_iou_ge_0.1": 0.0,
           "detect_iou_ge_0.3": 0.0
         },
         "en_cap_zh": {
-          "inbox_focus_mean": 2.079411414333011,
-          "iou_mean": 0.1428225986305629,
-          "peak_in_box": 0.7,
+          "inbox_focus_mean": 1.5103925302291432,
+          "iou_mean": 0.12389126661238098,
+          "peak_in_box": 0.32,
           "detect_iou_ge_0.1": 0.54,
-          "detect_iou_ge_0.3": 0.14
+          "detect_iou_ge_0.3": 0.09
         }
       },
-      "mean_gt_coverage": 0.22975127551020408,
+      "mean_gt_coverage": 0.33026686065051025,
       "target_kind": "animal"
     },
     "mixed": {
       "en_acc": 0.01,
       "en_asr": 0.99,
-      "zh_acc": 0.09,
-      "zh_asr": 0.91,
+      "zh_acc": 0.03,
+      "zh_asr": 0.97,
       "localization": {
         "en": {
-          "inbox_focus_mean": 2.3513876603486357,
-          "iou_mean": 0.26895454006365854,
-          "peak_in_box": 0.94,
+          "inbox_focus_mean": 2.491702220330713,
+          "iou_mean": 0.2642961834797691,
+          "peak_in_box": 0.86,
           "detect_iou_ge_0.1": 1.0,
-          "detect_iou_ge_0.3": 0.23
+          "detect_iou_ge_0.3": 0.3
         },
         "zh": {
-          "inbox_focus_mean": 1.7777997077085803,
-          "iou_mean": 0.10899818896910217,
-          "peak_in_box": 0.17,
-          "detect_iou_ge_0.1": 0.59,
+          "inbox_focus_mean": 1.5125993633960835,
+          "iou_mean": 0.08487838006180773,
+          "peak_in_box": 0.08,
+          "detect_iou_ge_0.1": 0.55,
           "detect_iou_ge_0.3": 0.0
         },
         "en_cap_zh": {
-          "inbox_focus_mean": 2.8987249506724226,
-          "iou_mean": 0.3402063596137802,
-          "peak_in_box": 1.0,
+          "inbox_focus_mean": 2.7671949396073012,
+          "iou_mean": 0.3073056692934138,
+          "peak_in_box": 0.96,
           "detect_iou_ge_0.1": 1.0,
-          "detect_iou_ge_0.3": 0.68
+          "detect_iou_ge_0.3": 0.54
         }
       },
-      "mean_gt_coverage": 0.22975127551020408,
+      "mean_gt_coverage": 0.22078164859693883,
       "target_kind": "animal"
     },
     "all_text": {
@@ -122,5 +119,5 @@
   },
   "device": "NVIDIA GeForce RTX 5070 Ti",
   "torch": "2.11.0+cu128",
-  "note": "all_sticker: both boxes CIFAR animal; mixed: animal+EN text same wrong animal class; all_text: EN+ZH typographic with protocol target."
+  "note": "all_sticker: both slots proportional CIFAR animal paste (no white pad); mixed: animal + EN text same wrong animal class; all_text: EN+ZH typographic with protocol target."
 }

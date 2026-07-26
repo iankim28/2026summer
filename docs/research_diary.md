@@ -2833,41 +2833,55 @@ EN-only Attn-last (full): inbox 4.25, IoU 0.503, peak 89.3%, det@.1 100%. Inters
 
 ## 2026-07-25 — Animal-sticker vs text dual-box ablation
 
-**Question:** Is Attn-last / hijack sensitive to generic visual anomalies (CIFAR animal patches in white boxes), or mainly to letters? If anomaly-sensitive, the same defense could cover typographic and sticker attacks.
+**Question:** Is Attn-last / hijack sensitive to generic visual anomalies (CIFAR animal patches), or mainly to letters? If anomaly-sensitive, the same defense could cover typographic and sticker attacks.
 
-**Setup:** Frozen dual-box geometry (`ref_bw×ref_bh` = 131×44), CIFAR-10 n=1000, Attn-last thr≥0.95 / dilate 3 / top-2 cc_bbox. Stickers = random CIFAR-10 **train** animal instances (bird/cat/deer/dog/frog/horse), no external art.
-- `all_sticker` — both boxes: animal patch in white box (same wrong animal class, two instances)
+**Setup:** Frozen dual `attack_pos` anchors, CIFAR-10 n=1000, Attn-last thr≥0.95 / dilate 3 / top-2 cc_bbox. Stickers = random CIFAR-10 **train** animal instances (bird/cat/deer/dog/frog/horse), no external art.
+- Render: animals upscaled **32→96** with **aspect preserved** (square), pasted **without** a white surround. Text slots keep the usual white pad.
+- `all_sticker` — both slots: animal paste (same wrong animal class, two instances)
 - `mixed` — slot0 animal, slot1 EN class-name text (same wrong animal class)
 - `all_text` — EN+ZH typographic (protocol target)
 
-Code: [lib/notebooks/animal_sticker_ablation/run_ablation.py](../lib/notebooks/animal_sticker_ablation/run_ablation.py). Results: [summary_n1000.json](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json). Gallery: [figures/gallery_attn_overlay.png](../lib/notebooks/animal_sticker_ablation/figures/gallery_attn_overlay.png).
+Code: [lib/notebooks/animal_sticker_ablation/run_ablation.py](../lib/notebooks/animal_sticker_ablation/run_ablation.py). Results: [summary_n1000.json](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json).
+Figures: [gallery_raw_and_attn.png](../lib/notebooks/animal_sticker_ablation/figures/gallery_raw_and_attn.png) (raw | EN Attn-last | ZH Attn-last per mode), [gallery_attn_overlay.png](../lib/notebooks/animal_sticker_ablation/figures/gallery_attn_overlay.png), [preview_raw_stickers.png](../lib/notebooks/animal_sticker_ablation/figures/preview_raw_stickers.png).
 
 Clean floors: EN **85.9%**, ZH **91.4%**.
+
+*(Earlier same-day run stretched animals into the typographic 131×44 white boxes — unreadable and artificially weak ASR. Superseded by this proportional paste.)*
+
+### Heatmaps (Attn-last)
+
+Qualitative from [gallery_raw_and_attn.png](../lib/notebooks/animal_sticker_ablation/figures/gallery_raw_and_attn.png) (4 hosts × 3 modes × raw/EN/ZH):
+
+- **`all_sticker`:** EN heat peaks on the square animal patches (readable 96×96 CIFAR animals, no white pad). ZH heat stays diffuse / on the host object — bilingual intersection fails even when EN locks on.
+- **`mixed`:** EN concentrates on the **text** box more than the animal; ZH also pulls toward the glyph region when present. One letter sticker is enough to drive the spiky bilingual pattern.
+- **`all_text`:** Classic dual-script hijack — both EN and ZH peak on the white text stickers; tightest EN∩ZH masks.
+
+Matches the tables: animal patches hijack classification and EN attention, but **ZH co-localization needs letters**.
 
 ### Undefended classification (hijack)
 
 | Mode | EN acc | EN ASR | ZH acc | ZH ASR |
 |------|-------:|-------:|-------:|-------:|
-| all_sticker | **53.6%** | 12.9% | **44.8%** | 20.3% |
-| mixed | 1.9% | **98.1%** | 8.3% | **91.4%** |
+| all_sticker | 11.0% | **76.6%** | 6.5% | **87.7%** |
+| mixed | 1.3% | **98.7%** | 2.2% | **97.6%** |
 | all_text | 4.5% | **95.3%** | 6.4% | **93.6%** |
 
-Animal-only stickers barely hijack (ASR ~13–20%). One EN text box restores near-full ASR (`mixed` ≈ `all_text`). Hijack is **letter-driven**, not animal-anomaly-driven.
+With readable square animals, `all_sticker` **does** hijack strongly (EN ASR 76.6%, ZH 87.7%). Adding one EN text box (`mixed`) pushes ASR to near-ceiling, matching / exceeding `all_text`.
 
 ### Localization (EN∩ZH cc_bbox vs GT union)
 
 | Mode | inbox | IoU | peak-in-box | det@IoU≥0.1 | det@IoU≥0.3 |
 |------|------:|----:|------------:|------------:|------------:|
-| all_sticker | 2.03 | 0.143 | 65.2% | 59.1% | 9.1% |
-| mixed | 2.87 | 0.344 | 97.3% | **100%** | 72.2% |
+| all_sticker | 1.48 | 0.117 | 34.4% | 51.1% | 5.8% |
+| mixed | 2.73 | 0.310 | 98.9% | **99.8%** | 54.1% |
 | all_text | 5.56 | **0.691** | **98.3%** | **100%** | **99.0%** |
 
-EN-only on `all_sticker` is stronger than intersection (det@.1 **96.5%**, IoU 0.308) but ZH barely locks onto animal patches (det@.1 12%), so EN∩ZH collapses — unlike typographic dual-script where both encoders agree.
+EN-only on `all_sticker`: inbox 1.82, IoU 0.283, peak 96.2%, det@.1 **99.3%** — EN attends the animal patches, but ZH does not (det@.1 1.1%), so EN∩ZH stays weak. Glyph dual-script (`all_text`) still wins bilingual localization.
 
 ### Verdict
 
-1. **Sensitive to letters, not CIFAR animal anomalies.** `all_sticker` ASR is low; `mixed` matches `all_text` once one text box appears.
-2. **Do not claim** that Attn∩ occlusion automatically defends animal sticker patches: bilingual intersection localization is weak without glyphs.
-3. EN alone can somewhat notice animal boxes, but the production EN∩L defense is tuned for **text** stickers.
+1. **Readable animal stickers are a real hijack** (unlike the aborted stretched-in-white-box version). Anomaly content matters when the patch is identifiable.
+2. **EN∩ZH localization remains text-favoring:** animal-only intersection is mediocre; one text box restores high det@.1. Production bilingual occlusion is still best justified for typographic stickers.
+3. EN-alone attention *can* lock onto animal patches (det@.1 ~99%), so a monolingual or EN-gated repair might partially transfer — not shown here.
 
-**Status:** Done.
+**Status:** Done (proportional paste, no white animal pad).

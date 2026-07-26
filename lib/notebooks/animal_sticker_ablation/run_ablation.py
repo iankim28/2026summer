@@ -1,8 +1,8 @@
 """Animal-sticker vs text dual-box ablation.
 
 Modes:
-  all_sticker — both boxes: CIFAR-10 animal patches in white boxes
-  mixed       — slot0 animal sticker, slot1 EN class-name text (same wrong class)
+  all_sticker — both slots: proportional CIFAR-10 animal paste (no white pad)
+  mixed       — slot0 animal, slot1 EN class-name text (same wrong class)
   all_text    — production EN+ZH typographic dual box (protocol target)
 
 Measures Attn-last localization + undefended acc/ASR.
@@ -48,6 +48,7 @@ from _common.protocol import (  # noqa: E402
 )
 from attack_placement import (  # noqa: E402
     ANIMAL_CLASS_IDS,
+    ANIMAL_STICKER_SIDE,
     FONT_SIZE,
     PAD,
     _font_paths,
@@ -121,7 +122,7 @@ def sample_two_animals(pools, class_id: int, img_idx: int):
     return pool[i0].copy(), pool[i1].copy()
 
 
-def build_mode_attack(data, mode: str, fonts: dict, pools, animal_tgt, ref_bw, ref_bh):
+def build_mode_attack(data, mode: str, fonts: dict, pools, animal_tgt):
     out, all_rects, targets = [], [], []
     for i in range(data["n"]):
         xy0 = data["attack_pos"]["en"][i]
@@ -152,8 +153,7 @@ def build_mode_attack(data, mode: str, fonts: dict, pools, animal_tgt, ref_bw, r
                 ("animal", a1),
                 xy0,
                 xy1,
-                ref_bw,
-                ref_bh,
+                animal_side=ANIMAL_STICKER_SIDE,
                 already_224=True,
                 pad=PAD,
                 return_boxes=True,
@@ -169,8 +169,7 @@ def build_mode_attack(data, mode: str, fonts: dict, pools, animal_tgt, ref_bw, r
                 ("text", word, fonts["en"]),
                 xy0,
                 xy1,
-                ref_bw,
-                ref_bh,
+                animal_side=ANIMAL_STICKER_SIDE,
                 already_224=True,
                 pad=PAD,
                 return_boxes=True,
@@ -327,9 +326,6 @@ def run(n: int, save_gallery_flag: bool = True):
     fonts = _fonts()
     data = load_protocol_data(n=n)
     true = data["true"]
-    attack_pos = data["attack_pos"]
-    ref_bw = int(attack_pos.get("ref_bw", 131))
-    ref_bh = int(attack_pos.get("ref_bh", 44))
 
     print("Loading CIFAR-10 train animal pools…", flush=True)
     pools = load_animal_pools()
@@ -357,23 +353,22 @@ def run(n: int, save_gallery_flag: bool = True):
         "top_k": TOP_K,
         "partner": "zh",
         "modes_list": list(MODES),
-        "box_size": {"ref_bw": ref_bw, "ref_bh": ref_bh},
+        "animal_sticker_side": ANIMAL_STICKER_SIDE,
         "animal_classes": list(ANIMAL_CLASS_IDS),
         "clean": {"en_acc": clean_en_acc, "zh_acc": clean_zh_acc},
         "modes": {},
         "device": torch.cuda.get_device_name(0),
         "torch": torch.__version__,
         "note": (
-            "all_sticker: both boxes CIFAR animal; mixed: animal+EN text same wrong animal class; "
+            "all_sticker: both slots proportional CIFAR animal paste (no white pad); "
+            "mixed: animal + EN text same wrong animal class; "
             "all_text: EN+ZH typographic with protocol target."
         ),
     }
 
     for mode in MODES:
         print(f"\n--- mode={mode} ---", flush=True)
-        imgs, rects, tgt = build_mode_attack(
-            data, mode, fonts, pools, animal_tgt, ref_bw, ref_bh
-        )
+        imgs, rects, tgt = build_mode_attack(data, mode, fonts, pools, animal_tgt)
         mode_images[mode] = imgs
         gt_masks = [rects_to_mask(r) for r in rects]
 

@@ -191,31 +191,36 @@ DRAW_MODES = ("full", "white_only", "text_only")
 # CIFAR-10 animal class indices / names (no vehicles).
 ANIMAL_CLASS_IDS = (2, 3, 4, 5, 6, 7)
 ANIMAL_CLASS_NAMES = ("bird", "cat", "deer", "dog", "frog", "horse")
+# Uniform upscale of native 32×32 CIFAR animals (aspect preserved; no stretch).
+ANIMAL_STICKER_SIDE = 96
 
 
-def _inner_content_size(bw: int, bh: int, pad: int = PAD) -> tuple[int, int]:
-    iw = max(1, int(bw) - 2 * pad)
-    ih = max(1, int(bh) - pad - BH_EXTRA)
-    return iw, ih
+def resize_animal_proportional(
+    animal: Image.Image,
+    side: int = ANIMAL_STICKER_SIDE,
+) -> Image.Image:
+    """Upscale animal into a side-fit box keeping aspect ratio (no stretch)."""
+    a = animal.convert("RGB")
+    w, h = a.size
+    scale = float(side) / float(max(w, h))
+    nw = max(1, int(round(w * scale)))
+    nh = max(1, int(round(h * scale)))
+    return a.resize((nw, nh), Image.BICUBIC)
 
 
-def paste_animal_in_box(
+def paste_animal_at(
     img: Image.Image,
     animal: Image.Image,
     xy,
-    bw: int,
-    bh: int,
-    pad: int = PAD,
+    side: int = ANIMAL_STICKER_SIDE,
     display_size: int = DISPLAY_SIZE,
 ) -> tuple[int, int, int, int]:
-    """White box at xy with CIFAR animal pasted in the inner pad region. Returns rect."""
-    rx, ry = clamp_xy(xy, bw, bh, display_size)
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([rx, ry, rx + bw, ry + bh], fill="white")
-    iw, ih = _inner_content_size(bw, bh, pad)
-    patch = animal.convert("RGB").resize((iw, ih), Image.BICUBIC)
-    img.paste(patch, (rx + pad, ry + pad))
-    return (rx, ry, rx + bw, ry + bh)
+    """Paste proportionally scaled animal at xy — no white surround. Returns GT rect."""
+    patch = resize_animal_proportional(animal, side=side)
+    pw, ph = patch.size
+    rx, ry = clamp_xy(xy, pw, ph, display_size)
+    img.paste(patch, (rx, ry))
+    return (rx, ry, rx + pw, ry + ph)
 
 
 def draw_text_box_at(
@@ -223,24 +228,17 @@ def draw_text_box_at(
     word: str,
     font,
     xy,
-    bw: int | None = None,
-    bh: int | None = None,
     pad: int = PAD,
     display_size: int = DISPLAY_SIZE,
 ) -> tuple[int, int, int, int]:
-    """White box + black text. If bw/bh given, use fixed size (for mixed geometry)."""
+    """Natural-size white box + black text (typography only)."""
     draw = ImageDraw.Draw(img)
     bb = draw.textbbox((0, 0), word, font=font)
-    if bw is None or bh is None:
-        bw = (bb[2] - bb[0]) + 2 * pad
-        bh = (bb[3] - bb[1]) + pad + BH_EXTRA
+    bw = (bb[2] - bb[0]) + 2 * pad
+    bh = (bb[3] - bb[1]) + pad + BH_EXTRA
     rx, ry = clamp_xy(xy, bw, bh, display_size)
     draw.rectangle([rx, ry, rx + bw, ry + bh], fill="white")
-    # Center text roughly in the fixed box when oversized.
-    tw, th = bb[2] - bb[0], bb[3] - bb[1]
-    tx = rx + max(pad, (bw - tw) // 2) - bb[0]
-    ty = ry + max(pad, (bh - th) // 2) - bb[1]
-    draw.text((tx, ty), word, fill="black", font=font)
+    draw.text((rx + pad - bb[0], ry + pad - bb[1]), word, fill="black", font=font)
     return (rx, ry, rx + bw, ry + bh)
 
 
@@ -250,14 +248,13 @@ def draw_dual_content_at(
     slot1,
     xy0,
     xy1,
-    bw: int,
-    bh: int,
+    animal_side: int = ANIMAL_STICKER_SIDE,
     already_224: bool = False,
     display_size: int = DISPLAY_SIZE,
     pad: int = PAD,
     return_boxes: bool = False,
 ):
-    """Draw two fixed-size white boxes with animal PIL and/or text content.
+    """Draw two slots: animal patches (no white pad) and/or typographic text boxes.
 
     Each slot is either:
       ("animal", pil_image)
@@ -272,13 +269,11 @@ def draw_dual_content_at(
         kind = slot[0]
         if kind == "animal":
             boxes.append(
-                paste_animal_in_box(img, slot[1], xy, bw, bh, pad=pad, display_size=display_size)
+                paste_animal_at(img, slot[1], xy, side=animal_side, display_size=display_size)
             )
         elif kind == "text":
             boxes.append(
-                draw_text_box_at(
-                    img, slot[1], slot[2], xy, bw=bw, bh=bh, pad=pad, display_size=display_size
-                )
+                draw_text_box_at(img, slot[1], slot[2], xy, pad=pad, display_size=display_size)
             )
         else:
             raise ValueError(f"Unknown slot kind {kind!r}")
