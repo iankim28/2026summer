@@ -1,0 +1,40 @@
+{
+  "definition": "Gated bilingual MIXED2000 under production black fill (and fill ablations). Same metric as mixed_2000_summary.json but fill varies. Source: partner_fill_ablation/results/{L}/gated_n1000.json. Blur history retained in mixed_2000_summary.json (Phase-C).",
+  "protocol": "frozen dual-box multi n=1000, Attn-last EN∩L cc_bbox thr≥0.95, Phase-C gate, CUDA",
+  "partners": [
+    {
+      "L": "zh",
+      "gated_fills": {
+        "neglect": {"l_atk": 0.717, "l_clean": 0.914, "l_mixed_2000": 0.8155, "bilingual_mixed_2000": 0.77375},
+        "blur": {"l_atk": 0.779, "l_clean": 0.914, "l_mixed_2000": 0.8465, "bilingual_mixed_2000": 0.81275},
+        "mean": {"l_atk": 0.775, "l_clean": 0.914, "l_mixed_2000": 0.8445, "bilingual_mixed_2000": 0.813},
+        "black": {"l_atk": 0.765, "l_clean": 0.914, "l_mixed_2000": 0.8395, "bilingual_mixed_2000": 0.8165}
+      },
+      "winner_bilingual": "black",
+      "black_vs_blur_bilingual_pp": 0.375
+    },
+    {
+      "L": "ko",
+      "gated_fills": {
+        "neglect": {"l_atk": 0.616, "l_clean": 0.895, "l_mixed_2000": 0.7555, "bilingual_mixed_2000": 0.74175},
+        "blur": {"l_atk": 0.739, "l_clean": 0.895, "l_mixed_2000": 0.817, "bilingual_mixed_2000": 0.785},
+        "mean": {"l_atk": 0.736, "l_clean": 0.893, "l_mixed_2000": 0.8145, "bilingual_mixed_2000": 0.78225},
+        "black": {"l_atk": 0.731, "l_clean": 0.894, "l_mixed_2000": 0.8125, "bilingual_mixed_2000": 0.7835}
+      },
+      "winner_bilingual": "blur",
+      "black_vs_blur_bilingual_pp": -0.15
+    },
+    {
+      "L": "ja",
+      "gated_fills": {
+        "neglect": {"l_atk": 0.845, "l_clean": 0.925, "l_mixed_2000": 0.885, "bilingual_mixed_2000": 0.8045},
+        "blur": {"l_atk": 0.83, "l_clean": 0.925, "l_mixed_2000": 0.8775, "bilingual_mixed_2000": 0.8245},
+        "mean": {"l_atk": 0.826, "l_clean": 0.925, "l_mixed_2000": 0.8755, "bilingual_mixed_2000": 0.822},
+        "black": {"l_atk": 0.828, "l_clean": 0.925, "l_mixed_2000": 0.8765, "bilingual_mixed_2000": 0.82525}
+      },
+      "winner_bilingual": "black",
+      "black_vs_blur_bilingual_pp": 0.075
+    }
+  ],
+  "note": "Unlike EN (black ≫ blur), partner bilingual ranking is tight: ZH/JA black edges blur; KO blur edges black (−0.15pp). L-only MIXED often prefers blur (ZH/KO) or neglect (JA)."
+}

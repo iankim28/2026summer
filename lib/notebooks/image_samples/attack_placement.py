@@ -186,6 +186,9 @@ def xy_for_image(attack_pos: dict, img_idx: int) -> tuple[Sequence[int], Sequenc
     return attack_pos["en"][img_idx], attack_pos["l"][img_idx]
 
 
+DRAW_MODES = ("full", "white_only", "text_only")
+
+
 def draw_dual_box_at(
     img,
     word0,
@@ -197,20 +200,36 @@ def draw_dual_box_at(
     already_224: bool = False,
     display_size: int = DISPLAY_SIZE,
     pad: int = PAD,
+    mode: str = "full",
+    return_boxes: bool = False,
 ):
-    """Draw two text boxes at saved top-left anchors (no RNG)."""
+    """Draw two text boxes at saved top-left anchors (no RNG).
+
+    mode:
+      full       — white rectangle + black text (production sticker)
+      white_only — white rectangle only (same measured bw×bh)
+      text_only  — black text only, no white fill (same anchors / GT box)
+    """
+    if mode not in DRAW_MODES:
+        raise ValueError(f"mode must be one of {DRAW_MODES}, got {mode!r}")
     if not already_224:
         img = img.convert("RGB").resize((display_size, display_size), Image.BICUBIC)
     else:
         img = img.copy()
     draw = ImageDraw.Draw(img)
+    boxes: list[tuple[int, int, int, int]] = []
     for word, font, xy in ((word0, font0, xy0), (word1, font1, xy1)):
         bb = draw.textbbox((0, 0), word, font=font)
         bw = (bb[2] - bb[0]) + 2 * pad
         bh = (bb[3] - bb[1]) + pad + BH_EXTRA
         rx, ry = clamp_xy(xy, bw, bh, display_size)
-        draw.rectangle([rx, ry, rx + bw, ry + bh], fill="white")
-        draw.text((rx + pad - bb[0], ry + pad - bb[1]), word, fill="black", font=font)
+        boxes.append((rx, ry, rx + bw, ry + bh))
+        if mode in ("full", "white_only"):
+            draw.rectangle([rx, ry, rx + bw, ry + bh], fill="white")
+        if mode in ("full", "text_only"):
+            draw.text((rx + pad - bb[0], ry + pad - bb[1]), word, fill="black", font=font)
+    if return_boxes:
+        return img, boxes
     return img
 
 

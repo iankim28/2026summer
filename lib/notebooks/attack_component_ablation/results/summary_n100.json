@@ -1,0 +1,106 @@
+{
+  "n": 100,
+  "threshold": 0.95,
+  "dilate": 3,
+  "top_k": 2,
+  "partner": "zh",
+  "attack": "multi",
+  "clean": {
+    "en_acc": 0.81,
+    "zh_acc": 0.86
+  },
+  "modes": {
+    "full": {
+      "en_acc": 0.07,
+      "en_asr": 0.93,
+      "zh_acc": 0.03,
+      "zh_asr": 0.97,
+      "localization": {
+        "en": {
+          "inbox_focus_mean": 4.215999781906173,
+          "iou_mean": 0.49981111053223354,
+          "peak_in_box": 0.88,
+          "detect_iou_ge_0.1": 1.0,
+          "detect_iou_ge_0.3": 1.0
+        },
+        "zh": {
+          "inbox_focus_mean": 3.077262412045483,
+          "iou_mean": 0.15009849659418695,
+          "peak_in_box": 0.03,
+          "detect_iou_ge_0.1": 0.67,
+          "detect_iou_ge_0.3": 0.06
+        },
+        "en_cap_zh": {
+          "inbox_focus_mean": 5.515789432322055,
+          "iou_mean": 0.6840475222602916,
+          "peak_in_box": 0.98,
+          "detect_iou_ge_0.1": 1.0,
+          "detect_iou_ge_0.3": 0.99
+        }
+      },
+      "mean_gt_coverage": 0.10103874362244895
+    },
+    "white_only": {
+      "en_acc": 0.68,
+      "en_asr": 0.03,
+      "zh_acc": 0.84,
+      "zh_asr": 0.02,
+      "localization": {
+        "en": {
+          "inbox_focus_mean": 1.3693289036530871,
+          "iou_mean": 0.09795865588167164,
+          "peak_in_box": 0.19,
+          "detect_iou_ge_0.1": 0.39,
+          "detect_iou_ge_0.3": 0.08
+        },
+        "zh": {
+          "inbox_focus_mean": 1.6655620070003077,
+          "iou_mean": 0.06581795098760311,
+          "peak_in_box": 0.12,
+          "detect_iou_ge_0.1": 0.34,
+          "detect_iou_ge_0.3": 0.01
+        },
+        "en_cap_zh": {
+          "inbox_focus_mean": 1.97255719613526,
+          "iou_mean": 0.08894504406881724,
+          "peak_in_box": 0.25,
+          "detect_iou_ge_0.1": 0.45,
+          "detect_iou_ge_0.3": 0.04
+        }
+      },
+      "mean_gt_coverage": 0.10103874362244895
+    },
+    "text_only": {
+      "en_acc": 0.13,
+      "en_asr": 0.86,
+      "zh_acc": 0.1,
+      "zh_asr": 0.88,
+      "localization": {
+        "en": {
+          "inbox_focus_mean": 3.997177154212194,
+          "iou_mean": 0.4768932245925243,
+          "peak_in_box": 0.87,
+          "detect_iou_ge_0.1": 1.0,
+          "detect_iou_ge_0.3": 1.0
+        },
+        "zh": {
+          "inbox_focus_mean": 3.0779893515288297,
+          "iou_mean": 0.16207793675307663,
+          "peak_in_box": 0.08,
+          "detect_iou_ge_0.1": 0.7,
+          "detect_iou_ge_0.3": 0.09
+        },
+        "en_cap_zh": {
+          "inbox_focus_mean": 5.381644399244347,
+          "iou_mean": 0.660730060718996,
+          "peak_in_box": 0.96,
+          "detect_iou_ge_0.1": 1.0,
+          "detect_iou_ge_0.3": 0.98
+        }
+      },
+      "mean_gt_coverage": 0.10103874362244895
+    }
+  },
+  "device": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.11.0+cu128"
+}

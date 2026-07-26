@@ -52,7 +52,7 @@
 - Show the localization recipe transfers to **all three partners (ZH, KO, JA)** under a shared protocol (`attack_pos` frozen; thr ≥ 0.95).
 - Make an **Attn-last attack detector** a **core** stage of the defense: gated Clean Δ → **0.0 / −0.2 / 0.0 pp** for ZH/KO/JA with ≤0.45 pp attacked-acc drop (`multi`); always-on Clean Δ (−1.5 ZH; ~−11 KO/JA) is the ablation that motivates the gate.
 - Report **MIXED2000** = ½ attacked + ½ clean policy acc — the joint score where **gated beats always-on** (esp. KO/JA +5.3 / +5.65 pp).
-- Show gated fill ranking on EN: **black > mean > blur > neglect** (EN MIXED2000 **79.35%** black vs **77.90%** blur; atk **72.9%** / clean **85.8%**).
+- Show gated fill ranking on EN: **black > mean > blur > neglect** (EN MIXED2000 **79.35%** black vs **77.90%** blur; atk **72.9%** / clean **85.8%**). **Production fill = black for all langs**; partner bilingual black: ZH **81.65%**, KO **78.35%**, JA **82.53%**.
 - On the same protocol: spatial gated defense leads bilingual means; **OCR+blur** is the closest spatial peer; **Defense-Prefix** is strong EN-only (EN MIXED2000 **81.65%**, ours **79.35%**, gap **−2.30 pp**) but weak once ZH is included (DP EN+ZH mean **59.2%**); **Dyslexify / SamplingTAR** heads-only are weak negatives; their attn-blur hybrids (~67% EN) still trail ours.
 - Provide an additional **negative baseline**: coarse grid occlusion — even with **confidence-drop scoring** or **exhaustive** 2-patch search — remains weaker and much more expensive than attention.
 
@@ -144,7 +144,7 @@ Name the full production stack: gated **`cc_bbox_black`** (Attn-last intersectio
 - **Production policy:** **`gated` only** for reporting — apply `cc_bbox_black` iff detector says attack.
 - **Ablation policies:** `never_defend` / `always_defend` (used to show MIXED2000 gated ≫ always, especially KO/JA).
 - Success bar: Clean Δ ≈ 0 under gate; attacked mean acc drops ≤1 pp vs always; MIXED2000 gated ≥ always.
-- Code: [`lib/notebooks/attack_detector/`](../lib/notebooks/attack_detector/); evaluated on `multi` for ZH/KO/JA. EN fill ranking: [`en_neglect_vs_blur/`](../lib/notebooks/en_neglect_vs_blur/).
+- Code: [`lib/notebooks/attack_detector/`](../lib/notebooks/attack_detector/); evaluated on `multi` for ZH/KO/JA. EN fill ranking: [`en_neglect_vs_blur/`](../lib/notebooks/en_neglect_vs_blur/). Partner fill ranking: [`partner_fill_ablation/`](../lib/notebooks/partner_fill_ablation/).
 
 ### 2.6 Saliency variants compared
 - **GradCAM** (cost ~6) — prior / production-style baseline.
@@ -235,7 +235,7 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
   - ZH **E + L** nearly reproduces the EN/ZH case-study winner (74.0% vs 74.9%; −0.9 pp under frozen geometry).
   - Hard attacks (Pure E, E + L) recover to mid-60s–mid-70s mean for KO/JA as well.
   - Pure L often already weak on KO/JA (defense can slightly hurt); ZH Pure L is the exception where defense helps more.
-  - Always-on KO/JA Clean Δ is the language-dependent failure mode — **production numbers are gated** (§3.8); do not silently substitute partner black-fill cells (partner black re-run not yet the reporting standard).
+  - Always-on KO/JA Clean Δ is the language-dependent failure mode — **production numbers are gated `cc_bbox_black`** (§3.8); partner bilingual black **81.65% / 78.35% / 82.53%** (ZH/KO/JA). Fill ablations retained; KO blur +0.15pp is not a protocol fork.
 - Protocol note (appendix / one paragraph): free thr-tune under freeze had dropped multi thr to 0.85–0.90 and inflated Clean Δ; flooring at 0.95 restored accuracy and clean cost. Report both if reviewing sensitivity.
 - Figure: language × attack panel of attacked vs defended mean acc + clean Δ.
 
@@ -331,7 +331,7 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - **Fill ranking (gated EN MIXED2000):** neglect **73.20%** < blur **77.90%** < mean **78.15%** < **black 79.35%** (+1.45 pp vs gated blur; +3.0 pp EN atk).
 - Defend coverage (full n=1000): attacked 99.4–99.8%; clean false-occlude 0.3–2.5% (KO highest).
 - Biggest win: KO/JA Clean Δ **≈ −11 pp → ~0** with <0.5 pp attacked-acc sacrifice; MIXED2000 makes gated the clear winner over always-on.
-- Honesty notes: (1) **79.35% is MIXED2000, not attacked-only**; (2) partner MIXED rows above still use Phase-C **blur** fill — EN black ranking is the fill evidence; do not claim partner black MIXED until re-run; (3) Pure E / Pure L under the gate and adaptive placement still open.
+- Honesty notes: (1) **79.35% is MIXED2000, not attacked-only**; (2) partner bilingual MIXED under black: ZH **81.65%**, KO **78.35%**, JA **82.53%** (ZH/JA black approx blur; KO blur +0.15pp — do not claim universal black win on partners); (3) Pure E / Pure L under the gate and adaptive placement still open.
 
 ![feature PCA / t-SNE](../lib/notebooks/attack_detector/results/zh/multi/pca_features.png)
 
@@ -366,7 +366,7 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - Evaluated on CIFAR-10 dual-box stickers with **frozen** placement — not ImageNet-scale scenes, not adaptive attackers that place text to evade attention or the detector.
 - Detector / gated results reported for **E + L (`multi`)**; Pure E / Pure L under the gate still open.
 - Pure L (especially ZH-only) stickers remain harder for the EN half of the intersection.
-- Partner MIXED2000 tables still use Phase-C **blur** fill on the same masks; EN black ranking is the fill evidence — partner black re-run pending.
+- Partner fill ranking is tight vs EN: bilingual black wins ZH/JA narrowly; KO prefers blur (−0.15pp). L-only MIXED often prefers blur (or neglect on JA).
 - Residual gap to clean under attack (~**13 pp** EN: 72.9% vs ~85.9%) unsolved — black fill and gating remove clean cost / improve atk, but do not close the residual; oracle GT+black only **74.6%** EN atk.
 - Occlusion-only does **not** beat Defense-Prefix on EN MIXED2000 (−2.30 pp).
 - Dyslexify / SamplingTAR are style ports (open_clip ViT-B/32 openai), not identical paper checkpoints.
@@ -382,7 +382,7 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - Write full paper prose + paper-ready figures (regenerate pipeline viz with **black** fill stage).
 - Close residual gap to clean under attack (better saliency / coverage; still short of the ~77.4% EN atk needed to clear DP EN MIXED at gated clean).
 - Extend detector evaluation to Pure E / Pure L and adaptive sticker placement.
-- Re-run partner ZH/KO/JA under gated **black** fill for bilingual MIXED2000 with production fill.
+- Partner gated fill tables done (black bilingual ZH/JA; KO blur-tied) — cite [`partner_fill_ablation`](../lib/notebooks/partner_fill_ablation/).
 - Test on higher-res datasets / more realistic text placements.
 - Optional contrast paragraph with Thread A (shared encoder) if the venue wants multilingual defense narrative.
 
@@ -421,4 +421,4 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - [x] Published baselines (OCR, Defense-Prefix, Dyslexify, SamplingTAR + hybrids) on leaderboard.
 - [x] Attack detector is a **core** pipeline stage (not optional); gated Clean Δ + MIXED2000 for ZH/KO/JA `multi`.
 - [x] Primary fill = **black**; blur/mean/neglect as ablations; EN gated black **72.9% / 85.8% / 79.35% MIXED2000**.
-- [x] Honesty: do not quote 79.35% as attacked-only; do not claim beat DP on EN MIXED; partner black re-run pending.
+- [x] Honesty: do not quote 79.35% as attacked-only; do not claim beat DP on EN MIXED; partner fill ranking logged (KO blur-tied).

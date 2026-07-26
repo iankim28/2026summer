@@ -4,8 +4,8 @@
 > notebook under `lib/notebooks/`. Geometry, sample indices, targets, and defense
 > defaults live here so new experiments do not silently diverge.
 >
-> **Last updated:** 2026-07-23 — frozen `attack_pos`, thr ≥ 0.95 production floor,
-> gated `attack_detector`, paper baselines.
+> **Last updated:** 2026-07-25 — frozen `attack_pos`, thr ≥ 0.95, gated detector,
+> **production fill = solid black** (`cc_bbox_black`) for EN and all partners ZH/KO/JA.
 
 Folder index and “last used” dates: [`README.md`](README.md).  
 Narrative: `docs/research_diary.md`.  
@@ -14,23 +14,26 @@ Baseline leaderboard: `docs/baseline_comparison.md`.
 
 ---
 
-## 1. What is current (2026-07-23)
+## 1. What is current (2026-07-25)
 
 | Stage | Folder | Role |
 |---|---|---|
 | Baseline saliency | [`attention_defense/`](attention_defense/) | Attn-last beats GradCAM (72.6% mean, cost 4) |
-| Defense winner | [`heatmap_defense_improvements/cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) | Attn-last → CC+bbox+blur (**74.9%** mean case-study, clean Δ −1.5pp) |
-| 4-lang + thr floor | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | EN∩L under frozen `attack_pos`; production thr ≥ 0.95 |
+| Mask recipe (design history) | [`heatmap_defense_improvements/cc_bbox_blur/`](heatmap_defense_improvements/cc_bbox_blur/) | Always-on Attn-last → CC+bbox+**blur** (**74.9%** mean case-study) |
+| 4-lang + thr floor | [`four_lang_cc_bbox_blur/`](four_lang_cc_bbox_blur/) | EN∩L under frozen `attack_pos`; thr ≥ 0.95 (blur fill = transfer ablation) |
 | KO/JA clean Δ | [`ko_ja_clean_damage/`](ko_ja_clean_damage/) | Threshold / dilate / bbox ablations on KO/JA only |
-| Heatmap attack detector | [`attack_detector/`](attack_detector/) | Learn clean vs attack from Attn-last features; gate `cc_bbox_blur` |
+| Heatmap attack detector | [`attack_detector/`](attack_detector/) | Learn clean vs attack from Attn-last features; **gate** occlusion |
+| **Production fill ranking** | [`en_neglect_vs_blur/`](en_neglect_vs_blur/), [`partner_fill_ablation/`](partner_fill_ablation/) | Gated neglect/blur/mean/**black** — **black is production** for EN+ZH/KO/JA |
 | Published baselines | [`paper_baselines/`](paper_baselines/) | Defense-Prefix, OCR+blur, Dyslexify, SamplingTAR |
 | Shared sample | [`image_samples/`](image_samples/) | Fixed CIFAR-10 indices + **frozen attack coordinates** |
 | Grid baseline | [`_test_grid/`](_test_grid/) | Conf-drop 4×4 occlusion (negative / cost baseline) |
 
 Early EN/ZH GradCAM + grid lineage: [`_en_zh/`](_en_zh/).
 
-**Cite for transfer / gated / baseline claims:** thr-floor four_lang + detector + `docs/baseline_comparison.md`.  
-**Cite for EN∩ZH ablation winner detail:** `cc_bbox_blur` **74.9% / −1.5pp** (same recipe; pre-freeze RNG geometry).
+**Production stack (quote this):** gated **`cc_bbox_black`** = Attn-last EN∩L → `cc_bbox` (thr≥0.95) → **solid black fill** → apply iff detector fires.  
+**Cite for EN:** `en_neglect_vs_blur/results/` — **72.9% / 85.8% / 79.35% MIXED2000**.  
+**Cite for partner bilingual MIXED2000 (black):** ZH **81.65%**, KO **78.35%**, JA **82.53%** (`partner_fill_ablation/results/`, `attack_detector/results/mixed_2000_black_summary.json`).  
+**Ablation only:** always-on / Phase-C `cc_bbox_blur` (blur fill); do not quote as production.
 
 ---
 
@@ -210,7 +213,7 @@ EN/ZH-only studies historically used the same dual-box geometry with `L=zh`.
 - Resize map to 224×224
 - Cost: **4** forward passes / image for two-model intersection (vs GradCAM **6**)
 
-### 7.2 `cc_bbox_blur` (production defense)
+### 7.2 Gated `cc_bbox_black` (production defense)
 
 Per image, for scoring pair EN ∩ L:
 
@@ -219,15 +222,27 @@ Per image, for scoring pair EN ∩ L:
    `best_thr = max(free_tuned, 0.95)`; log both `threshold_free` and `threshold`)
 3. Dilate (default 3×3, 3 iterations; KO/JA ablations also try 1)
 4. Keep top-2 connected components; snap each to axis-aligned bbox
-5. Fill masked region with Gaussian blur (`BLUR_RADIUS=12`)
-6. Re-classify
+5. **Fill masked region with solid black** (`out[mask] = 0`) — production for **all** langs
+6. Apply steps 1–5 **only if** the Attn-last detector gate fires; else pass through
+7. Re-classify
 
-**EN/ZH multilingual references:**
+**Fill ablations** (same masks/gate; not production): Gaussian blur (`BLUR_RADIUS=12`), mean-color fill, ViT-token neglect. EN ranking: black > mean > blur > neglect. Partner bilingual: black wins ZH/JA; KO blur +0.15pp — **still freeze black** for a single shared protocol.
+
+**Headline production numbers (gated black, n=1000 `multi`):**
+
+| Score | Value | Source |
+|---|---:|---|
+| EN atk / clean / MIXED2000 | **72.9% / 85.8% / 79.35%** | `en_neglect_vs_blur` |
+| ZH bilingual MIXED2000 | **81.65%** | `partner_fill_ablation` |
+| KO bilingual MIXED2000 | **78.35%** | `partner_fill_ablation` |
+| JA bilingual MIXED2000 | **82.53%** | `partner_fill_ablation` |
+
+**Design-history blur references** (always-on `cc_bbox_blur`, not production):
 
 | Setting | Mean def | Clean Δ | Notes |
 |---|---:|---:|---|
 | Case-study (`heatmap_defense_improvements`) | **74.9%** | **−1.5pp** | pre-freeze RNG geometry |
-| Thr-floor four_lang (frozen `attack_pos`) | **74.0%** | **−1.5pp** | production transfer number |
+| Thr-floor four_lang (frozen `attack_pos`) | **74.0%** | **−1.5pp** | localization / transfer ablation |
 
 ### 7.3 Threshold floor (required after protocol freeze)
 
@@ -243,15 +258,15 @@ for full n=1000 runs. Prefer **`tight_dilate`** as the default KO/JA geometry tw
 
 ### 7.4 Gated defense — `attack_detector`
 
-Always-on blur still hurts clean KO/JA (~−11pp). Gate with Attn-last **heatmap shape**:
+Always-on occlusion still hurts clean KO/JA (~−11pp). Gate with Attn-last **heatmap shape**:
 
 | Phase | What |
 |---|---|
 | A | PCA + t-SNE on 26 Attn-last scalars (EN / L / ∩) — evidence clusters separate |
 | B | Logistic + calibrated linear SVM; image-level 70/15/15; attack-recall ≥ **0.99** |
-| C | Apply `cc_bbox_blur` iff detector says attack |
+| C | Apply **`cc_bbox_black`** iff detector says attack (Phase-C logs historically used blur; production fill is black — see §7.2) |
 
-**Production gated results (`multi`, n=1000):**
+**Gate Clean Δ evidence (`multi`, n=1000; Phase-C blur logs — gate behavior unchanged under black):**
 
 | L | Always atk | Gated atk | Always Clean Δ | Gated Clean Δ |
 |---|---:|---:|---:|---:|
@@ -259,12 +274,12 @@ Always-on blur still hurts clean KO/JA (~−11pp). Gate with Attn-last **heatmap
 | ko | 69.9% | 69.45% | −11.25 | **−0.20** |
 | ja | 75.9% | 75.7% | −11.50 | **0.00** |
 
-Code: [`attack_detector/`](attack_detector/). Open: Pure E / Pure L gating.
+Code: [`attack_detector/`](attack_detector/). Production black MIXED: [`mixed_2000_black_summary.json`](attack_detector/results/mixed_2000_black_summary.json). Open: Pure E / Pure L gating.
 
 ### 7.5 Historical (lineage only)
 
 Under `_en_zh/en_zh_multi_uni_attack/`: GradCAM intersection (`cam_2mod` / `cam_4mod`)
-and early grid. Superseded by Attn-last + `cc_bbox_blur` for new work; grid retained
+and early grid. Superseded by gated Attn-last + `cc_bbox_black` for new work; grid retained
 as a cost baseline in [`_test_grid/`](_test_grid/).
 
 ---
@@ -311,10 +326,12 @@ When reporting no-defense vs defense tables, label columns **Atk EN (EN CLIP)** 
 image_samples/attack_placement.py     ← bake / load attack_pos
 attention_defense/                    ← Attn-last vs GradCAM
 heatmap_defense_improvements/
-  cc_bbox_blur/                       ← EN/ZH case-study winner (74.9%)
+  cc_bbox_blur/                       ← always-on blur case-study (74.9%; design history)
 four_lang_cc_bbox_blur/               ← ZH/KO/JA transfer + thr floor + pipeline figs
 ko_ja_clean_damage/                   ← KO/JA Clean Δ ablations
-attack_detector/                      ← heatmap-shape gate for cc_bbox_blur
+attack_detector/                      ← heatmap-shape gate (Phase C); production fill=black
+en_neglect_vs_blur/                   ← EN gated fill ranking → black production
+partner_fill_ablation/                ← ZH/KO/JA gated fill ranking → black production
 paper_baselines/                      ← DP / OCR / Dyslexify / SamplingTAR
 _test_grid/                           ← improved conf-drop grid (frozen attack_pos)
 _en_zh/en_zh_multi_uni_attack/        ← early multi/uni + CAM cost study
@@ -344,12 +361,13 @@ without changing frozen coordinates.
 ### Why Attn-last over GradCAM?
 Cheaper (4 vs 6), higher defended accuracy, much lower clean-image damage.
 
-### Why `cc_bbox_blur`?
-Top-2 CC + bbox focuses the mask on text-like blobs; blur fill is kinder to clean
-images than mean fill while matching best attacked accuracy.
+### Why `cc_bbox` + black fill?
+Top-2 CC + bbox focuses the mask on text-like blobs. On gated EN, **black > mean >
+blur > neglect** (+1.45pp MIXED vs blur). Partners are tight (KO blur +0.15pp bilingual);
+**freeze black for all langs** so future tables share one production fill.
 
 ### Why gate with a heatmap detector?
-Always-on KO/JA Clean Δ (~−11pp) is mostly false blurs on clean images. Attn-last
+Always-on KO/JA Clean Δ (~−11pp) is mostly false occlusions on clean images. Attn-last
 shape (spiky vs spread) separates clean vs attacked almost perfectly; gating collapses
 Clean Δ to ~0 with ≤0.45pp attacked-acc drop on `multi`.
 

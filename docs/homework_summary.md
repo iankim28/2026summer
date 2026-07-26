@@ -16,7 +16,7 @@
 
 ## One-paragraph overview
 
-Today I locked the production defense as **gated `cc_bbox_black`**: the Attn-last detector gate is a core pipeline stage (not optional), and the occlusion fill is solid **black** (blur / mean / ViT-token neglect are ablations). On English CLIP, gated black reaches **72.9% atk / 85.8% clean / 79.35% MIXED2000** — **+1.45pp** MIXED over gated blur, but still **−2.30pp** vs Defense-Prefix’s EN MIXED **81.65%**. An occlusion-only chase (incl. OCR∪Attn) could not clear that bar (best **79.70%**). I also finished a fair **ZH Defense-Prefix** (ZH **44.5%**, EN+ZH mean **59.2%**), Dyslexify/SamplingTAR **hybrids** (EN **66.9% / 67.3%**), detector Phase A/B visualization for ZH/KO/JA, a failure-analysis write-up, synced the paper outline to match the new stack, and wrote up **why ZH recovers higher than EN after the same occlusion** (Latin-script / training asymmetry + floors — not a ZH-favoring mask).
+Today I locked the production defense as **gated `cc_bbox_black`**: the Attn-last detector gate is a core pipeline stage (not optional), and the occlusion fill is solid **black** (blur / mean / ViT-token neglect are ablations). On English CLIP, gated black reaches **72.9% atk / 85.8% clean / 79.35% MIXED2000** — **+1.45pp** MIXED over gated blur, but still **−2.30pp** vs Defense-Prefix’s EN MIXED **81.65%**. An occlusion-only chase (incl. OCR∪Attn) could not clear that bar (best **79.70%**). Partner ZH/KO/JA got the same gated fill table: bilingual MIXED prefers **black** on ZH (**81.65%**) and JA (**82.53%**), while KO prefers **blur** by **0.15pp** (black **78.35%**). I also finished a fair **ZH Defense-Prefix** (ZH **44.5%**, EN+ZH mean **59.2%**), Dyslexify/SamplingTAR **hybrids** (EN **66.9% / 67.3%**), detector Phase A/B visualization for ZH/KO/JA, a failure-analysis write-up, synced the paper outline to match the new stack, and wrote up **why ZH recovers higher than EN after the same occlusion** (Latin-script / training asymmetry + floors — not a ZH-favoring mask).
 
 ---
 
@@ -169,6 +169,24 @@ Paper **mean EN+ZH** view: ours always-on blur **74.9%** already beats OCR **73.
 
 ---
 
+### 8. Partner fill ablations (ZH / KO / JA) — follow EN
+
+Same gated Attn EN∩L `cc_bbox` + Phase-C gate; fills = neglect / blur / mean / black. Score L and bilingual EN+L MIXED2000.
+
+**Bilingual MIXED2000 (production quote):**
+
+| Partner | neglect | blur | mean | **black** | Winner |
+| --- | ---: | ---: | ---: | ---: | --- |
+| ZH | 77.38% | 81.28% | 81.30% | **81.65%** | black (+0.37pp vs blur) |
+| KO | 74.18% | **78.50%** | 78.23% | 78.35% | blur (+0.15pp vs black) |
+| JA | 80.45% | 82.45% | 82.20% | **82.53%** | black (+0.08pp vs blur) |
+
+**Production freeze:** gated **`cc_bbox_black` for all langs** (EN + ZH/KO/JA). Quote bilingual black rows above in future tables. Ablation note only: KO blur +0.15pp bilingual; L-only ZH/KO prefer blur; JA L-only prefers neglect — not production.
+
+Full tables: [`research_diary.md` § 2026-07-25 — Partner fill ablation](research_diary.md); JSON [`partner_fill_ablation/results/`](../lib/notebooks/partner_fill_ablation/results/). Protocol: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md) §7.2.
+
+---
+
 ## Numbers to quote in a meeting
 
 | Claim | Number |
@@ -181,6 +199,8 @@ Paper **mean EN+ZH** view: ours always-on blur **74.9%** already beats OCR **73.
 | EN atk needed to clear DP at clean 85.9% | ≳ **77.4%** |
 | Best OCR∪Attn black MIXED (not production) | **79.70%** |
 | Fill ranking (gated EN MIXED) | black > mean > blur > neglect |
+| Partner bilingual MIXED **black** (ZH/KO/JA, production) | **81.65% / 78.35% / 82.53%** |
+| Production fill (all langs) | gated **`cc_bbox_black`** (blur/mean/neglect = ablation) |
 | ZH DP defended / ASR / Clean Δ | **44.5% / 52.5% / +0.4pp** |
 | DP EN+ZH mean | **59.2%** |
 | Dyslexify hybrid EN / MIXED / Clean Δ | **66.9% / 72.35% / −8.1pp** |
@@ -193,15 +213,15 @@ Paper **mean EN+ZH** view: ours always-on blur **74.9%** already beats OCR **73.
 
 ## Next steps
 
-1. Write the paper (outline already synced to gated black).
-2. Optional experiments: Pure E / Pure L under the gate; partner ZH/KO/JA black re-run for bilingual MIXED with production fill; close residual ~**13pp** EN atk→clean gap (72.9% vs ~85.9%).
+1. Write the paper (outline already synced to gated black; partner fill tables now available).
+2. Optional experiments: Pure E / Pure L under the gate; close residual ~**13pp** EN atk→clean gap (72.9% vs ~85.9%).
 3. Do **not** re-chase occlusion-only vs DP with more fills (oracle closed that). Optional only: ZH-disagreement vote after gated occlusion for EN MIXED > 81.65% without DP.
 
 ---
 
 ## One breath
 
-> Detect with Attn-last heatmap shape, localize where EN ∩ L agree, black-fill the sticker boxes, reclassify. EN gated black is **72.9% atk / 85.8% clean / 79.35% MIXED2000** — better than blur (**+1.45pp** MIXED), still short of DP’s **81.65%** on EN alone (−2.30pp); bilingual means still favor spatial once ZH DP (**44.5%**) is included. ZH recovers higher than EN after the same mask (**78.2% vs 71.6%**) mainly from Latin-script / training asymmetry, not a ZH-favoring mask. Head surgery alone fails; hybrids (~67% EN) confirm occlusion is what recovers accuracy.
+> Detect with Attn-last heatmap shape, localize where EN ∩ L agree, black-fill the sticker boxes, reclassify. Production fill is **black for all langs**. EN gated black is **72.9% atk / 85.8% clean / 79.35% MIXED2000** — better than blur (**+1.45pp** MIXED), still short of DP’s **81.65%** on EN alone (−2.30pp); bilingual partner black is **81.65% / 78.35% / 82.53%** (ZH/KO/JA). ZH recovers higher than EN after the same mask (**78.2% vs 71.6%**) mainly from Latin-script / training asymmetry, not a ZH-favoring mask. Head surgery alone fails; hybrids (~67% EN) confirm occlusion is what recovers accuracy.
 
 ---
 
@@ -210,7 +230,9 @@ Paper **mean EN+ZH** view: ours always-on blur **74.9%** already beats OCR **73.
 | Work | Path |
 | --- | --- |
 | EN fill / black ranking + leaderboard JSON | `lib/notebooks/en_neglect_vs_blur/results/` |
-| Occlusion vs DP chase JSON | `lib/notebooks/en_occlusion_beat_dp/results/summary_n1000.json` |
+| Partner fill ranking (ZH/KO/JA) | `lib/notebooks/partner_fill_ablation/results/` |
+| Partner bilingual black MIXED rollup | `lib/notebooks/attack_detector/results/mixed_2000_black_summary.json` |
+| Occlusion vs DP chase JSON | `lib/notebooks/en_occlusion_beat_dp/results/summary_n1000.json`
 | ZH + EN Defense-Prefix merged | `lib/notebooks/paper_baselines/defense_prefix/results/comparison_summary_final_n1000_en_zh.json` |
 | Dyslexify hybrid | `lib/notebooks/paper_baselines/dyslexify/results/comparison_summary_final_n1000_hybrid.json` |
 | SamplingTAR hybrid | `lib/notebooks/paper_baselines/sampling_tar/results/comparison_summary_final_n1000_hybrid.json` |

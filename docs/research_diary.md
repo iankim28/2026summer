@@ -2547,7 +2547,7 @@ MIXED2000 = `0.5 × attacked + 0.5 × clean` on the same n=1000 pool.
 
 - **DP:** EN atk/clean 73.8%/89.5%; ZH 44.5%/91.8%.
 - **Ours EN:** gated `cc_bbox_black` — 72.9%/85.8%.
-- **Ours ZH:** gated EN∩ZH Phase-C (`cc_bbox_blur`) — 77.9%/91.4% (partner black re-run still pending).
+- **Ours ZH:** gated EN∩ZH Phase-C (`cc_bbox_blur`) — 77.9%/91.4%; partner black re-run logged in § Partner fill ablation (bilingual black ZH **81.65%**).
 
 DP wins EN (−2.30 pp); occlusion wins ZH (+16.50 pp) and the bilingual mean (+7.10 pp).
 
@@ -2754,3 +2754,77 @@ From [`en_neglect_vs_blur/results/escalate_n1000.json`](../lib/notebooks/en_negl
 Both hybrids clear **EN ≫ 50%** and **MIXED2000 ≫ 50%**. Clean Δ (~−8pp) is the tradeoff vs heads-only / OCR. Still below `cc_bbox_blur` / OCR mean accuracy; usable as strengthened circuit+spatial peers rather than dead negatives.
 
 **Status:** Goal met; heads-only kept as weak negatives; hybrids are the reportable Dyslexify/SamplingTAR numbers going forward.
+
+## 2026-07-25 — Partner fill ablation (ZH/KO/JA follow EN)
+
+**Goal:** Same gated fill table as EN (neglect / blur / mean / black) for partners ZH, KO, JA under Phase-C gate + EN∩L `cc_bbox` masks.
+
+**Code:** [`lib/notebooks/partner_fill_ablation/`](../lib/notebooks/partner_fill_ablation/) — `run_eval.py`, `helpers.py` (image fills + per-backbone neglect: B/32 grid 7×7, B/16 grid 14×14; HF token-zero for ZH/KO; open_clip for JA).
+
+**Protocol:** n=1000, dual-box `multi`, thr≥0.95, CUDA (`2.11.0+cu128`). Reused `attack_detector/results/{L}/multi/cache` + recomputed Phase-C gates (no retrain).
+
+### Gated bilingual MIXED2000 (= 0.5·mean(EN,L atk) + 0.5·mean(EN,L clean_policy))
+
+| Partner | neglect | blur | mean | black | Winner |
+|--------|--------:|-----:|-----:|------:|--------|
+| ZH | 77.38% | 81.28% | 81.30% | **81.65%** | black (+0.37pp vs blur) |
+| KO | 74.18% | **78.50%** | 78.23% | 78.35% | blur (+0.15pp vs black) |
+| JA | 80.45% | 82.45% | 82.20% | **82.53%** | black (+0.08pp vs blur) |
+
+### L-only MIXED2000 (partner model)
+
+| Partner | neglect | blur | mean | black |
+|--------|--------:|-----:|-----:|------:|
+| ZH | 81.55% | **84.65%** | 84.45% | 83.95% |
+| KO | 75.55% | **81.70%** | 81.45% | 81.25% |
+| JA | **88.50%** | 87.75% | 87.55% | 87.65% |
+
+### Notes
+
+- Blur arms match Phase-C [`mixed_2000_summary.json`](../lib/notebooks/attack_detector/results/mixed_2000_summary.json) exactly (ZH 81.275%, KO 78.50%, JA 82.45%).
+- Unlike EN (black **+1.45pp** MIXED over blur), partner bilingual black≈blur. Keep black as shared production fill for EN consistency; call out KO blur-tied.
+- JA neglect wins L-only MIXED (token zero helps JA); bilingual still prefers black because EN recovers more under black.
+- Outputs: `partner_fill_ablation/results/{zh,ko,ja}/gated_n1000.json`, `leaderboard.json`, [`mixed_2000_black_summary.json`](../lib/notebooks/attack_detector/results/mixed_2000_black_summary.json).
+
+**Status:** Done. Partner black pending cleared.
+
+## 2026-07-25 — Attack-component attention ablation (white box vs letters vs full)
+
+**Question:** Does Attn-last focus on the white pad, the black letters, or the combined sticker? Can it localize each anomaly? Which component hijacks classification?
+
+**Setup:** Frozen dual-box multi (EN+ZH words), CIFAR-10 n=1000, Attn-last thr>=0.95 / dilate 3 / top-2 cc_bbox. Modes share the same attack_pos and measured bw×bh GT boxes.
+- full — white rectangle + black text (current)
+- white_only — white rectangle only
+- text_only — black letters only (no white fill)
+
+Code: [lib/notebooks/attack_component_ablation/run_ablation.py](../lib/notebooks/attack_component_ablation/run_ablation.py). Results: [summary_n1000.json](../lib/notebooks/attack_component_ablation/results/summary_n1000.json). Gallery: [figures/gallery_attn_overlay.png](../lib/notebooks/attack_component_ablation/figures/gallery_attn_overlay.png).
+
+Clean floors: EN **85.9%**, ZH **91.4%**.
+
+### Undefended classification (hijack)
+
+| Mode | EN acc | EN ASR | ZH acc | ZH ASR |
+|------|-------:|-------:|-------:|-------:|
+| full | 4.5% | **95.3%** | 6.4% | **93.6%** |
+| white_only | **75.5%** | 2.3% | **82.7%** | 2.1% |
+| text_only | 9.6% | **89.8%** | 15.2% | **84.5%** |
+
+White pads alone barely hijack. Black letters alone nearly match the full sticker ASR. The typographic attack is **text-driven**, not white-box-driven.
+
+### Localization (EN∩ZH cc_bbox vs GT union)
+
+| Mode | inbox | IoU | peak-in-box | det@IoU≥0.1 | det@IoU≥0.3 |
+|------|------:|----:|------------:|------------:|------------:|
+| full | 5.56 | **0.691** | **98.3%** | **100%** | **99.0%** |
+| white_only | 1.90 | 0.083 | 27.0% | 41.1% | 3.7% |
+| text_only | 5.52 | **0.669** | **97.7%** | **100%** | **98.5%** |
+
+EN-only Attn-last (full): inbox 4.25, IoU 0.503, peak 89.3%, det@.1 100%. Intersection tightens localization further.
+
+### Verdict
+
+1. **Distracted by text, not white boxes.** text_only ≈ full on ASR and attention; white_only is near-clean on ASR and poorly localized.
+2. **Attn-last localizes letter / sticker anomalies well** (det@.1 = 100% for full and text_only under EN∩ZH), but **not blank white pads**.
+3. Best anomaly localizer for our threat model is still the **glyph-bearing sticker** (full or text-only); white rectangles alone are a weak anomaly signal for both attention and classification.
+
+**Status:** Done. Supports claiming the defense localizes typographic *text* anomalies; white pad is secondary.
