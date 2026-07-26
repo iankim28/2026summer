@@ -1,0 +1,14 @@
+{
+  "status": "final",
+  "n": 1000,
+  "stage": "all",
+  "fills": [
+    "blur",
+    "mean",
+    "black",
+    "neglect"
+  ],
+  "patch_thr": 0.5,
+  "threshold": 0.95,
+  "device": "NVIDIA GeForce RTX 5070 Ti"
+}

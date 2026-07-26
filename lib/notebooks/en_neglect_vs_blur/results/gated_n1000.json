@@ -1,0 +1,52 @@
+{
+  "n": 1000,
+  "detector": {
+    "primary": "linear_svm",
+    "threshold": 0.4733603113038565,
+    "fire_attacked": 0.998,
+    "fire_clean": 0.004
+  },
+  "arms": {
+    "blur": {
+      "atk_acc": 0.699,
+      "asr": 0.028,
+      "clean_acc": 0.859,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.7789999999999999,
+      "beats_dp": false,
+      "defend_frac_attacked": 0.998,
+      "defend_frac_clean": 0.004
+    },
+    "mean": {
+      "atk_acc": 0.704,
+      "asr": 0.029,
+      "clean_acc": 0.859,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.7815,
+      "beats_dp": false,
+      "defend_frac_attacked": 0.998,
+      "defend_frac_clean": 0.004
+    },
+    "black": {
+      "atk_acc": 0.729,
+      "asr": 0.037,
+      "clean_acc": 0.858,
+      "clean_delta": -0.0010000000000000009,
+      "mixed_2000": 0.7935,
+      "beats_dp": false,
+      "defend_frac_attacked": 0.998,
+      "defend_frac_clean": 0.004
+    },
+    "neglect": {
+      "atk_acc": 0.605,
+      "asr": 0.09,
+      "clean_acc": 0.859,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.732,
+      "beats_dp": false,
+      "defend_frac_attacked": 0.998,
+      "defend_frac_clean": 0.004
+    }
+  },
+  "dp_bar": 0.8165
+}

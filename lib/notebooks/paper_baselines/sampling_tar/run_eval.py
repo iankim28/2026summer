@@ -3,6 +3,10 @@
 Port of SamplingTAR (Liu et al.): mine heads by CLS→text-patch attribution
 overlap, select via z-threshold on score distribution, ablate with
 fix_attn_head_list (alpha=1). EN ViT-B/32 openai. No SAE (direct attn score).
+
+Modes:
+  heads  — original circuit ablation only
+  hybrid — attn-guided Gaussian blur of top typo-attn patches + head ablation
 """
 from __future__ import annotations
 
@@ -23,6 +27,11 @@ from _common.attn_ablate import (  # noqa: E402
     heads_to_layer_spec,
     patch_mask_from_rects,
 )
+from _common.hybrid_spatial import (  # noqa: E402
+    DEFAULT_SCORE_FRAC,
+    DEFAULT_TOP_K,
+    classify_hybrid,
+)
 from _common.protocol import (  # noqa: E402
     CLASSES,
     DEVICE,
@@ -36,7 +45,8 @@ from _common.protocol import (  # noqa: E402
 )
 
 RESULTS = Path(__file__).resolve().parent / "results"
-COST_PROXY = 2
+COST_HEADS = 2
+COST_HYBRID = 3
 N_LAYERS, N_HEADS, GRID = 12, 12, 7
 
 
@@ -85,8 +95,8 @@ def tune_z(en, text_emb, clean, attacked, true, means, mu, sigma, probe_n=40):
     """Pick z in {0.5,1,1.5,2} maximizing attack acc subject to clean drop <= 5pp."""
     clean_p, atk_p, true_p = clean[:probe_n], attacked[:probe_n], true[:probe_n]
     base_clean = float((classify_batch(en, clean_p, text_emb) == true_p).mean())
-    best = None  # (score, a_acc, z, heads, thr)  score = a_acc - drop
-    for z in [2.0, 1.5, 1.0, 0.5]:  # prefer fewer heads
+    best = None  # (score, a_acc, z, heads, thr, feasible)
+    for z in [2.0, 1.5, 1.0, 0.5]:
         heads, thr = select_by_z(means, mu, sigma, z=z)
         if not heads:
             continue
@@ -109,7 +119,13 @@ def tune_z(en, text_emb, clean, attacked, true, means, mu, sigma, probe_n=40):
     return best[3], best[2], best[4]
 
 
-def run_eval(n: int, status: str):
+def run_eval(
+    n: int,
+    status: str,
+    mode: str = "hybrid",
+    top_k_patches: int = DEFAULT_TOP_K,
+    score_frac: float = DEFAULT_SCORE_FRAC,
+):
     assert torch.cuda.is_available()
     data = load_protocol_data(n=n)
     attacked, rects = build_multi_attack(data)
@@ -128,13 +144,16 @@ def run_eval(n: int, status: str):
         probe_n=min(40, data["n"]),
     )
     if not heads:
-        # top-5 by score
         heads = [k for k, _ in sorted(means.items(), key=lambda kv: -kv[1])[:5]]
         print("Fallback top-5 heads", heads)
 
     RESULTS.mkdir(parents=True, exist_ok=True)
     with open(RESULTS / "selected_heads.json", "w", encoding="utf-8") as f:
-        json.dump({"heads": heads, "z": z_used, "thr": thr, "n_mine": mine_n}, f, indent=2)
+        json.dump(
+            {"heads": heads, "z": z_used, "thr": thr, "n_mine": mine_n, "mode": mode},
+            f,
+            indent=2,
+        )
 
     clean_p = classify_batch(en, data["clean_224"], text_emb)
     atk_p = classify_batch(en, attacked, text_emb)
@@ -143,20 +162,50 @@ def run_eval(n: int, status: str):
     print(f"Vanilla clean={100*clean_acc:.1f}% atk={100*atk_acc:.1f}% ASR={100*atk_asr:.1f}%")
 
     t0 = time.time()
-    def_preds = classify_with_heads(en, attacked, text_emb, heads)
+    mean_patches = None
+    if mode == "hybrid":
+        def_preds, mean_patches = classify_hybrid(
+            en,
+            attacked,
+            text_emb,
+            heads,
+            top_k_patches=top_k_patches,
+            score_frac=score_frac,
+        )
+        clean_def, _ = classify_hybrid(
+            en,
+            data["clean_224"],
+            text_emb,
+            heads,
+            top_k_patches=top_k_patches,
+            score_frac=score_frac,
+        )
+        cost = COST_HYBRID
+        notes = (
+            f"SamplingTAR hybrid: sticker-attn heads + attn-guided blur "
+            f"(top_k={top_k_patches}, score_frac={score_frac}) + fix_attn alpha=1. No SAE."
+        )
+        variant = "heads+attn_blur"
+    else:
+        def_preds = classify_with_heads(en, attacked, text_emb, heads)
+        clean_def = classify_with_heads(en, data["clean_224"], text_emb, heads)
+        cost = COST_HEADS
+        notes = "SamplingTAR-style: attn-to-sticker mining + z-threshold; fix_attn alpha=1. No SAE."
+        variant = "heads"
+
     progress_log(len(def_preds) - 1, len(def_preds), int((def_preds == true).sum()), t0)
     def_acc, def_asr = acc_asr(def_preds, true, target)
     changed = int((def_preds != atk_p).sum())
-    print(f"Hook fired: preds_changed={changed}/{len(def_preds)}")
+    print(f"Hook/hybrid fired: preds_changed={changed}/{len(def_preds)}")
     if status == "sanity" and changed == 0 and len(heads) > 0:
-        raise RuntimeError("Gate A fail: SamplingTAR hook did not change predictions")
+        raise RuntimeError("Gate A fail: SamplingTAR hybrid/hook did not change predictions")
 
-    clean_def = classify_with_heads(en, data["clean_224"], text_emb, heads)
     clean_def_acc = float((clean_def == true).mean())
     clean_delta = clean_def_acc - clean_acc
     print(
-        f"SamplingTAR EN acc={100*def_acc:.1f}% Clean_delta={100*clean_delta:.1f}pp "
+        f"SamplingTAR [{mode}] EN acc={100*def_acc:.1f}% Clean_delta={100*clean_delta:.1f}pp "
         f"heads={len(heads)} z={z_used}"
+        + (f" mean_blur_patches={mean_patches:.1f}" if mean_patches is not None else "")
     )
 
     payload = {
@@ -164,11 +213,16 @@ def run_eval(n: int, status: str):
         "status": status,
         "n": int(data["n"]),
         "scope": "en_only",
-        "inference_cost": COST_PROXY,
+        "mode": mode,
+        "variant": variant,
+        "inference_cost": cost,
         "n_heads_ablated": len(heads),
         "heads": heads,
         "z": z_used,
         "score_threshold": thr,
+        "top_k_patches": int(top_k_patches) if mode == "hybrid" else None,
+        "score_frac": float(score_frac) if mode == "hybrid" else None,
+        "mean_blur_patches": mean_patches,
         "defense": {
             "en": {
                 "acc": def_acc,
@@ -187,10 +241,14 @@ def run_eval(n: int, status: str):
         "defense_acc_en": def_acc,
         "clean_delta_en": clean_delta,
         "preds_changed_vs_vanilla": changed,
-        "notes": "SamplingTAR-style: attn-to-sticker mining + z-threshold; fix_attn alpha=1. No SAE.",
+        "notes": notes,
     }
-    write_summary(RESULTS / f"comparison_summary_{status}_n{data['n']}.json", payload)
-    write_summary(RESULTS / "comparison_summary.json", payload)
+    suffix = f"_{mode}" if mode == "hybrid" else ""
+    write_summary(RESULTS / f"comparison_summary_{status}_n{data['n']}{suffix}.json", payload)
+    if mode == "hybrid":
+        write_summary(RESULTS / "comparison_summary_hybrid.json", payload)
+    else:
+        write_summary(RESULTS / "comparison_summary.json", payload)
     return payload
 
 
@@ -198,8 +256,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, required=True)
     ap.add_argument("--status", choices=["sanity", "smoke", "final"], required=True)
+    ap.add_argument("--mode", choices=["heads", "hybrid"], default="hybrid")
+    ap.add_argument("--top-k-patches", type=int, default=DEFAULT_TOP_K)
+    ap.add_argument("--score-frac", type=float, default=DEFAULT_SCORE_FRAC)
     args = ap.parse_args()
-    run_eval(args.n, args.status)
+    run_eval(
+        args.n,
+        args.status,
+        mode=args.mode,
+        top_k_patches=args.top_k_patches,
+        score_frac=args.score_frac,
+    )
 
 
 if __name__ == "__main__":

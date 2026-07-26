@@ -3,6 +3,10 @@
 Port of Dyslexify (Hufe et al.): mine heads by typographic attention score on
 sticker patches, greedy-select by attack-acc gain with clean-acc budget, ablate
 CLS→spatial attention (alpha=1) at inference. EN ViT-B/32 openai only.
+
+Modes:
+  heads  — original head ablation only
+  hybrid — attn-guided Gaussian blur of top typo-attn patches + head ablation
 """
 from __future__ import annotations
 
@@ -14,7 +18,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -23,6 +26,11 @@ from _common.attn_ablate import (  # noqa: E402
     fix_cls_attn_heads,
     heads_to_layer_spec,
     patch_mask_from_rects,
+)
+from _common.hybrid_spatial import (  # noqa: E402
+    DEFAULT_SCORE_FRAC,
+    DEFAULT_TOP_K,
+    classify_hybrid,
 )
 from _common.protocol import (  # noqa: E402
     CLASSES,
@@ -37,7 +45,8 @@ from _common.protocol import (  # noqa: E402
 )
 
 RESULTS = Path(__file__).resolve().parent / "results"
-COST_PROXY = 2
+COST_HEADS = 2
+COST_HYBRID = 3
 N_LAYERS, N_HEADS, GRID = 12, 12, 7
 
 
@@ -82,11 +91,7 @@ def classify_with_heads(en, imgs, text_emb, heads, batch_size=32):
 
 def greedy_select(en, text_emb, clean, attacked, true, ranked,
                   eps=0.001, stop_at_delta=0.05, max_heads=24, probe_n=40):
-    """Select a prefix of typo-ranked heads maximizing attack acc under clean budget.
-
-    Tries greedy keep/skip first, then sweeps prefix lengths k=1..K on the ranked
-    list and keeps the best feasible set (paper-like: rank by typo score, grow circuit).
-    """
+    """Select a prefix of typo-ranked heads maximizing attack acc under clean budget."""
     clean_p = clean[:probe_n]
     atk_p = attacked[:probe_n]
     true_p = true[:probe_n]
@@ -94,7 +99,6 @@ def greedy_select(en, text_emb, clean, attacked, true, ranked,
     base_atk = float((classify_batch(en, atk_p, text_emb) == true_p).mean())
     print(f"Select probe n={probe_n} base_clean={100*base_clean:.1f}% base_atk={100*base_atk:.1f}%")
 
-    # Stage 1: greedy keep/skip
     selected = []
     cur_atk = base_atk
     skips = 0
@@ -120,7 +124,6 @@ def greedy_select(en, text_emb, clean, attacked, true, ranked,
         if len(selected) >= max_heads:
             break
 
-    # Stage 2: sweep ranked prefixes; pick best attack acc with clean_drop <= budget
     best = (cur_atk if selected else base_atk, list(selected))
     K = min(12, len(ranked))
     for k in range(1, K + 1):
@@ -134,14 +137,19 @@ def greedy_select(en, text_emb, clean, attacked, true, ranked,
 
     selected = best[1]
     if not selected:
-        # last resort: single highest-score head even if slightly over budget
         selected = [(ranked[0][1], ranked[0][2])]
         print("Fallback: single top head", selected)
     print(f"Selected {len(selected)} heads: {selected} (probe_atk={100*best[0]:.1f}%)")
     return selected
 
 
-def run_eval(n: int, status: str):
+def run_eval(
+    n: int,
+    status: str,
+    mode: str = "hybrid",
+    top_k_patches: int = DEFAULT_TOP_K,
+    score_frac: float = DEFAULT_SCORE_FRAC,
+):
     assert torch.cuda.is_available()
     data = load_protocol_data(n=n)
     attacked, rects = build_multi_attack(data)
@@ -150,7 +158,6 @@ def run_eval(n: int, status: str):
     en = EnCLIP()
     text_emb = en.embed_texts(CLASSES["en"])
 
-    # Mine + select on available data (use up to 100 for selection when n large)
     mine_n = min(50, data["n"])
     ranked, score_mat = typographic_scores(en, attacked, rects, max_images=mine_n)
     if status == "sanity" and ranked[0][0] <= 0:
@@ -162,39 +169,68 @@ def run_eval(n: int, status: str):
         max_heads=16 if n <= 100 else 24,
     )
     if status == "sanity" and len(heads) == 0:
-        # Fall back to top-3 by score so gate can still test the hook
         heads = [(L, H) for _, L, H in ranked[:3]]
         print("Sanity fallback: using top-3 scored heads", heads)
 
     RESULTS.mkdir(parents=True, exist_ok=True)
     with open(RESULTS / "selected_heads.json", "w", encoding="utf-8") as f:
-        json.dump({"heads": heads, "n_mine": mine_n}, f, indent=2)
+        json.dump({"heads": heads, "n_mine": mine_n, "mode": mode}, f, indent=2)
 
-    # Baselines
     clean_p = classify_batch(en, data["clean_224"], text_emb)
     atk_p = classify_batch(en, attacked, text_emb)
     clean_acc = float((clean_p == true).mean())
     atk_acc, atk_asr = acc_asr(atk_p, true, target)
     print(f"Vanilla clean={100*clean_acc:.1f}% atk={100*atk_acc:.1f}% ASR={100*atk_asr:.1f}%")
 
-    # Defended
     t0 = time.time()
-    def_preds = classify_with_heads(en, attacked, text_emb, heads, batch_size=32)
+    mean_patches = None
+    if mode == "hybrid":
+        def_preds, mean_patches = classify_hybrid(
+            en,
+            attacked,
+            text_emb,
+            heads,
+            top_k_patches=top_k_patches,
+            score_frac=score_frac,
+        )
+        clean_def, _ = classify_hybrid(
+            en,
+            data["clean_224"],
+            text_emb,
+            heads,
+            top_k_patches=top_k_patches,
+            score_frac=score_frac,
+        )
+        cost = COST_HYBRID
+        notes = (
+            f"Dyslexify hybrid: typo-attn heads + attn-guided blur "
+            f"(top_k={top_k_patches}, score_frac={score_frac}) + CLS attn redirect."
+        )
+        variant = "heads+attn_blur"
+    else:
+        def_preds = classify_with_heads(en, attacked, text_emb, heads, batch_size=32)
+        clean_def = classify_with_heads(en, data["clean_224"], text_emb, heads)
+        cost = COST_HEADS
+        notes = "Dyslexify-style: typo-attn score + greedy select; CLS attn redirect (alpha=1)."
+        variant = "heads"
+
     for i in range(0, len(def_preds), 50):
-        running = int((def_preds[: i + 50] == true[: i + 50]).sum()) if i + 50 <= len(def_preds) else int((def_preds == true).sum())
-        progress_log(min(i + 49, len(def_preds) - 1), len(def_preds), running, t0)
+        end = min(i + 50, len(def_preds))
+        running = int((def_preds[:end] == true[:end]).sum())
+        progress_log(end - 1, len(def_preds), running, t0)
+
     def_acc, def_asr = acc_asr(def_preds, true, target)
     changed = int((def_preds != atk_p).sum())
-    print(f"Hook fired: preds_changed={changed}/{len(def_preds)}")
+    print(f"Hook/hybrid fired: preds_changed={changed}/{len(def_preds)}")
     if status == "sanity" and changed == 0 and len(heads) > 0:
-        raise RuntimeError("Gate A fail: ablation hook did not change predictions")
+        raise RuntimeError("Gate A fail: ablation/hybrid did not change predictions")
 
-    clean_def = classify_with_heads(en, data["clean_224"], text_emb, heads)
     clean_def_acc = float((clean_def == true).mean())
     clean_delta = clean_def_acc - clean_acc
     print(
-        f"Dyslexify EN acc={100*def_acc:.1f}% Clean_delta={100*clean_delta:.1f}pp "
+        f"Dyslexify [{mode}] EN acc={100*def_acc:.1f}% Clean_delta={100*clean_delta:.1f}pp "
         f"heads={len(heads)}"
+        + (f" mean_blur_patches={mean_patches:.1f}" if mean_patches is not None else "")
     )
 
     payload = {
@@ -202,9 +238,14 @@ def run_eval(n: int, status: str):
         "status": status,
         "n": int(data["n"]),
         "scope": "en_only",
-        "inference_cost": COST_PROXY,
+        "mode": mode,
+        "variant": variant,
+        "inference_cost": cost,
         "n_heads_ablated": len(heads),
         "heads": heads,
+        "top_k_patches": int(top_k_patches) if mode == "hybrid" else None,
+        "score_frac": float(score_frac) if mode == "hybrid" else None,
+        "mean_blur_patches": mean_patches,
         "defense": {
             "en": {
                 "acc": def_acc,
@@ -223,10 +264,14 @@ def run_eval(n: int, status: str):
         "defense_acc_en": def_acc,
         "clean_delta_en": clean_delta,
         "preds_changed_vs_vanilla": changed,
-        "notes": "Dyslexify-style: typo-attn score + greedy select; CLS attn redirect (alpha=1).",
+        "notes": notes,
     }
-    write_summary(RESULTS / f"comparison_summary_{status}_n{data['n']}.json", payload)
-    write_summary(RESULTS / "comparison_summary.json", payload)
+    suffix = f"_{mode}" if mode == "hybrid" else ""
+    write_summary(RESULTS / f"comparison_summary_{status}_n{data['n']}{suffix}.json", payload)
+    if mode == "hybrid":
+        write_summary(RESULTS / "comparison_summary_hybrid.json", payload)
+    else:
+        write_summary(RESULTS / "comparison_summary.json", payload)
     return payload
 
 
@@ -234,8 +279,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, required=True)
     ap.add_argument("--status", choices=["sanity", "smoke", "final"], required=True)
+    ap.add_argument("--mode", choices=["heads", "hybrid"], default="hybrid")
+    ap.add_argument("--top-k-patches", type=int, default=DEFAULT_TOP_K)
+    ap.add_argument("--score-frac", type=float, default=DEFAULT_SCORE_FRAC)
     args = ap.parse_args()
-    run_eval(args.n, args.status)
+    run_eval(
+        args.n,
+        args.status,
+        mode=args.mode,
+        top_k_patches=args.top_k_patches,
+        score_frac=args.score_frac,
+    )
 
 
 if __name__ == "__main__":

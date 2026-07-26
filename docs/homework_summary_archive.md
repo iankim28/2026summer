@@ -1,12 +1,55 @@
-# Archive — Homework Summary (through July 19, 2026)
+# Archive — Homework Summary (through July 24, 2026)
 
-**Status:** Archived. Current briefing: [`homework_summary.md`](homework_summary.md) (July 20–23).  
+**Status:** Archived. Current briefing: [`homework_summary.md`](homework_summary.md) (**July 25 only**).  
 **Project:** Defending multilingual CLIP classifiers against typographic (text-overlay) attacks on CIFAR-10.
 
 This file holds all superseded homework briefings in one place:
 
-1. **Part A** — July 16–19 defense sprint (`cc_bbox_blur`, 4-lang, KO/JA clean Δ)
-2. **Part B** — July 5 Assignment 1–2 (JA model swap, 4×4 attack matrix)
+1. **Part C** — July 20–24 (frozen protocol, detector gate, baselines, MIXED2000)
+2. **Part A** — July 16–19 defense sprint (`cc_bbox_blur`, 4-lang, KO/JA clean Δ)
+3. **Part B** — July 5 Assignment 1–2 (JA model swap, 4×4 attack matrix)
+
+---
+
+# Part C — Frozen protocol + detector + baselines (July 20–24, 2026)
+
+## One-paragraph overview
+
+After locking `cc_bbox_blur` as the defense, evaluation was made fair and paper-ready. (1) **Froze attack geometry** so every method sees the same EN/L sticker positions. (2) **Restored accuracy** with thr ≥ 0.95 (ZH multi **74.0%**, Clean Δ **−1.5pp**). (3) Built an **Attn-last heatmap attack detector** — Clean Δ → **~0** for ZH/KO/JA with ≤0.45pp atk drop. (4) Ran four **published baselines** on the same protocol. (5) Jul 24: introduced **MIXED2000** so gated ≫ always is visible (esp. KO/JA).
+
+## What was done (by topic)
+
+### Frozen attack geometry + thr floor
+
+- `attack_pos` baked into `CIFAR10_BALANCED_1000_SAMPLE.json`; thr = max(free, 0.95).
+- ZH/KO/JA multi thr-floor def: **74.0% / 69.9% / 75.9%**; Clean Δ **−1.5 / −11.2 / −11.5**.
+
+### Gated detector (`multi`)
+
+| L | Always atk | Gated atk | Always Clean Δ | Gated Clean Δ |
+| --- | ---: | ---: | ---: | ---: |
+| zh | 74.0% | **73.9%** | −1.45 | **0.00** |
+| ko | 69.9% | **69.45%** | −11.25 | **−0.20** |
+| ja | 75.9% | **75.7%** | −11.50 | **0.00** |
+
+### Baselines (n=1000, Jul 23)
+
+| Method | Result |
+| --- | --- |
+| Defense-Prefix (EN then) | EN 73.8% |
+| OCR + blur | 73.8% mean |
+| Dyslexify / SamplingTAR heads | 20.0% / 11.6% EN |
+| Ours ref (always-on blur) | 74.9% mean / −1.5pp |
+
+### MIXED2000 (Jul 24)
+
+| L | Always | Gated | Gated − always |
+| --- | ---: | ---: | ---: |
+| zh | 80.60% | **81.28%** | +0.68 |
+| ko | 73.20% | **78.50%** | +5.30 |
+| ja | 76.80% | **82.45%** | +5.65 |
+
+DP EN MIXED2000 bar = **81.65%**. Full prior tables/diary: `docs/research_diary.md` (2026-07-20 → 2026-07-24).
 
 ---
 

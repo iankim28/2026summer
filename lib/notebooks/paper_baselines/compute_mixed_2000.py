@@ -14,9 +14,26 @@ OUT_DIR = HERE / "results"
 
 BASELINES = [
     ("ocr_blur", "OCR + blur", HERE / "ocr_blur" / "results" / "comparison_summary_final_n1000.json"),
-    ("defense_prefix", "Defense-Prefix", HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000.json"),
-    ("dyslexify", "Dyslexify", HERE / "dyslexify" / "results" / "comparison_summary_final_n1000.json"),
-    ("sampling_tar", "SamplingTAR", HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000.json"),
+    # Prefer EN+ZH merged summary when ZH CIFAR DP token exists; else EN-only.
+    (
+        "defense_prefix",
+        "Defense-Prefix",
+        HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000_en_zh.json"
+        if (HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000_en_zh.json").is_file()
+        else HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000.json",
+    ),
+    ("dyslexify", "Dyslexify (heads)", HERE / "dyslexify" / "results" / "comparison_summary_final_n1000.json"),
+    (
+        "dyslexify_hybrid",
+        "Dyslexify hybrid",
+        HERE / "dyslexify" / "results" / "comparison_summary_final_n1000_hybrid.json",
+    ),
+    ("sampling_tar", "SamplingTAR (heads)", HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000.json"),
+    (
+        "sampling_tar_hybrid",
+        "SamplingTAR hybrid",
+        HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000_hybrid.json",
+    ),
 ]
 
 # Ours refs: Phase C gated mixed-2000 for partner ZH (same table as diary §2026-07-24).
@@ -59,6 +76,8 @@ def scope_label(g: dict) -> str:
     scope = g.get("scope", "")
     if "en_zh" in scope or len(g.get("defense", {})) > 1:
         return "EN+ZH"
+    if scope in ("zh_only", "zh"):
+        return "ZH"
     return "EN"
 
 
@@ -93,6 +112,9 @@ def main() -> None:
     print("Sample:", SAMPLE_ID, "(same 1000 idx + frozen attack_pos as our model)\n")
 
     for method_id, display, path in BASELINES:
+        if not path.is_file():
+            print(f"SKIP {display}: missing {path}")
+            continue
         g = json.loads(path.read_text(encoding="utf-8"))
         scope = scope_label(g)
         policies = policies_from_summary(g)

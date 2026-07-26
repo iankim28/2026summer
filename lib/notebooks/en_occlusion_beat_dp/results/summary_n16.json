@@ -1,0 +1,132 @@
+{
+  "status": "sanity",
+  "n": 16,
+  "dp_bar": 0.8165,
+  "gated_black_ref": 0.7935,
+  "constraint": "occlusion_only_no_DP",
+  "never": {
+    "atk_acc": 0.0,
+    "clean_acc": 0.75,
+    "mixed_2000": 0.375
+  },
+  "detector": {
+    "primary": "linear_svm",
+    "threshold": 0.4733603113038565,
+    "fire_attacked": 0.998,
+    "fire_clean": 0.004
+  },
+  "arms": [
+    {
+      "name": "gated_cc_bbox_black",
+      "mode": "black",
+      "atk_acc": 0.5,
+      "asr": 0.0625,
+      "clean_acc": 0.75,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.625,
+      "beats_dp": false,
+      "defend_frac_attacked": 1.0,
+      "defend_frac_clean": 0.0,
+      "pick_counts_atk": {
+        "black": 16
+      },
+      "pick_counts_clean": {},
+      "elapsed_s": 0.15384411811828613
+    },
+    {
+      "name": "gated_union_black",
+      "mode": "black",
+      "atk_acc": 0.5,
+      "asr": 0.0625,
+      "clean_acc": 0.75,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.625,
+      "beats_dp": false,
+      "defend_frac_attacked": 1.0,
+      "defend_frac_clean": 0.0,
+      "pick_counts_atk": {
+        "black": 16
+      },
+      "pick_counts_clean": {},
+      "elapsed_s": 0.07885932922363281
+    },
+    {
+      "name": "gated_union_ensemble",
+      "mode": "ensemble",
+      "atk_acc": 0.5625,
+      "asr": 0.0625,
+      "clean_acc": 0.75,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.65625,
+      "beats_dp": false,
+      "defend_frac_attacked": 1.0,
+      "defend_frac_clean": 0.0,
+      "pick_counts_atk": {
+        "blur": 4,
+        "mean": 5,
+        "black": 7
+      },
+      "pick_counts_clean": {},
+      "elapsed_s": 0.6185534000396729
+    },
+    {
+      "name": "gated_cc_bbox_ensemble",
+      "mode": "ensemble",
+      "atk_acc": 0.5,
+      "asr": 0.0625,
+      "clean_acc": 0.75,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.625,
+      "beats_dp": false,
+      "defend_frac_attacked": 1.0,
+      "defend_frac_clean": 0.0,
+      "pick_counts_atk": {
+        "blur": 3,
+        "mean": 4,
+        "black": 9
+      },
+      "pick_counts_clean": {},
+      "elapsed_s": 0.6156394481658936
+    },
+    {
+      "name": "gated_union_ensemble_raw",
+      "mode": "ensemble_raw",
+      "atk_acc": 0.5625,
+      "asr": 0.0625,
+      "clean_acc": 0.75,
+      "clean_delta": 0.0,
+      "mixed_2000": 0.65625,
+      "beats_dp": false,
+      "defend_frac_attacked": 1.0,
+      "defend_frac_clean": 0.0,
+      "pick_counts_atk": {
+        "blur": 4,
+        "mean": 5,
+        "black": 7
+      },
+      "pick_counts_clean": {},
+      "elapsed_s": 0.7912998199462891
+    }
+  ],
+  "best": {
+    "name": "gated_union_ensemble",
+    "mode": "ensemble",
+    "atk_acc": 0.5625,
+    "asr": 0.0625,
+    "clean_acc": 0.75,
+    "clean_delta": 0.0,
+    "mixed_2000": 0.65625,
+    "beats_dp": false,
+    "defend_frac_attacked": 1.0,
+    "defend_frac_clean": 0.0,
+    "pick_counts_atk": {
+      "blur": 4,
+      "mean": 5,
+      "black": 7
+    },
+    "pick_counts_clean": {},
+    "elapsed_s": 0.6185534000396729
+  },
+  "beat_dp": false,
+  "ceiling_note": "Need EN atk >~77.4% at clean~85.9% for MIXED>81.65%. Best atk=56.25% clean=75.00% MIXED=65.62%."
+}

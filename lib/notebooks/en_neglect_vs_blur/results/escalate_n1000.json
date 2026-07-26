@@ -1,0 +1,72 @@
+{
+  "n": 1000,
+  "dp_bar": 0.8165,
+  "patch_thr": {
+    "0.25": {
+      "atk_acc": 0.594,
+      "asr": 0.056,
+      "clean_acc": 0.734,
+      "mixed_2000": 0.6639999999999999,
+      "beats_dp": false
+    },
+    "0.5": {
+      "atk_acc": 0.607,
+      "asr": 0.088,
+      "clean_acc": 0.783,
+      "mixed_2000": 0.6950000000000001,
+      "beats_dp": false
+    },
+    "0.75": {
+      "atk_acc": 0.489,
+      "asr": 0.286,
+      "clean_acc": 0.835,
+      "mixed_2000": 0.6619999999999999,
+      "beats_dp": false
+    }
+  },
+  "ocr_neglect": {
+    "atk_acc": 0.509,
+    "asr": 0.24,
+    "clean_acc": 0.849,
+    "mixed_2000": 0.679,
+    "beats_dp": false
+  },
+  "dp_neglect": {
+    "black": {
+      "atk_acc": 0.828,
+      "asr": 0.02,
+      "clean_acc": 0.891,
+      "mixed_2000": 0.8594999999999999,
+      "beats_dp": true
+    },
+    "blur": {
+      "atk_acc": 0.82,
+      "asr": 0.026,
+      "clean_acc": 0.902,
+      "mixed_2000": 0.861,
+      "beats_dp": true
+    },
+    "dp_only": {
+      "atk_acc": 0.738,
+      "asr": 0.164,
+      "clean_acc": 0.895,
+      "mixed_2000": 0.8165,
+      "beats_dp": false
+    },
+    "patch_zero_pixels": {
+      "atk_acc": 0.842,
+      "asr": 0.015,
+      "clean_acc": 0.891,
+      "mixed_2000": 0.8665,
+      "beats_dp": true
+    }
+  },
+  "best": {
+    "name": "dp+patch_zero_pixels",
+    "mixed_2000": 0.8665,
+    "atk_acc": 0.842,
+    "asr": 0.015,
+    "clean_acc": 0.891,
+    "beats_dp": true
+  }
+}

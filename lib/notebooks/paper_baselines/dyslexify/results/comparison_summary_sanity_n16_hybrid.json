@@ -1,0 +1,81 @@
+{
+  "method": "dyslexify",
+  "status": "sanity",
+  "n": 16,
+  "scope": "en_only",
+  "mode": "hybrid",
+  "variant": "heads+attn_blur",
+  "inference_cost": 3,
+  "n_heads_ablated": 12,
+  "heads": [
+    [
+      7,
+      4
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      11,
+      8
+    ],
+    [
+      5,
+      11
+    ],
+    [
+      9,
+      8
+    ],
+    [
+      5,
+      0
+    ],
+    [
+      3,
+      0
+    ],
+    [
+      9,
+      6
+    ],
+    [
+      0,
+      8
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      11,
+      1
+    ],
+    [
+      9,
+      1
+    ]
+  ],
+  "top_k_patches": 8,
+  "mean_blur_patches": 8.0,
+  "defense": {
+    "en": {
+      "acc": 0.5,
+      "asr": 0.0625,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.75,
+      "masked_acc": 0.625,
+      "delta_acc": -0.125
+    }
+  },
+  "defense_acc_en": 0.5,
+  "clean_delta_en": -0.125,
+  "preds_changed_vs_vanilla": 15,
+  "notes": "Dyslexify hybrid: typo-attn heads + attn-guided blur (top_k=8) + CLS attn redirect."
+}

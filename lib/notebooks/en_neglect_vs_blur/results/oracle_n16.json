@@ -1,0 +1,30 @@
+{
+  "n": 16,
+  "never": {
+    "atk_acc": 0.0,
+    "asr": 1.0
+  },
+  "arms": {
+    "blur": {
+      "atk_acc": 0.5625,
+      "asr": 0.0625,
+      "mean_mask_coverage": 0.09130983936543367
+    },
+    "mean": {
+      "atk_acc": 0.5625,
+      "asr": 0.0625,
+      "mean_mask_coverage": 0.09130983936543367
+    },
+    "black": {
+      "atk_acc": 0.5,
+      "asr": 0.0625,
+      "mean_mask_coverage": 0.09130983936543367
+    },
+    "neglect": {
+      "atk_acc": 0.5,
+      "asr": 0.1875,
+      "mean_neglected_patches": 3.875
+    }
+  },
+  "ceiling_note": "oracle neglect EN atk=50.00%; BELOW ~77.4% needed for MIXED>81.65% at clean=85.9%"
+}

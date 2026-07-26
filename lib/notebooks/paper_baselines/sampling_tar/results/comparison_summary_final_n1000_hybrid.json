@@ -1,0 +1,64 @@
+{
+  "method": "sampling_tar",
+  "status": "final",
+  "n": 1000,
+  "scope": "en_only",
+  "mode": "hybrid",
+  "variant": "heads+attn_blur",
+  "inference_cost": 3,
+  "n_heads_ablated": 7,
+  "heads": [
+    [
+      5,
+      11
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      11,
+      1
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      9,
+      8
+    ],
+    [
+      9,
+      6
+    ],
+    [
+      11,
+      4
+    ]
+  ],
+  "z": 2.0,
+  "score_threshold": 0.41975456416148693,
+  "top_k_patches": 4,
+  "score_frac": 0.35,
+  "mean_blur_patches": 3.682,
+  "defense": {
+    "en": {
+      "acc": 0.673,
+      "asr": 0.051,
+      "baseline_acc": 0.045,
+      "baseline_asr": 0.953
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.776,
+      "delta_acc": -0.08299999999999996
+    }
+  },
+  "defense_acc_en": 0.673,
+  "clean_delta_en": -0.08299999999999996,
+  "preds_changed_vs_vanilla": 905,
+  "notes": "SamplingTAR hybrid: sticker-attn heads + attn-guided blur (top_k=4, score_frac=0.35) + fix_attn alpha=1. No SAE."
+}

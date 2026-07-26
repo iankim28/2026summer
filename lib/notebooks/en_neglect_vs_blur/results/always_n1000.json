@@ -1,0 +1,59 @@
+{
+  "n": 1000,
+  "threshold": 0.95,
+  "patch_thr": 0.5,
+  "blur_radius": 12,
+  "never": {
+    "atk_acc": 0.045,
+    "asr": 0.953,
+    "clean_acc": 0.859,
+    "mixed_2000": 0.452
+  },
+  "arms": {
+    "blur": {
+      "atk_acc": 0.7,
+      "asr": 0.026,
+      "clean_acc": 0.837,
+      "clean_delta": -0.02200000000000002,
+      "mixed_2000": 0.7685,
+      "beats_dp": false,
+      "elapsed_s": 4.303364038467407,
+      "atk_mean_mask_coverage": 0.0880645527742347,
+      "clean_mean_mask_coverage": 0.07079860889668367
+    },
+    "mean": {
+      "atk_acc": 0.705,
+      "asr": 0.027,
+      "clean_acc": 0.819,
+      "clean_delta": -0.040000000000000036,
+      "mixed_2000": 0.762,
+      "beats_dp": false,
+      "elapsed_s": 4.136386394500732,
+      "atk_mean_mask_coverage": 0.0880645527742347,
+      "clean_mean_mask_coverage": 0.07079860889668367
+    },
+    "black": {
+      "atk_acc": 0.729,
+      "asr": 0.036,
+      "clean_acc": 0.822,
+      "clean_delta": -0.03700000000000003,
+      "mixed_2000": 0.7755,
+      "beats_dp": false,
+      "elapsed_s": 2.2797951698303223,
+      "atk_mean_mask_coverage": 0.0880645527742347,
+      "clean_mean_mask_coverage": 0.07079860889668367
+    },
+    "neglect": {
+      "atk_acc": 0.607,
+      "asr": 0.088,
+      "clean_acc": 0.783,
+      "clean_delta": -0.07599999999999996,
+      "mixed_2000": 0.6950000000000001,
+      "beats_dp": false,
+      "elapsed_s": 9.646891593933105,
+      "atk_mean_neglected_patches": 3.753,
+      "clean_mean_neglected_patches": 3.195
+    }
+  },
+  "dp_bar": 0.8165
+}

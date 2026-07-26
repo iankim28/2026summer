@@ -49,5 +49,6 @@
       1
     ]
   ],
-  "n_mine": 50
+  "n_mine": 50,
+  "mode": "hybrid"
 }

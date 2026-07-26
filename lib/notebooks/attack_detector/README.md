@@ -34,12 +34,27 @@ python _build_notebook.py
 python run_all.py
 ```
 
+## Phase A/B visualization
+
+Standalone (uses baked Attn-last cache + sklearn; no CLIP bake):
+
+```bash
+python make_phase_ab_viz.py
+```
+
+Writes process strips + ROC/confusion into `results/{L}/multi/` (same folder as Phase A/B/C). Diary: `docs/research_diary.md` entry **2026-07-25**.
+
 ## Outputs
 
 | Path | Contents |
 |------|----------|
 | `results/{L}/multi/cache/*.npz` | Baked Attn-last maps |
 | `results/{L}/multi/pca_features.png` / `tsne_features.png` | Phase A |
-| `results/{L}/multi/detector_metrics.json` | Phase B |
-| `results/{L}/multi/gated_comparison.json` | Phase C |
+| `results/{L}/multi/phase_a_summary.json` | Phase A metrics |
+| `results/{L}/multi/detector_metrics.json` / `feature_importance.png` | Phase B |
+| `results/{L}/multi/phase_ab_process.png` | Phase A/B process strip (clean vs attacked + gate) |
+| `results/{L}/multi/phase_b_roc_cm.png` | Phase B ROC + test confusion |
+| `results/{L}/multi/phase_ab_viz_summary.json` | Viz captions / example indices |
+| `results/{L}/multi/gated_comparison.json` / `gated_comparison.png` | Phase C |
 | `results/comparison_summary.json` | Roll-up across partners |
+| `results/phase_ab_viz_rollups.json` | Cross-partner viz summary |

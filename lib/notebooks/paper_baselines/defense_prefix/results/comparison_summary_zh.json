@@ -1,0 +1,30 @@
+{
+  "method": "defense_prefix",
+  "status": "final",
+  "n": 1000,
+  "scope": "zh_only",
+  "lang": "zh",
+  "model": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "token": "D:\\ian\\2026summer\\lib\\notebooks\\paper_baselines\\defense_prefix\\results\\dp_cifar10_zh_vit-b16.pt",
+  "inference_cost": 2,
+  "defense": {
+    "zh": {
+      "acc": 0.445,
+      "asr": 0.525,
+      "baseline_acc": 0.064,
+      "baseline_asr": 0.936
+    }
+  },
+  "clean_degradation": {
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.918,
+      "delta_acc": 0.0040000000000000036
+    }
+  },
+  "defense_acc_zh": 0.445,
+  "clean_delta_zh": 0.0040000000000000036,
+  "preds_changed_vs_vanilla": 413,
+  "mean_cosine_vanilla_dp_text": 0.777823269367218,
+  "notes": "CIFAR-trained ChineseCLIP DP token; ZH prompts (\u4e00\u5f20*{}\u7684\u7167\u7247\u3002); multi EN+ZH stickers; eval sample unused in train."
+}

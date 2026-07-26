@@ -1,164 +1,223 @@
-# Homework Summary — Recent Progress (July 20–23, 2026)
+# Homework Summary — July 25, 2026
 
 **Project:** Defending multilingual CLIP classifiers against typographic (text-overlay) attacks on CIFAR-10.  
-**Audience:** Quick briefing for professor meeting — what was finished on the checklist, and what comes next.
+**Audience:** Quick briefing for professor meeting — what was done **today**.
 
-> Older briefings (Jul 5 assignments + Jul 16–19 defense sprint): [`homework_summary_archive.md`](homework_summary_archive.md).  
-> Shared experiment conventions: [`lib/notebooks/PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).  
-> Published baseline numbers: [`baseline_comparison.md`](baseline_comparison.md).
+> Older briefings: [`homework_summary_archive.md`](homework_summary_archive.md).  
+> Protocol: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).  
+> Baselines: [`baseline_comparison.md`](baseline_comparison.md).  
+> Current stack / failure modes: [`failure_analysis.md`](failure_analysis.md).  
+> Full diary for today: [`research_diary.md`](research_diary.md) (2026-07-25 entries).
+
+**Shared protocol for all tables below unless noted:** frozen dual-box CIFAR-10 n=1000 (`CIFAR10_BALANCED_1000_SAMPLE` + `attack_pos`), 224×224, attack = `multi`, thr ≥ 0.95, CUDA.  
+**MIXED2000:** `0.5 * attacked_acc + 0.5 * clean_policy_acc`.
 
 ---
 
 ## One-paragraph overview
 
-After locking `cc_bbox_blur` as the defense, I made evaluation fair and paper-ready. (1) **Froze attack geometry** so every method sees the same EN/L sticker positions per image. (2) **Restored accuracy** under that new protocol with a thr ≥ 0.95 floor (ZH multi **74.0%**, Clean Δ **−1.5pp**). (3) Built an **Attn-last heatmap attack detector** (PCA/t-SNE evidence + SVM gate) so blur runs only when stickers are present — Clean Δ → **~0** for ZH/KO/JA with ≤0.45pp attacked-acc drop. (4) Ran four **published baselines** on the same protocol; `cc_bbox_blur` still leads mean accuracy. Open work is mostly writing the paper.
+Today I locked the production defense as **gated `cc_bbox_black`**: the Attn-last detector gate is a core pipeline stage (not optional), and the occlusion fill is solid **black** (blur / mean / ViT-token neglect are ablations). On English CLIP, gated black reaches **72.9% atk / 85.8% clean / 79.35% MIXED2000** — **+1.45pp** MIXED over gated blur, but still **−2.30pp** vs Defense-Prefix’s EN MIXED **81.65%**. An occlusion-only chase (incl. OCR∪Attn) could not clear that bar (best **79.70%**). I also finished a fair **ZH Defense-Prefix** (ZH **44.5%**, EN+ZH mean **59.2%**), Dyslexify/SamplingTAR **hybrids** (EN **66.9% / 67.3%**), detector Phase A/B visualization for ZH/KO/JA, a failure-analysis write-up, synced the paper outline to match the new stack, and wrote up **why ZH recovers higher than EN after the same occlusion** (Latin-script / training asymmetry + floors — not a ZH-favoring mask).
 
 ---
 
-## Checklist status
+## What was done
 
-| Item | Status | Date |
-|------|--------|------|
-| Bring accuracy back up for new (frozen) protocol | Done | 2026-07-21 |
-| Redo tables under new protocol (keep old tables; create new) | Done | 2026-07-20/21 |
-| Rename no-defense columns so “atk” = CLIP (EN / L) | Done | 2026-07-20/21 |
-| Freeze attack position (same EN/L anchors for all methods) | Done | 2026-07-20 |
-| Heatmap-pattern attack detector + gated occlusion | Done (`multi`) | 2026-07-22/23 |
-| Dim-reduction / decision-boundary exploration (PCA, t-SNE) | Done (Phase A evidence) | 2026-07-22/23 |
-| Find published baselines beyond grid search | Done | 2026-07-23 |
-| Run baselines (DP → OCR → Dyslexify → SamplingTAR) | Done (n=1000) | 2026-07-23 |
-| Update `PROTOCOL.md` | Done | 2026-07-20–23 |
-| Start paper / write up results | In progress (outline) | `docs/paper_draft.md` |
+### 1. EN fill ablations — neglect vs blur vs mean vs black
+
+Gated Attn `cc_bbox`, EN score. Prefer **black**; still below DP EN MIXED **81.65%**.
+
+| Fill (gated) | EN atk | EN clean | EN MIXED2000 | vs DP |
+| --- | ---: | ---: | ---: | --- |
+| neglect | 60.5% | 85.9% | 73.20% | below |
+| blur | 69.9% | 85.9% | 77.90% | below |
+| mean | 70.4% | 85.9% | 78.15% | below |
+| **black** | **72.9%** | **85.8%** | **79.35%** | −2.30pp |
+| Defense-Prefix (bar) | 73.8% | 89.5% | **81.65%** | — |
+
+Full data (oracle, always-on, DP+spatial escalate): [`research_diary.md` § 2026-07-25 — EN neglect vs Gaussian blur](research_diary.md#L2604).
 
 ---
 
-## What was done (by topic)
+### 2. Occlusion-only chase of DP EN MIXED 81.65% (no DP in winner)
 
-### 1. Frozen attack geometry (fair baseline for every test)
+Best attention-only vs OCR∪Attn (logged only). Did **not** beat DP.
 
-**Problem:** Each notebook re-sampled sticker positions → grid vs attention vs baselines were not comparable.
+| Arm | EN atk | ASR | EN MIXED2000 | vs DP |
+| --- | ---: | ---: | ---: | --- |
+| gated `cc_bbox` black (ours) | **72.9%** | 3.7% | **79.35%** | −2.30pp |
+| gated OCR∪`cc_bbox` black | 73.6% | 3.1% | **79.70%** | −1.95pp |
+| Defense-Prefix (bar) | 73.8% | 16.4% | **81.65%** | — |
 
-**Fix:** Bake once into `image_samples/CIFAR10_BALANCED_1000_SAMPLE.json` under `attack_pos`:
+Full data (ensembles, pick counts, ceiling math): [`research_diary.md` § 2026-07-25 — Occlusion-only chase of DP EN MIXED2000](research_diary.md#L2670).
 
-| Slot | Key | Meaning |
-|------|-----|---------|
-| 0 | `en` | Top-left of English box (1000 images) |
-| 1 | `l` | Top-left of partner-language box (1000 images) |
+---
 
-- Reference bake size `131×44`; runtime measures the real word, clamps into 224×224.
-- Same anchors for grid, attention, `cc_bbox_blur`, detector, and paper baselines.
-- Spec: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md) §5; helper `image_samples/attack_placement.py`.
+### 3. ZH Defense-Prefix (ChineseCLIP CIFAR retrain)
 
-### 2. Bring accuracy back up under the new protocol
+Fair ZH DP token; EN+ZH mean collapses vs spatial peers.
 
-Free thr-tune after the freeze dropped several multi cells to thr 0.85–0.90 → defended acc and Clean Δ collapsed (e.g. ZH multi 74.9→71.7, Clean Δ −1.5→−7.0; KO multi Clean Δ → −25.5).
+| Lang | Defended acc | ASR | Clean Δ | MIXED2000 |
+| --- | ---: | ---: | ---: | ---: |
+| EN (prior) | **73.8%** | 16.4% | +0.5pp | **81.65%** |
+| ZH (new) | **44.5%** | 52.5% | +0.4pp | **68.15%** |
+| Mean EN+ZH | **59.2%** | — | +0.45pp | **74.90%** |
 
-**Production fix:** `threshold = max(threshold_free, 0.95)` on the full n=1000 run.
+Full data (train protocol, Gate A): [`research_diary.md` § 2026-07-25 — ZH Defense-Prefix](research_diary.md#L2510).
 
-| Cell | Free-tune def | Thr-floor def | Free Clean Δ | Floor Clean Δ |
-|------|-------------:|--------------:|-------------:|--------------:|
-| zh/multi | 71.7% | **74.0%** | −7.0 | **−1.5** |
-| ko/multi | 64.0% | **69.9%** | −25.5 | **−11.2** |
-| ja/multi | 73.6% | **75.9%** | −23.1 | **−11.5** |
+---
 
-ZH multi is within **0.9pp** of the pre-freeze 74.9% case-study number, with Clean Δ back at −1.5. Cite **thr-floor** numbers going forward.
+### 4. Dyslexify / SamplingTAR hybrids (heads + attn-guided blur)
 
-### 3. New tables (old ones kept; atk = CLIP)
+Occlusion, not head ablation alone, drives recovery. Still below gated black.
 
-Previous tables stay in [`homework_summary_archive.md`](homework_summary_archive.md). New-protocol tables below. In no-defense columns, **Atk EN / Atk L** mean the English / partner **CLIP** accuracies before defense (not “attack strength” jargon).
+| Method | Mode | EN atk | Clean Δ | MIXED2000 |
+| --- | --- | ---: | ---: | ---: |
+| Dyslexify | heads | 20.0% | 0.0pp | 52.95% |
+| Dyslexify | **hybrid** | **66.9%** | −8.1pp | **72.35%** |
+| SamplingTAR | heads | 11.6% | +0.2pp | 48.85% |
+| SamplingTAR | **hybrid** | **67.3%** | −8.3pp | **72.45%** |
 
-#### No defense vs `cc_bbox_blur` (thr-floor, frozen `attack_pos`, n=1000)
+Full data (heads, `score_frac`, smoke ladder): [`research_diary.md` § 2026-07-25 — Dyslexify / SamplingTAR hybrids](research_diary.md#L2724).
 
-| Cell | Atk EN (EN CLIP) | Atk L (partner CLIP) | Atk mean | Def mean | Clean EN / L |
-|------|-----------------:|---------------------:|---------:|---------:|-------------:|
-| zh/uni_en | 3.8% | 24.8% | 14.3% | **60.2%** | 85.9 / 91.4 |
-| zh/uni_l | 72.0% | 40.3% | 56.1% | **67.2%** | 85.9 / 91.4 |
-| zh/multi | 4.5% | 6.4% | 5.5% | **74.0%** | 85.9 / 91.4 |
-| ko/uni_en | 3.8% | 12.9% | 8.3% | **63.7%** | 85.9 / 89.6 |
-| ko/uni_l | 70.0% | 78.2% | 74.1% | **68.4%** | 85.9 / 89.6 |
-| ko/multi | 3.5% | 12.3% | 7.9% | **69.9%** | 85.9 / 89.6 |
-| ja/uni_en | 3.8% | 3.2% | 3.5% | **72.3%** | 85.9 / 92.5 |
-| ja/uni_l | 71.3% | 84.6% | 78.0% | **72.8%** | 85.9 / 92.5 |
-| ja/multi | 4.1% | 5.4% | 4.8% | **75.9%** | 85.9 / 92.5 |
+---
 
-Hard attacks (`uni_en`, `multi`) fall to ~4–14% mean and recover to mid-60s–mid-70s. Native-only `uni_l` on KO/JA is already weak; defense barely helps.
+### 5. Detector Phase A/B visualization (ZH / KO / JA)
 
-Grid under freeze: conf-drop winner still **48.5%** mean @ cost 62 (unchanged) — still a negative baseline.
+Gallery: [`docs/figures/attack_detector/gallery.html`](figures/attack_detector/gallery.html).
 
-### 4. Heatmap-pattern attack detector → gated occlusion
+| Partner | PCA NN-cent. test | Test AUC | Fire clean / atk (n=1000) |
+| --- | ---: | ---: | ---: |
+| ZH | 99.0% | **1.000** | 0.4% / 99.8% |
+| KO | 97.3% | **0.999** | 2.5% / 99.4% |
+| JA | 97.7% | **1.000** | 0.3% / 99.8% |
 
-**Idea:** Typographic stickers → **spiky / biased** Attn-last maps; clean images → **more spread**. Learn that shape, then occlude (blur) only when the detector says “attack.” Scope extended from always-attacked assumption to **clean + attacked**.
+Full data (thresholds, CMs, figure list): [`research_diary.md` § 2026-07-25 — Phase A/B gated occlusion visualization](research_diary.md#L2547).
 
-**Pipeline** (`lib/notebooks/attack_detector/`), attack = `multi`, frozen geometry:
+---
 
-1. Bake Attn-last for clean + attacked (1000 each); 26 scalars from EN / L / ∩ maps.
-2. **Phase A:** PCA + t-SNE — clusters separate (teacher-style dim-reduction evidence; decision boundary is in feature space, not t-SNE coords).
-3. **Phase B:** logistic + calibrated linear SVM; attack-recall ≥ **0.99**.
-4. **Phase C:** `never` / `always` / `gated` `cc_bbox_blur`.
+### 6. Failure analysis + paper outline sync
 
-| L | Test AUC | Always atk | Gated atk | Δ atk | Always Clean Δ | Gated Clean Δ |
-|---|---------:|-----------:|----------:|------:|---------------:|--------------:|
-| zh | 1.000 | 74.0% | **73.9%** | −0.10 | −1.45 | **0.00** |
-| ko | 0.999 | 69.9% | **69.45%** | −0.45 | −11.25 | **−0.20** |
-| ja | 1.000 | 75.9% | **75.7%** | −0.20 | −11.50 | **0.00** |
+- [`failure_analysis.md`](failure_analysis.md) — locked “ours” as gated `cc_bbox_black`; quote/do-not-claim list (79.35% = MIXED, not atk-only).
+- [`paper_draft.md`](paper_draft.md) — gate = core; fill = black; lead gated Clean Δ + MIXED2000 + EN gated-black.
 
-Biggest win: KO/JA Clean Δ **≈ −11pp → ~0** with <0.5pp attacked-acc cost. Caveat: reported for `multi` only; Pure E / Pure L gating still open.
+No single diary entry for this write-up pass; numbers live in the Jul 25 diary sections above + [`failure_analysis.md`](failure_analysis.md).
 
-### 5. More baselines (beyond grid) — find + run
+---
 
-Only competitive sanity check before was grid search. Found four published / portable methods and ran them on the **same frozen dual-box protocol** (smoke ladder n=16 → 100 → 1000). Order used: training-heavy first, then no-train spatial / heatmap peers.
+### 7. Why ZH > EN after occlusion, and EN headroom vs baselines
 
-| # | Method | Needs train data? | Final (n=1000) | vs ours |
-|---|--------|-------------------|----------------|---------|
-| 1 | **Defense-Prefix** (Azuma & Matsui 2023) | Yes — ImageNet DP failed; retrained 10 ep on CIFAR-10 train | **73.8% EN**, Clean Δ +0.5pp, ASR 16.4% | Strong EN-only; no ZH; high residual ASR |
-| 2 | **OCR + blur** (EasyOCR → blur r=12) | No | **73.8% mean**, Clean Δ −0.7pp; sticker hit 90.3% | Closest peer; we win **+1.1pp** mean |
-| 3 | **Dyslexify-style** head ablation | No (heatmap / attn heads) | **20.0% EN**, Clean Δ 0 | Weak negative |
-| 4 | **SamplingTAR-style** circuit ablation | No | **11.6% EN**, Clean Δ +0.2pp | Weakest peer |
+**Verdict**
 
-**Ours (reference):** `cc_bbox_blur` EN∩ZH multi — **74.9%** mean (case-study) / **74.0%** thr-floor four_lang, Clean Δ **−1.5pp**, cost 4.
+1. **ZH higher post-occlusion accuracy is mostly script/training asymmetry + higher ZH floors**, not a better ZH-specific mask.
+2. **Pure EN occlusion already beats every EN baseline except Defense-Prefix.** Clearing DP’s EN MIXED2000 **81.65%** without DP text tokens looks infeasible from current ceilings; **DP + spatial** is the only path that has cleared it.
 
-Living leaderboard: [`baseline_comparison.md`](baseline_comparison.md). Code: `lib/notebooks/paper_baselines/`.
+**Same defense, two models** (`cc_bbox_blur`: EN∩ZH Attn-last ∩ thr≥0.95 → top-2 CC → bbox → Gaussian blur r=12; dual-box `multi`, n=1000):
+
+| Model | Clean | Atk (no def) | After occlusion |
+| --- | ---: | ---: | ---: |
+| **EN** OpenAI ViT-B/32 | 85.9% | ~4.3–4.5% | **71.6%** |
+| **ZH** ChineseCLIP ViT-B/16 | 91.4% | ~6.4–7.3% | **78.2%** |
+
+Sources: [`baseline_comparison.md`](baseline_comparison.md); diary Latin-script asymmetry (~L894–1032) + `cc_bbox_blur` results.
+
+**Mechanism (in order of importance)**
+
+| Factor | Claim |
+| --- | --- |
+| Latin universally class-relevant | Web-trained CLIPs treat English overlays as classification signal; Hangul/CJK overlays mostly do not transfer the other way |
+| ChineseCLIP less sensitive to Latin even before defense | Under EN attack ZH historically ~27–33% vs EN ~5%; Chinese-caption training → Latin overlay carries less label signal |
+| Higher ZH floors amplify post-defense gap | Clean 91.4% vs 85.9%; slightly higher undefended atk → same residual sticker leakage hurts EN more |
+| Not primarily patch size | EN 7×7 (B/32) vs ZH 14×14 (B/16); swapping EN→ViT-B/16 did **not** help defense (`vit16_en/`) |
+| Mask is shared, not ZH-favoring | Dual-box oracle: covering the **EN** sticker matters for both; ZH-only occlusion barely helps. Same mask → ZH still +6.6pp → residual Latin remains more toxic to EN |
+
+```mermaid
+flowchart LR
+  LatinSticker[Latin sticker] --> AllCLIPs[All CLIPs attend Latin]
+  LatinSticker --> ENHurt[EN strongly hijacked]
+  LatinSticker --> ZHMild[ZH only partly hijacked]
+  SharedMask[Shared EN intersect ZH mask] --> SoftBlur[Blur glyphs keep object]
+  SoftBlur --> ENRec[EN recovers to 71.6%]
+  SoftBlur --> ZHRec[ZH recovers to 78.2%]
+  ZHMild --> ZHRec
+  ENHurt --> ENRec
+```
+
+**Can EN occlusion beat all other EN baselines?**
+
+| EN baseline | EN atk / MIXED2000 | Ours best occlusion-only | Status |
+| --- | ---: | ---: | --- |
+| Dyslexify heads / hybrid | 20.0% / 66.9% (MIXED ~72.35%) | gated OCR∪`cc_bbox` black **73.6%** atk, **79.70%** MIXED | **Already beat** |
+| SamplingTAR heads / hybrid | 11.6% / 67.3% (MIXED ~72.45%) | same | **Already beat** |
+| OCR + blur | 72.8% EN; MIXED ~79.05% | 73.6% / **79.70%** | **Already beat** (narrowly) |
+| **Defense-Prefix** | **73.8%** atk, clean 89.5%, **81.65%** MIXED | 73.6% / **79.70%** | **Not beaten** (−1.95pp MIXED) |
+
+Paper **mean EN+ZH** view: ours always-on blur **74.9%** already beats OCR **73.8%** and DP mean **59.2%** (ZH DP collapses to 44.5%).
+
+**What was already tried for EN today** (see §§1–2): fill ranking black > blur > mean ≫ neglect; gated black **79.35%** / OCR∪ black **79.70%**; oracle GT+black EN atk only **74.6%** ≪ **77.4%** needed to clear DP at gated clean ≈85.9%; conf-drop ensemble does not beat always-black; **DP + patch-zero** reaches MIXED **86.65%** (only successful “beat DP” path).
+
+**Realistic further options**
+
+| Path | Likely outcome | Notes |
+| --- | --- | --- |
+| More occlusion tuning (thr, dilate, fills, OCR∪) | **Unlikely to clear 81.65%** | Oracle already below needed atk |
+| Emphasize mean EN+ZH + Clean Δ in paper | **Already wins that leaderboard** | Matches [`baseline_comparison.md`](baseline_comparison.md) |
+| DP + spatial for EN-only SOTA | **Already clears DP** (86.65%) | Different claim than occlusion-only |
+| Cross-model disagreement / ZH vote to rescue EN | Untested | Ensemble family, not better EN occlusion |
+| Train EN adapter / stronger EN backbone | Open, expensive | Outside current stack |
+
+**Recommendation:** Treat EN-only DP as a different defense class. For the occlusion paper claim, keep emphasizing **mean EN+ZH + Clean Δ**. If the goal is literally best EN MIXED2000, ship **DP+spatial**, not more fill ablations. Do **not** re-run fill/OCR∪ chases. Optional high-signal test still open: when gate fires and EN/ZH top-1 disagree after occlusion, take ZH’s class (or conf-weighted mix) and score whether EN MIXED2000 can exceed **81.65%** without DP tokens. Otherwise close the occlusion-only EN chase on the oracle ceiling (**74.6% ≪ 77.4%**).
 
 ---
 
 ## Numbers to quote in a meeting
 
 | Claim | Number |
-|-------|--------|
-| New-protocol ZH multi (thr-floor) | **74.0%** mean, Clean Δ **−1.5pp** |
-| Gated Clean Δ (ZH / KO / JA, `multi`) | **0.0 / −0.2 / 0.0 pp** |
-| Gated atk drop vs always | ≤ **0.45pp** |
-| Closest published peer (OCR+blur) | 73.8% mean (−1.1pp vs our 74.9%) |
-| Defense-Prefix (CIFAR-trained) | 73.8% EN, ASR still 16.4% |
-| Head-ablation baselines | 11.6–20% EN (fail) |
-| Grid conf-drop (frozen) | still **48.5%** @ cost 62 |
+| --- | --- |
+| EN gated black (atk / clean / MIXED) | **72.9% / 85.8% / 79.35%** |
+| Gate fire (atk / clean) | **99.8% / 0.4%** |
+| vs gated blur (EN MIXED) | **+1.45pp** (79.35 − 77.90) |
+| vs DP EN MIXED2000 | **−2.30pp** (79.35 vs 81.65) |
+| Oracle GT + black EN atk ceiling | **74.6%** |
+| EN atk needed to clear DP at clean 85.9% | ≳ **77.4%** |
+| Best OCR∪Attn black MIXED (not production) | **79.70%** |
+| Fill ranking (gated EN MIXED) | black > mean > blur > neglect |
+| ZH DP defended / ASR / Clean Δ | **44.5% / 52.5% / +0.4pp** |
+| DP EN+ZH mean | **59.2%** |
+| Dyslexify hybrid EN / MIXED / Clean Δ | **66.9% / 72.35% / −8.1pp** |
+| SamplingTAR hybrid EN / MIXED / Clean Δ | **67.3% / 72.45% / −8.3pp** |
+| DP + patch-zero hybrid EN MIXED (different system) | **86.65%** |
+| Always-on blur EN / ZH defended (same mask) | **71.6% / 78.2%** |
+| Occlusion-only EN vs DP EN MIXED (best OCR∪) | **79.70%** vs **81.65%** (−1.95pp) |
 
 ---
 
-## Next steps (priority order)
+## Next steps
 
-1. **Write the paper** — expand [`paper_draft.md`](paper_draft.md); lead with frozen protocol, gated Clean Δ, baseline leaderboard.
-2. **Optional experiments** — gate detector on Pure E / Pure L; adaptive sticker placement; close residual ~10–15pp gap to clean under attack.
-3. **Optional** — multilingual / ZH Defense-Prefix for a fairer prompt-baseline comparison.
+1. Write the paper (outline already synced to gated black).
+2. Optional experiments: Pure E / Pure L under the gate; partner ZH/KO/JA black re-run for bilingual MIXED with production fill; close residual ~**13pp** EN atk→clean gap (72.9% vs ~85.9%).
+3. Do **not** re-chase occlusion-only vs DP with more fills (oracle closed that). Optional only: ZH-disagreement vote after gated occlusion for EN MIXED > 81.65% without DP.
 
 ---
 
-## How to explain the stack in one breath
+## One breath
 
-> We freeze the same dual-box sticker positions for every method, build a mask where English and partner CLIP attention agree, snap it to sticker-shaped boxes, and blur. A cheap heatmap-shape detector turns that blur on only when an attack is present, so Clean Δ is ~0. On the same protocol we beat or match OCR and prompt baselines; attention-head surgery alone does not fix dual-box stickers.
+> Detect with Attn-last heatmap shape, localize where EN ∩ L agree, black-fill the sticker boxes, reclassify. EN gated black is **72.9% atk / 85.8% clean / 79.35% MIXED2000** — better than blur (**+1.45pp** MIXED), still short of DP’s **81.65%** on EN alone (−2.30pp); bilingual means still favor spatial once ZH DP (**44.5%**) is included. ZH recovers higher than EN after the same mask (**78.2% vs 71.6%**) mainly from Latin-script / training asymmetry, not a ZH-favoring mask. Head surgery alone fails; hybrids (~67% EN) confirm occlusion is what recovers accuracy.
 
 ---
 
 ## Key paths
 
 | Work | Path |
-|------|------|
-| Protocol (source of truth) | `lib/notebooks/PROTOCOL.md` |
-| Frozen sample + `attack_pos` | `lib/notebooks/image_samples/` |
-| 4-lang thr-floor results | `lib/notebooks/four_lang_cc_bbox_blur/` |
-| Attack detector (gated) | `lib/notebooks/attack_detector/` |
-| Paper baselines | `lib/notebooks/paper_baselines/` |
-| Baseline leaderboard | `docs/baseline_comparison.md` |
+| --- | --- |
+| EN fill / black ranking + leaderboard JSON | `lib/notebooks/en_neglect_vs_blur/results/` |
+| Occlusion vs DP chase JSON | `lib/notebooks/en_occlusion_beat_dp/results/summary_n1000.json` |
+| ZH + EN Defense-Prefix merged | `lib/notebooks/paper_baselines/defense_prefix/results/comparison_summary_final_n1000_en_zh.json` |
+| Dyslexify hybrid | `lib/notebooks/paper_baselines/dyslexify/results/comparison_summary_final_n1000_hybrid.json` |
+| SamplingTAR hybrid | `lib/notebooks/paper_baselines/sampling_tar/results/comparison_summary_final_n1000_hybrid.json` |
+| Phase A/B roll-up | `lib/notebooks/attack_detector/results/phase_ab_viz_rollups.json` |
+| Detector figures gallery | `docs/figures/attack_detector/gallery.html` |
+| Failure analysis | `docs/failure_analysis.md` |
 | Paper outline | `docs/paper_draft.md` |
-| Archive (all older briefings) | `docs/homework_summary_archive.md` |
-| Full diary | `docs/research_diary.md` (2026-07-20 → 2026-07-23) |
+| Baseline leaderboard | `docs/baseline_comparison.md` |
+| Archive (Jul 20–24 and earlier) | `docs/homework_summary_archive.md` |
+| Diary (today) | `docs/research_diary.md` (2026-07-25) |

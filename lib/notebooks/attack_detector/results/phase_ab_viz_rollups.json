@@ -1,0 +1,194 @@
+{
+  "zh": {
+    "L": "zh",
+    "attack": "multi",
+    "primary": "linear_svm",
+    "threshold": 0.4733603113038565,
+    "val_auc": 0.9998222222222222,
+    "test_auc": 1.0,
+    "fire_rate_clean_full": 0.004,
+    "fire_rate_attacked_full": 0.998,
+    "test_fire_clean": 0.0,
+    "test_fire_attacked": 1.0,
+    "examples": [
+      {
+        "tag": "clean",
+        "idx": 439,
+        "score": 0.0016557798208591268,
+        "fired": false
+      },
+      {
+        "tag": "attacked",
+        "idx": 884,
+        "score": 0.9985373234295172,
+        "fired": true
+      }
+    ],
+    "phase_a_existing": {
+      "pca_explained_variance_sum": 0.6668084937627248,
+      "pca_nearest_centroid_test_acc": 0.99,
+      "n_features": 26
+    },
+    "detector_metrics_existing": {
+      "primary": "linear_svm",
+      "threshold": 0.4733603113038565,
+      "test_at_threshold": {
+        "acc": 1.0,
+        "auc": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "confusion_matrix": [
+          [
+            150,
+            0
+          ],
+          [
+            0,
+            150
+          ]
+        ],
+        "fire_rate_clean": 0.0,
+        "fire_rate_attacked": 1.0,
+        "threshold": 0.4733603113038565
+      },
+      "phase_a_pca_nn_cent_acc": 0.99
+    },
+    "outputs": {
+      "phase_ab_process": "results\\zh\\multi\\phase_ab_process.png",
+      "phase_b_roc_cm": "results\\zh\\multi\\phase_b_roc_cm.png",
+      "pca_features": "results\\zh\\multi\\pca_features.png",
+      "tsne_features": "results\\zh\\multi\\tsne_features.png",
+      "feature_importance": "results\\zh\\multi\\feature_importance.png"
+    },
+    "n_features": 26
+  },
+  "ko": {
+    "L": "ko",
+    "attack": "multi",
+    "primary": "linear_svm",
+    "threshold": 0.39927954953083966,
+    "val_auc": 0.9989333333333333,
+    "test_auc": 0.9992,
+    "fire_rate_clean_full": 0.025,
+    "fire_rate_attacked_full": 0.994,
+    "test_fire_clean": 0.06666666666666667,
+    "test_fire_attacked": 1.0,
+    "examples": [
+      {
+        "tag": "clean",
+        "idx": 439,
+        "score": 0.0035869885148928408,
+        "fired": false
+      },
+      {
+        "tag": "attacked",
+        "idx": 884,
+        "score": 0.9882934568859173,
+        "fired": true
+      }
+    ],
+    "phase_a_existing": {
+      "pca_explained_variance_sum": 0.797834291662324,
+      "pca_nearest_centroid_test_acc": 0.9733333333333334,
+      "n_features": 26
+    },
+    "detector_metrics_existing": {
+      "primary": "linear_svm",
+      "threshold": 0.39927954953083966,
+      "test_at_threshold": {
+        "acc": 0.9666666666666667,
+        "auc": 0.9992,
+        "precision": 0.9375,
+        "recall": 1.0,
+        "f1": 0.967741935483871,
+        "confusion_matrix": [
+          [
+            140,
+            10
+          ],
+          [
+            0,
+            150
+          ]
+        ],
+        "fire_rate_clean": 0.06666666666666667,
+        "fire_rate_attacked": 1.0,
+        "threshold": 0.39927954953083966
+      },
+      "phase_a_pca_nn_cent_acc": 0.9733333333333334
+    },
+    "outputs": {
+      "phase_ab_process": "results\\ko\\multi\\phase_ab_process.png",
+      "phase_b_roc_cm": "results\\ko\\multi\\phase_b_roc_cm.png",
+      "pca_features": "results\\ko\\multi\\pca_features.png",
+      "tsne_features": "results\\ko\\multi\\tsne_features.png",
+      "feature_importance": "results\\ko\\multi\\feature_importance.png"
+    },
+    "n_features": 26
+  },
+  "ja": {
+    "L": "ja",
+    "attack": "multi",
+    "primary": "linear_svm",
+    "threshold": 0.5405508705530608,
+    "val_auc": 0.9997333333333334,
+    "test_auc": 1.0,
+    "fire_rate_clean_full": 0.003,
+    "fire_rate_attacked_full": 0.998,
+    "test_fire_clean": 0.0,
+    "test_fire_attacked": 1.0,
+    "examples": [
+      {
+        "tag": "clean",
+        "idx": 439,
+        "score": 0.011405935714269623,
+        "fired": false
+      },
+      {
+        "tag": "attacked",
+        "idx": 884,
+        "score": 0.9984698758802907,
+        "fired": true
+      }
+    ],
+    "phase_a_existing": {
+      "pca_explained_variance_sum": 0.6894694093491186,
+      "pca_nearest_centroid_test_acc": 0.9766666666666667,
+      "n_features": 26
+    },
+    "detector_metrics_existing": {
+      "primary": "linear_svm",
+      "threshold": 0.5405508705530608,
+      "test_at_threshold": {
+        "acc": 1.0,
+        "auc": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "confusion_matrix": [
+          [
+            150,
+            0
+          ],
+          [
+            0,
+            150
+          ]
+        ],
+        "fire_rate_clean": 0.0,
+        "fire_rate_attacked": 1.0,
+        "threshold": 0.5405508705530608
+      },
+      "phase_a_pca_nn_cent_acc": 0.9766666666666667
+    },
+    "outputs": {
+      "phase_ab_process": "results\\ja\\multi\\phase_ab_process.png",
+      "phase_b_roc_cm": "results\\ja\\multi\\phase_b_roc_cm.png",
+      "pca_features": "results\\ja\\multi\\pca_features.png",
+      "tsne_features": "results\\ja\\multi\\tsne_features.png",
+      "feature_importance": "results\\ja\\multi\\feature_importance.png"
+    },
+    "n_features": 26
+  }
+}
