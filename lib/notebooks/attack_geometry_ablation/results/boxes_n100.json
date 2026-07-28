@@ -1,0 +1,180 @@
+{
+  "n": 100,
+  "threshold": 0.95,
+  "dilate": 3,
+  "top_k": 2,
+  "fill": "black",
+  "partner": "zh",
+  "attack": "multi",
+  "arms_list": [
+    "never",
+    "always_en_cap_zh",
+    "gated_en_cap_zh"
+  ],
+  "clean_never": {
+    "en_acc": 0.81,
+    "zh_acc": 0.86
+  },
+  "device": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.11.0+cu128",
+  "sweep": "boxes",
+  "font_size": 24,
+  "box_counts": [
+    1,
+    2,
+    3
+  ],
+  "cells": {
+    "boxes1": {
+      "arms": {
+        "never": {
+          "en_acc": 0.05,
+          "en_asr": 0.95,
+          "zh_acc": 0.38,
+          "zh_asr": 0.61,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.0,
+          "mean_gt_coverage": 0.05773517219387754
+        },
+        "always_en_cap_zh": {
+          "en_acc": 0.64,
+          "en_asr": 0.05,
+          "zh_acc": 0.8,
+          "zh_asr": 0.02,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.08972437021683674
+        },
+        "gated_en_cap_zh": {
+          "en_acc": 0.64,
+          "en_asr": 0.05,
+          "zh_acc": 0.8,
+          "zh_asr": 0.02,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.08972437021683674,
+          "defended_frac_atk": 1.0,
+          "defended_frac_clean": 0.0,
+          "fire_attacked": 1.0,
+          "fire_clean": 0.0
+        }
+      },
+      "detector": {
+        "primary": "logistic",
+        "threshold": 0.41950081099762143,
+        "fire_attacked": 1.0,
+        "fire_clean": 0.0,
+        "val_auc": 1.0,
+        "test_auc": 1.0
+      }
+    },
+    "boxes2": {
+      "arms": {
+        "never": {
+          "en_acc": 0.07,
+          "en_asr": 0.93,
+          "zh_acc": 0.03,
+          "zh_asr": 0.97,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.0,
+          "mean_gt_coverage": 0.10103874362244895
+        },
+        "always_en_cap_zh": {
+          "en_acc": 0.66,
+          "en_asr": 0.05,
+          "zh_acc": 0.75,
+          "zh_asr": 0.04,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.08558414381377552
+        },
+        "gated_en_cap_zh": {
+          "en_acc": 0.66,
+          "en_asr": 0.05,
+          "zh_acc": 0.75,
+          "zh_asr": 0.04,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.08558414381377552,
+          "defended_frac_atk": 1.0,
+          "defended_frac_clean": 0.0,
+          "fire_attacked": 1.0,
+          "fire_clean": 0.0
+        }
+      },
+      "detector": {
+        "primary": "logistic",
+        "threshold": 0.5142089443305204,
+        "fire_attacked": 1.0,
+        "fire_clean": 0.0,
+        "val_auc": 1.0,
+        "test_auc": 1.0
+      }
+    },
+    "boxes3": {
+      "arms": {
+        "never": {
+          "en_acc": 0.05,
+          "en_asr": 0.95,
+          "zh_acc": 0.0,
+          "zh_asr": 1.0,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.0,
+          "mean_gt_coverage": 0.1587739158163265
+        },
+        "always_en_cap_zh": {
+          "en_acc": 0.08,
+          "en_asr": 0.91,
+          "zh_acc": 0.21,
+          "zh_asr": 0.79,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.06818120216836734
+        },
+        "gated_en_cap_zh": {
+          "en_acc": 0.08,
+          "en_asr": 0.91,
+          "zh_acc": 0.21,
+          "zh_asr": 0.79,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.06818120216836734,
+          "defended_frac_atk": 0.98,
+          "defended_frac_clean": 0.02,
+          "fire_attacked": 0.98,
+          "fire_clean": 0.02
+        }
+      },
+      "detector": {
+        "primary": "linear_svm",
+        "threshold": 0.49087909658456325,
+        "fire_attacked": 0.98,
+        "fire_clean": 0.02,
+        "val_auc": 1.0,
+        "test_auc": 0.9866666666666667
+      }
+    }
+  },
+  "note": "Box-count sweep at FONT_SIZE=24. boxes=1 uses frozen EN anchor only; boxes=2 is protocol dual EN+ZH; boxes=3 adds seeded third EN box."
+}

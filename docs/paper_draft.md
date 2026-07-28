@@ -3,7 +3,7 @@
 **Working title (placeholder):** Cross-Lingual Attention Intersection as a Spatial Defense Against Typographic Attacks on Multilingual CLIP  
 **Status:** Outline / idea map — not prose. Expand each bullet into paragraphs later.  
 **Scope of this draft:** Thread B defense line (separate per-language CLIPs + typographic attacks + saliency masking). Thread A (shared multilingual CLIP + PGD) can be mentioned briefly as motivation / contrast, not as the main contribution.  
-**Last synced:** 2026-07-25 — frozen `attack_pos`, thr ≥ 0.95, **gated Attn-last detector as a core pipeline stage**, primary fill = **solid black** (`cc_bbox_black`), MIXED2000 joint score, and published baselines incl. Dyslexify/SamplingTAR hybrids (`docs/baseline_comparison.md`, `docs/failure_analysis.md`).
+**Last synced:** 2026-07-27 (paper pass) — gated `cc_bbox_black` production stack; main avg + lang-detail tables from [`4_lang_table.md`](4_lang_table.md); appendix ablations from [`ablation_study.md`](ablation_study.md) (fill, gate, glyphs vs pads, animal/hybrid defense, font 12/24/40, boxes 1/2/3).
 
 ---
 
@@ -26,6 +26,18 @@
 - Native-script attacks (ZH/KO/JA stickers) transfer poorly to foreign models; Pure L on KO/JA is often already weak.
 - Therefore the paper **always pairs EN with partner L** for the spatial defense, and centers evaluation on **Pure E** and **E + L** (the hard cases). Pure L is kept for completeness and to expose EN-attention limits on non-Latin glyphs — not because native-only stickers are the main threat.
 - One-sentence framing for prose: *English text is the dominant cross-model typographic threat, so every defense pairing includes the English CLIP and every hard attack includes at least one English sticker.*
+
+#### 1.2.2 Why CLIP “reads” stickers — glyphs, not blank pads
+
+Typographic attacks look like painted labels to humans, but the model’s failure mode is more specific: **last-layer attention locks onto the letterforms**, not onto a generic rectangular anomaly.
+
+Web-trained CLIP image towers see Latin (and other) glyphs co-occurring with captions throughout pretraining, so class-name overlays become strong visual evidence for the written label. That explains both the high ASR of English stickers across languages (§1.2.1) and why a spatial defense that finds **where both models attend** can neutralize the attack without OCR.
+
+Two controlled checks support this claim (details in §2.3.2; numbers in §3.2.1):
+- **White pad vs letters vs full sticker.** Blank white boxes barely hijack and are poorly localized. Black letters alone nearly match the full sticker’s ASR and EN∩ZH detection rate. The white surround is secondary packaging; **glyphs drive both distraction and localization**.
+- **Animal patches vs text.** Readable non-text animal stickers can still hijack classification, and EN attention often finds them — but **bilingual EN∩ZH agreement stays weak until letters appear**. The production intersection mask is therefore best motivated as a **typographic / glyph** localizer, not a universal anomaly detector.
+
+One-sentence framing: *CLIP is distracted by readable text in the image; our defense finds those glyphs via cross-lingual attention agreement, not by looking for white rectangles.*
 
 ### 1.3 Gap — detection alone is not enough
 - Prediction disagreement across models can flag some attacks (modest AUC), but does not restore the correct label.
@@ -55,9 +67,11 @@
 - Show gated fill ranking on EN: **black > mean > blur > neglect** (EN MIXED2000 **79.35%** black vs **77.90%** blur; atk **72.9%** / clean **85.8%**). **Production fill = black for all langs**; partner bilingual black: ZH **81.65%**, KO **78.35%**, JA **82.53%**.
 - On the same protocol: spatial gated defense leads bilingual means; **OCR+blur** is the closest spatial peer; **Defense-Prefix** is strong EN-only (EN MIXED2000 **81.65%**, ours **79.35%**, gap **−2.30 pp**) but weak once ZH is included (DP EN+ZH mean **59.2%**); **Dyslexify / SamplingTAR** heads-only are weak negatives; their attn-blur hybrids (~67% EN) still trail ours.
 - Provide an additional **negative baseline**: coarse grid occlusion — even with **confidence-drop scoring** or **exhaustive** 2-patch search — remains weaker and much more expensive than attention.
+- Show that Attn-last / EN∩ZH localizes **glyphs**, not blank white pads (§1.2.2, §3.2.1); gated black recovers typographic stickers well, hybrid partially, animal-only poorly (§3.2.2).
+- Report attack-geometry sensitivity: production **font 24 / 2 boxes**; font 40 and 3-box attacks stress the `top_k=2` recipe (§3.11).
 
 ### 1.6 Paper roadmap (one sentence)
-- Section 2 methods (dataset + frozen geometry, 4 models, 3 attack types, gated `cc_bbox_black`, fill ablations, published + grid baselines) → Section 3 results (gated Clean Δ + MIXED2000; fill ranking; 4-lang always-on transfer as localization evidence; EN∩ZH ablations; baseline leaderboard) → Section 4 conclusion / limitations / next steps.
+- Section 2 methods → Section 3 results (main avg leaderboard §3.5; lang detail; glyph/animal checks; gated Clean Δ + MIXED2000; fill ranking; geometry ablations) → Section 4 conclusion / limitations. Full ablation appendix: [`ablation_study.md`](ablation_study.md).
 
 ---
 
@@ -95,7 +109,7 @@
 - Method: render adversarial class name as text on the image (`draw_word`); no gradients.
 - **Dual-box geometry** (main threat model):
   - Two non-overlapping white text boxes at frozen `attack_pos` coordinates.
-  - Font size fixed (24 @ 224×224 in defense experiments).
+  - **Font size fixed at 24** @ 224×224 for all main / baseline tables. Sensitivity to font size (12 / 24 / 40) and box count (1 / 2 / 3) is reported in the attack-geometry ablation ([`ablation_study.md`](ablation_study.md) §B.3–B.4; [`attack_geometry_ablation/`](../lib/notebooks/attack_geometry_ablation/)) — do not treat other sizes as production.
 - **Three attack types** (poster names; notebook codes in parentheses):
 
 | Poster name | Notebook code | Box 0 | Box 1 |
@@ -114,6 +128,40 @@
 #### 2.3.1 English-centric attack design (pointer)
 - Rationale already stated in **§1.2.1**; Methods only operationalizes it: slot 0 is always the EN box position; Pure E / E+L / Pure L matrix uses the same frozen geometry for every partner L.
 - Brief reminder if needed: English = highest-ASR attack language; Pure L retained as the weak / completeness cell.
+
+#### 2.3.2 Attack-component checks — glyphs vs pads vs non-text stickers
+
+These are **diagnostic attacks** on the same frozen dual-box `attack_pos` (EN∩ZH, `multi` geometry, n=1000, Attn-last thr ≥ 0.95 / dilate 3 / top-2 `cc_bbox`). They justify treating the threat as **readable text**, and treating EN∩ZH attention as a **glyph localizer**.
+
+**A. White pad vs letters vs full typographic sticker**  
+Code: [`attack_component_ablation/`](../lib/notebooks/attack_component_ablation/). Same measured GT boxes; three render modes:
+- `full` — white rectangle + black class-name text (production sticker).
+- `white_only` — white rectangle only (no letters).
+- `text_only` — black letters only (no white fill).
+
+Report undefended EN/ZH acc+ASR and Attn-last localization (inbox focus, IoU vs GT union, peak-in-box, det@IoU ≥ 0.1 / 0.3) for EN, ZH, and EN∩ZH.
+
+**Claim to support:** if `text_only` ≈ `full` on ASR and localization, and `white_only` is near-clean / poorly localized, then the model is distracted by **glyphs**, not by the white box.
+
+**B. Animal sticker vs text (content control)**  
+Code: [`animal_sticker_ablation/`](../lib/notebooks/animal_sticker_ablation/). Same anchors; animal patches = CIFAR-10 **train** animals (bird/cat/deer/dog/frog/horse) upscaled **32→96** with aspect preserved, pasted **without** a white surround.
+- `all_sticker` — both slots animal (same wrong animal class).
+- `mixed` — slot 0 animal, slot 1 EN class-name text.
+- `all_text` — production EN+ZH typographic dual box.
+
+Same undefended + localization metrics as (A).
+
+**Claim to support:** non-text anomalies can still hijack classification (and EN attention), but **EN∩ZH co-localization strengthens when letters are present** — so bilingual intersection is motivated for typographic stickers, not as a catch-all anomaly mask.
+
+**C. Black occlusion recovery (defense arms on A/B modes)**  
+Code: [`animal_sticker_ablation/run_occlusion.py`](../lib/notebooks/animal_sticker_ablation/run_occlusion.py). Same modes as (B). Fill = solid black. Masks: EN∩ZH `cc_bbox` and EN-only `cc_bbox`. Policies: never / always-on / Phase-C gated (gate trained **per mode** on clean vs that mode’s Attn-last features) + GT-oracle black ceiling. Results: [`occlusion_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/occlusion_n1000.json).
+
+**D. Attack geometry (font size; number of boxes)**  
+Code: [`attack_geometry_ablation/`](../lib/notebooks/attack_geometry_ablation/). EN∩ZH never / always / gated `cc_bbox_black`, thr ≥ 0.95, n=1000.
+- Font ∈ {12, **24**, 40} at dual-box protocol anchors.
+- Boxes ∈ {1, **2**, 3} at font 24 (`top_k=2` mask unchanged; third box is a seeded extra EN sticker).
+
+*Figure idea:* Attn overlays ([`gallery_raw_and_attn.png`](../lib/notebooks/animal_sticker_ablation/figures/gallery_raw_and_attn.png)) + occlusion before/after ([`gallery_occlusion.png`](../lib/notebooks/animal_sticker_ablation/figures/gallery_occlusion.png)).
 
 ### 2.4 Defense pipeline (main method)
 Describe as a fixed sequence for any partner `L ∈ {ZH, KO, JA}`. Production policy is **gated** — occlude only when the detector fires:
@@ -171,7 +219,9 @@ Living numbers: [`docs/baseline_comparison.md`](baseline_comparison.md). Code: [
 Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 
 ### 2.8 Ablations and negative controls (Methods, not full results)
+- Canonical write-up: [`ablation_study.md`](ablation_study.md) (do not re-run frozen cells).
 - **No defense** (attacked accuracy floor).
+- **Attack components (§2.3.2):** glyphs vs pads; animal / mixed / text localization + **black occlusion recovery**; font size; box count.
 - **Always-on vs gated** under the same masks — show MIXED2000 gated > always (esp. KO/JA).
 - **Fill ranking (gated EN):** neglect (ViT token zero) / blur / mean / **black** — black is production.
 - **Grid occlusion search** (4×4 patches) — two axes to report:
@@ -193,15 +243,16 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 
 ### 2.9 Implementation notes (short)
 - Shared protocol: [`lib/notebooks/PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).
-- Notebooks: `attention_defense`, `heatmap_defense_improvements`, `four_lang_cc_bbox_blur`, `ko_ja_clean_damage`, `attack_detector`, `en_neglect_vs_blur`, `en_occlusion_beat_dp`, `paper_baselines/*`, grid: `_test_grid` (+ lineage under `_en_zh/`).
+- Notebooks: `attention_defense`, `heatmap_defense_improvements`, `four_lang_cc_bbox_blur`, `ko_ja_clean_damage`, `attack_detector`, `en_neglect_vs_blur`, `en_occlusion_beat_dp`, `attack_component_ablation`, `animal_sticker_ablation`, `attack_geometry_ablation`, `paper_baselines/*`, grid: `_test_grid` (+ lineage under `_en_zh/`).
+- Living tables: [`4_lang_table.md`](4_lang_table.md) (main + lang detail), [`ablation_study.md`](ablation_study.md) (appendix).
 - Thresholds chosen on tune set with thr ≥ 0.95 floor; report frozen thr / coverage alongside accuracy.
-- Pipeline figure regenerator: `four_lang_cc_bbox_blur/make_pipeline_viz.py` (EN ∩ ZH / KO / JA examples; update fill stage to black when regenerating for the paper).
+- Pipeline figure regenerator: `four_lang_cc_bbox_blur/make_pipeline_viz.py` (EN ∩ ZH / KO / JA examples; **still need black-fill regen** — current PNGs show blur).
 
 ---
 
 ## 3. Results
 
-*Outline of result blocks / figures / tables — fill with exact numbers when writing. Quote sets: (i) gated `cc_bbox_black` EN **72.9% / 85.8% / 79.35% MIXED2000**; (ii) gated Clean Δ + MIXED2000 always vs gated; (iii) fill ranking black > mean > blur > neglect; (iv) four_lang always-on transfer under frozen `attack_pos` + thr≥0.95 as localization evidence; (v) published baseline leaderboard.*
+*Outline of result blocks. Canonical quote tables: [`4_lang_table.md`](4_lang_table.md) (main avg + lang detail); [`ablation_study.md`](ablation_study.md) (component ablations). Headline set: gated `cc_bbox_black` EN **72.9% / 85.8% / 79.35% MIXED**; partner bilingual black mean **80.84%** (ZH/KO/JA **81.65 / 78.35 / 82.53%**).*
 
 ### 3.1 Clean-image side effects (no attack) — lead claim
 - **Production (gated, `multi`):** Clean Δ → **0.0 / −0.2 / 0.0 pp** for ZH / KO / JA — the Clean-Δ story for the paper.
@@ -214,6 +265,54 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - English text overlays are a **universal** threat across EN/ZH/KO/JA models; native-script Pure L attacks are often weaker on KO/JA.
 - Point to 4×4 accuracy / ASR matrix from CIFAR-10 typographic study if needed for context.
 - Disagreement detector: works modestly (above chance) but is not the main contribution — spatial repair **with** the heatmap-shape gate is.
+
+#### 3.2.1 Glyphs vs pads vs animal stickers (supports §1.2.2)
+
+**White / letters / full** (EN∩ZH `cc_bbox`, n=1000; clean floors EN 85.9% / ZH 91.4%):
+
+| Mode | EN ASR | ZH ASR | EN∩ZH IoU | EN∩ZH det@IoU≥0.1 |
+|------|-------:|-------:|----------:|------------------:|
+| full | **95.3%** | **93.6%** | **0.691** | **100%** |
+| white_only | 2.3% | 2.1% | 0.083 | 41.1% |
+| text_only | **89.8%** | **84.5%** | **0.669** | **100%** |
+
+**Takeaway:** blank pads do not hijack and are weakly localized; letters alone ≈ full sticker. Attention follows **glyphs**.
+
+**Animal / mixed / text** (same protocol; animals 96×96, no white pad):
+
+| Mode | EN ASR | ZH ASR | EN∩ZH IoU | EN∩ZH det@IoU≥0.1 | Notes |
+|------|-------:|-------:|----------:|------------------:|-------|
+| all_sticker | **76.6%** | **87.7%** | 0.117 | 51.1% | EN-only det@.1 **99.3%**; ZH det@.1 **1.1%** |
+| mixed | **98.7%** | **97.6%** | 0.310 | **99.8%** | one text box restores bilingual detect |
+| all_text | **95.3%** | **93.6%** | **0.691** | **100%** | tightest EN∩ZH |
+
+**Takeaway:** non-text stickers can fool the classifier, but **EN∩ZH localization is text-favoring**.
+
+#### 3.2.2 Black occlusion recovery — sticker / hybrid / text (supports §2.3.2 C)
+
+Gated / always-on / EN-only / oracle GT black on the same three modes ([`occlusion_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/occlusion_n1000.json); full tables in [`ablation_study.md`](ablation_study.md) §A.3 / §B.2).
+
+**Gated black (n=1000)**
+
+| Mode | Arm | EN acc | EN ASR | ZH acc | Clean Δ EN | fire atk / clean |
+|------|-----|-------:|-------:|-------:|-----------:|-----------------:|
+| all_text | EN∩ZH | **72.9%** | **3.7%** | **76.5%** | −0.1 pp | 99.8% / 0.4% |
+| all_text | EN-only | 68.0% | 3.6% | 69.5% | −0.1 pp | 99.8% / 0.4% |
+| mixed | EN∩ZH | **43.5%** | 27.3% | 45.1% | −0.1 pp | 98.6% / 0.7% |
+| mixed | EN-only | 40.2% | 27.4% | 41.0% | −0.1 pp | 98.6% / 0.7% |
+| all_sticker | EN∩ZH | 20.6% | 54.2% | 16.8% | −1.8 pp | 98.2% / 26.1% |
+| all_sticker | EN-only | **32.9%** | **28.5%** | 29.5% | −6.1 pp | 98.2% / 26.1% |
+
+Oracle GT black ceilings: all_text EN **74.6%**; mixed **64.3%**; all_sticker **56.9%**.
+
+**Claims**
+1. Production EN∩ZH black is a **typographic** defense — `all_text` near oracle; `mixed` partial; `all_sticker` barely moves.
+2. EN-only helps animals more than bilingual (32.9% vs 20.6%) but costs clean accuracy; still far below oracle → **localization**, not fill, is the bottleneck.
+3. Animal-mode gates are leakier on clean (fire_clean **26%**) than typographic spikes (~0–1%).
+
+![occlusion gallery](../lib/notebooks/animal_sticker_ablation/figures/gallery_occlusion.png)
+
+*Figure: raw | EN∩ZH black | EN-only black for animal / mixed / text.*
 
 ### 3.3 Four-language transfer (L ∈ {ZH, KO, JA}) — localization evidence
 - Design matrix: for each L, evaluate **Pure E / Pure L / E + L** with always-on EN ∩ L `cc_bbox_blur` under **frozen `attack_pos` + thr ≥ 0.95** — shows the mask recipe transfers before gating/black fill.
@@ -253,26 +352,38 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 
 ![unilingual attention defense](../lib/notebooks/attention_defense/unilingual/results/final_comparison.png)
 
-### 3.5 Published baselines vs gated `cc_bbox_black` (EN∩ZH `multi`, n=1000)
-- Leaderboard sketch (from [`baseline_comparison.md`](baseline_comparison.md) + EN gated-black / MIXED2000):
+### 3.5 Main results — ours vs 4 baselines (averages + lang detail)
 
-| Method | Acc | Clean Δ | EN MIXED2000 | Cost | Notes |
-|---|---:|---:|---:|---:|---|
-| **Gated `cc_bbox_black` (ours)** | **72.9%** EN atk | **−0.1pp** | **79.35%** | 4 | Attn-last → CC+bbox+**black**; gate fire 99.8%/0.4% |
-| Defense-Prefix (CIFAR-trained) | 73.8% EN / 44.5% ZH | +0.5pp | **81.65%** EN | 2 | EN strong; ZH weak (ASR 52.5%); mean EN+ZH **59.2%** |
-| OCR + blur | 73.8% mean | −0.7pp | ~80.88% | 3 | Closest spatial peer; sticker hit 90.3% |
-| SamplingTAR hybrid | 67.3% EN | −8.3pp | 72.45% | 3 | Heads + attn-guided blur |
-| Dyslexify hybrid | 66.9% EN | −8.1pp | 72.35% | 3 | Heads + attn-guided blur |
-| Always-on `cc_bbox_blur` (ref) | 74.9% mean | −1.5pp | ~80.60% ZH | 4 | Localization case-study; not production |
-| Dyslexify (heads) | 20.0% EN | 0.0pp | 52.95% | 2 | Head ablation negative |
-| SamplingTAR (heads) | 11.6% EN | +0.2pp | 48.85% | 2 | Circuit ablation; weakest peer |
+Canonical source: [`4_lang_table.md`](4_lang_table.md). Prefer **MIXED2000** as the joint headline; always show Scope (methods do not share identical language coverage).
 
-- Talking points:
-  - **Do not claim** occlusion-only beats DP on EN MIXED2000 — gated black **79.35%** is **−2.30 pp** vs DP **81.65%**.
-  - **Do claim** bilingual spatial advantage: DP EN+ZH mean **59.2% ≪** gated spatial means (ZH gated MIXED ~**81.3%**).
-  - OCR∪Attn black can edge to EN MIXED **79.70%** — localization ablation only; production “ours” stays Attn heatmap (no OCR).
-  - **Head / circuit ablations** recover only ~12–20% EN; hybrids (~67% EN) show **spatial occlusion**, not head surgery alone, drives recovery — still trail gated black.
-  - Vanilla multi attack floor (same sample): EN ~4.5%, ZH ~6.4%.
+#### Table A — averages (paper main table)
+
+| Method | Scope | Atk acc (avg) | Clean Δ (avg) | MIXED2000 (avg) | Cost |
+|--------|-------|--------------:|--------------:|----------------:|-----:|
+| **Gated `cc_bbox_black` (ours)** | EN∩ZH / EN∩KO / EN∩JA | **73.3%** | **≈ 0.0 / −0.2 / 0.0 pp** | **80.84%** | 4 |
+| OCR + blur | EN+ZH | 73.8% | −0.7 pp | 80.88% | 3 |
+| Defense-Prefix | EN+ZH | 59.2% | +0.5 pp | 74.90% | 2 |
+| SamplingTAR hybrid | EN only | 67.3% | −8.3 pp | 72.45% | 3 |
+| Dyslexify hybrid | EN only | 66.9% | −8.1 pp | 72.35% | 3 |
+
+Ours avg MIXED = mean of partner bilingual black **81.65 / 78.35 / 82.53%**. Ours avg atk = mean of partner mean-atk **74.7 / 69.4 / 75.9%**.
+
+#### Table B — language detail (ours gated black)
+
+| Pairing | EN atk | L atk | Mean atk | EN MIXED | Bilingual MIXED | Gate fire (atk / clean) |
+|---------|-------:|------:|---------:|---------:|----------------:|-------------------------:|
+| EN∩ZH | **72.9%** | **76.5%** | **74.7%** | **79.35%** | **81.65%** | 99.8% / 0.4% |
+| EN∩KO | 65.6% | 73.1% | 69.4% | 75.45% | **78.35%** | 99.4% / 2.5% |
+| EN∩JA | 68.9% | 82.8% | 75.9% | 77.40% | **82.53%** | 99.8% / 0.3% |
+
+Baseline per-lang cells (OCR/DP EN+ZH; hybrids EN-only): [`4_lang_table.md`](4_lang_table.md) Table 2b.
+
+#### Talking points
+- **Do not claim** occlusion-only beats DP on EN MIXED2000 — gated black EN **79.35%** is **−2.30 pp** vs DP EN **81.65%**.
+- **Do claim** cross-language spatial advantage: ours partner-mean MIXED **80.84%** vs DP EN+ZH MIXED **74.90%** / mean atk **59.2%**.
+- OCR is the closest spatial peer on EN+ZH MIXED (**80.88%**); no KO/JA OCR port yet.
+- Heads-only Dyslexify / SamplingTAR (20.0% / 11.6% EN) are negatives; hybrids (~67% EN / ~72.4% MIXED) confirm occlusion drives recovery but still trail gated black.
+- Design-history ref (not production): always-on `cc_bbox_blur` EN∩ZH mean **74.9%**, Clean Δ **−1.5 pp**.
 
 ### 3.6 Grid-search baseline — confidence-drop **and** exhaustive search
 - **Scoring axis (n=1000, greedy 2-patch, E+L EN+ZH; frozen coords unchanged winner):**
@@ -354,9 +465,32 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 ![KO/JA clean-damage ablation](../lib/notebooks/ko_ja_clean_damage/results/final_comparison.png)
 
 ### 3.10 Summary table for the reader (results closer)
-- One “leaderboard” table spanning: gated `cc_bbox_black` (EN + partner MIXED2000), fill ablations, always-on `cc_bbox_blur` (transfer ref), OCR+blur, Defense-Prefix, Dyslexify/SamplingTAR heads+hybrids, conf-drop grid.
-- Include a **MIXED2000** column so gated’s clean advantage is visible.
-- Highlight recommended config: **Attn-last + `cc_bbox` + black fill + detector gate** (default); thr ≥ 0.95; cite OCR/DP as closest published peers.
+- **Main table:** §3.5 Table A (averages) — ours vs OCR / DP / SamplingTAR hybrid / Dyslexify hybrid.
+- **Detail table:** §3.5 Table B + [`4_lang_table.md`](4_lang_table.md) Table 2b.
+- **Appendix:** [`ablation_study.md`](ablation_study.md) — fill, gate, glyphs vs pads, sticker/hybrid defense, font, boxes.
+- Highlight recommended config: **Attn-last + `cc_bbox` + black fill + detector gate**; thr ≥ 0.95; **font 24 / NUM_BOXES=2**.
+
+### 3.11 Attack geometry — font size and number of boxes
+
+Full tables: [`ablation_study.md`](ablation_study.md) §B.3–B.4. Code: [`attack_geometry_ablation/`](../lib/notebooks/attack_geometry_ablation/). EN∩ZH gated `cc_bbox_black`, n=1000.
+
+**Font (dual-box)**
+
+| Font | never EN ASR | gated EN | gated ZH | Clean Δ EN |
+|-----:|-------------:|---------:|---------:|-----------:|
+| 12 | 89.9% | **76.0%** | 83.9% | +0.0 pp |
+| **24** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
+| 40 | 96.9% | 58.3% | 56.3% | −0.4 pp |
+
+**Boxes (font 24; mask `top_k=2`)**
+
+| Boxes | never EN ASR | gated EN | gated ZH | Clean Δ EN |
+|------:|-------------:|---------:|---------:|-----------:|
+| 1 | 94.1% | **75.3%** | 80.7% | −0.1 pp |
+| **2** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
+| 3 | 97.5% | 8.5% | 22.1% | −0.7 pp |
+
+**Claims:** Font **24** and **2 boxes** stay production (font-24 / boxes-2 cells reproduce EN gated **72.9%**). Font 40 is a harder spatial threat (−14.6 pp gated EN). Three boxes defeat `top_k=2` occlusion (gated EN **8.5%**) — capacity limit of the mask recipe, not a reason to change main tables. Mention font size 24 explicitly in the threat-model paragraph.
 
 ---
 
@@ -366,9 +500,12 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - Cross-lingual attention intersection (EN ∩ L for ZH/KO/JA) is a practical **spatial** defense for typographic attacks on separate CLIPs — not only a disagreement alarm.
 - Last-layer attention outperforms GradCAM in this dual-box setting on accuracy and cost.
 - Mask post-processing (`cc_bbox`) plus **solid black fill**, applied only when an Attn-last **detector gate** fires, is the production stack (gated `cc_bbox_black`).
-- The localization recipe transfers to Chinese, Korean, and Japanese partners on Pure E / E+L under a **shared frozen evaluation set**; gating solves always-on KO/JA clean damage (Clean Δ ≈ 0; MIXED2000 gated ≫ always).
-- On gated EN, **black > mean > blur > neglect** (MIXED2000 **79.35%**; atk **72.9%** / clean **85.8%**).
-- Against published peers: gated spatial defense leads bilingual means; OCR+blur is close; CIFAR-trained Defense-Prefix is strong EN-only (EN MIXED **81.65%**, ours **79.35%**, **−2.30 pp**) but weak with ZH; head ablations fail; head+blur hybrids still trail; grid search fails even with conf-drop / exhaustive search.
+- The localization recipe transfers to Chinese, Korean, and Japanese partners; gating solves always-on KO/JA clean damage (Clean Δ ≈ 0; MIXED2000 gated ≫ always).
+- Partner-mean bilingual MIXED under gated black: **80.84%** (ZH/KO/JA **81.65 / 78.35 / 82.53%**); EN MIXED **79.35%** (atk **72.9%** / clean **85.8%**).
+- On gated EN, **black > mean > blur > neglect**.
+- Against published peers (§3.5): ours leads cross-language MIXED averages; OCR is closest on EN+ZH; DP wins EN-only MIXED but collapses with ZH; head ablations fail; hybrids still trail; grid search fails.
+- Glyphs — not blank pads — drive hijack and EN∩ZH localization; gated black recovers typographic stickers, partially hybrid, poorly animal-only (§3.2).
+- Production threat model is **font 24 / 2 boxes**; larger fonts and 3-box attacks stress the recipe (§3.11).
 
 ### 4.2 Limitations (must-include honesty)
 - Evaluated on CIFAR-10 dual-box stickers with **frozen** placement — not ImageNet-scale scenes, not adaptive attackers that place text to evade attention or the detector.
@@ -377,20 +514,24 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 - Partner fill ranking is tighter than EN (KO blur +0.15pp bilingual); protocol still freezes **black for all** so tables stay comparable.
 - Residual gap to clean under attack (~**13 pp** EN: 72.9% vs ~85.9%) unsolved — black fill and gating remove clean cost / improve atk, but do not close the residual; oracle GT+black only **74.6%** EN atk.
 - Occlusion-only does **not** beat Defense-Prefix on EN MIXED2000 (−2.30 pp).
+- EN∩ZH is a **glyph** localizer: blank white pads and animal-only stickers are poorly co-localized / poorly repaired (gated animal EN **20.6%**; EN-only **32.9%** vs oracle **56.9%**). Do not claim universal anomaly detection.
+- Three simultaneous stickers defeat production `top_k=2` occlusion (gated EN **8.5%**) — known capacity limit.
+- Font 40 drops gated EN by **−14.6 pp** vs protocol 24 — larger glyphs are harder for the current mask budget.
 - Dyslexify / SamplingTAR are style ports (open_clip ViT-B/32 openai), not identical paper checkpoints.
 - Grid / hybrid search not competitive enough to recommend despite scoring and exhaustive-search fixes.
+- Main-table averages mix scopes (ours 3 partners; OCR/DP EN+ZH; hybrids EN-only) — always show Scope.
 
 ### 4.3 Broader implications
 - Separate encoders + spatial agreement may complement prediction-disagreement detectors.
 - **Selective black occlusion** (detect → localize EN∩L → black out → reclassify) is preferable to always-on blur when partner heatmaps are noisy; soft blur remains a useful ablation, not the production fill.
-- English text remains the dominant transfer threat across models — defenses should prioritize localizing Latin-script stickers.
+- English text remains the dominant transfer threat across models — defenses should prioritize localizing **glyphs** (Latin-script stickers), not generic white rectangles (§1.2.2 / §3.2.1).
 - Spatial localization beats pure mechanistic head ablation on dual-box typographic attacks in this setting (hybrids confirm occlusion, not heads alone, drives recovery).
 
 ### 4.4 Next steps / future work
-- Write full paper prose + paper-ready figures (regenerate pipeline viz with **black** fill stage).
+- Expand outline → full prose; regenerate pipeline figures with **black** fill (current PNGs still show blur).
 - Close residual gap to clean under attack (better saliency / coverage; still short of the ~77.4% EN atk needed to clear DP EN MIXED at gated clean).
 - Extend detector evaluation to Pure E / Pure L and adaptive sticker placement.
-- Future result tables: gated **`cc_bbox_black`** only (EN + ZH/KO/JA); blur/mean/neglect stay in ablation appendix.
+- Optional: stronger animal / multi-sticker localization (EN-gated repair; raise `top_k` under 3-box threat) — not required for typographic main claim.
 - Test on higher-res datasets / more realistic text placements.
 - Optional contrast paragraph with Thread A (shared encoder) if the venue wants multilingual defense narrative.
 
@@ -401,7 +542,7 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 
 ## Appendix ideas (optional, not required for first draft)
 
-- Full ablation tables and failed ideas (peakiness gate, free-tune vs thr-floor under freeze, always-on vs gated MIXED2000).
+- Full ablation tables: [`ablation_study.md`](ablation_study.md) (fill, gate, 4-lang, text vs white, sticker/text/hybrid defense, font size, box count) plus failed ideas (peakiness gate, free-tune vs thr-floor under freeze, always-on vs gated MIXED2000).
 - Fill-ranking table (neglect / blur / mean / black) and oracle GT-box ceiling.
 - Model cards / Hugging Face IDs and prompt templates.
 - Example defended images (attacked → heatmap → mask → **black** → prediction) — update from `four_lang_cc_bbox_blur/results/pipeline_*.png` (ZH/KO/JA).
@@ -416,17 +557,18 @@ Smoke ladder per method: n=16 sanity → n=100 smoke → **n=1000 final**.
 
 ## Writing checklist (when expanding outline → prose)
 
-- [ ] Lock final title and abstract (150–200 words from §1.4–1.5 + gated-black / MIXED2000 headlines + baseline framing).
+- [ ] Lock final title and abstract (150–200 words from §1.4–1.5 + gated-black / MIXED2000 headlines + §3.5 main table).
 - [ ] Related Work subsection (CLIP typographic attacks; GradCAM / attention rollout; multilingual / ensemble defenses; OCR defenses; Defense-Prefix; Dyslexify / SamplingTAR + hybrids; occlusion-based defenses).
-- [ ] Insert exact tables from `docs/research_diary.md` (2026-07-16 → 2026-07-25), `docs/failure_analysis.md`, `docs/baseline_comparison.md`, and notebook `results/*.json`.
 - [ ] Decide whether Thread A appears only in Related Work / Discussion or is omitted.
 - [ ] Regenerate pipeline figures with black fill as the final stage (current PNGs still show blur).
-- [x] Figures linked in outline (method diagram / pipeline; main bar charts; 4-lang transfer; qualitative examples) — replace/replot at paper DPI later if needed.
+- [x] Main avg + lang-detail tables synced from [`4_lang_table.md`](4_lang_table.md) into **§3.5**.
+- [x] Ablation appendix source [`ablation_study.md`](ablation_study.md) linked; animal occlusion **§3.2.2**; font/boxes **§3.11**.
+- [x] Figures linked in outline (method diagram / pipeline; 4-lang transfer; occlusion gallery; qualitative examples) — replace/replot at paper DPI later if needed.
 - [x] Four languages (EN/ZH/KO/JA) front-loaded in Intro + Methods.
-- [x] Attack types named Pure E / E + L / Pure L; **why English** justified early in **§1.2.1** (Methods keeps a short pointer).
-- [x] Dataset source + balanced-sample construction + frozen `attack_pos` + thr ≥ 0.95 specified.
+- [x] Attack types named Pure E / E + L / Pure L; **why English** in **§1.2.1**; **why letters** in **§1.2.2**.
+- [x] Dataset + frozen `attack_pos` + thr ≥ 0.95; **font 24 / NUM_BOXES=2** stated as production threat model.
 - [x] Grid baseline covers conf-drop **and** exhaustive search.
-- [x] Published baselines (OCR, Defense-Prefix, Dyslexify, SamplingTAR + hybrids) on leaderboard.
-- [x] Attack detector is a **core** pipeline stage (not optional); gated Clean Δ + MIXED2000 for ZH/KO/JA `multi`.
-- [x] Primary fill = **black**; blur/mean/neglect as ablations; EN gated black **72.9% / 85.8% / 79.35% MIXED2000**.
-- [x] Honesty: do not quote 79.35% as attacked-only; do not claim beat DP on EN MIXED; production fill = black for all langs.
+- [x] Published baselines on §3.5 leaderboard (OCR, DP, Dyslexify/SamplingTAR hybrids).
+- [x] Attack detector is a **core** pipeline stage; gated Clean Δ + MIXED2000 for ZH/KO/JA `multi`.
+- [x] Primary fill = **black**; EN gated black **72.9% / 85.8% / 79.35% MIXED**; partner mean MIXED **80.84%**.
+- [x] Honesty: do not quote 79.35% as attacked-only; do not claim beat DP on EN MIXED; production fill = black for all langs; animal/3-box limits stated.

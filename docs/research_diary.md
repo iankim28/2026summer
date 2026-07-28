@@ -2882,6 +2882,102 @@ EN-only on `all_sticker`: inbox 1.82, IoU 0.283, peak 96.2%, det@.1 **99.3%** �
 
 1. **Readable animal stickers are a real hijack** (unlike the aborted stretched-in-white-box version). Anomaly content matters when the patch is identifiable.
 2. **EN∩ZH localization remains text-favoring:** animal-only intersection is mediocre; one text box restores high det@.1. Production bilingual occlusion is still best justified for typographic stickers.
-3. EN-alone attention *can* lock onto animal patches (det@.1 ~99%), so a monolingual or EN-gated repair might partially transfer — not shown here.
+3. EN-alone attention *can* lock onto animal patches (det@.1 ~99%), so a monolingual or EN-gated repair might partially transfer — measured in the 2026-07-27 occlusion follow-up below.
 
-**Status:** Done (proportional paste, no white animal pad).
+**Status:** Done (proportional paste, no white animal pad). Attack+localization only here; black occlusion recovery is the next entry.
+
+## 2026-07-27 — Animal-sticker black occlusion recovery
+
+**Question:** Does production `cc_bbox_black` repair animal / mixed / text dual-box attacks? Does EN-only black close the gap bilingual localization misses on `all_sticker`?
+
+**Setup:** Same modes and frozen anchors as the 2026-07-25 animal ablation. Fill = solid black. Masks: EN∩ZH `cc_bbox` (thr≥0.95 / dilate 3 / top-2) and EN-only `cc_bbox`. Arms: never, always-on, Phase-C gated (gate trained **per mode** on clean vs that mode’s Attn-last features — not typographic-cached gates), plus GT-oracle black ceiling. Clean never floors: EN **85.9%**, ZH **91.4%**.
+
+Code: [lib/notebooks/animal_sticker_ablation/run_occlusion.py](../lib/notebooks/animal_sticker_ablation/run_occlusion.py). Results: [occlusion_n1000.json](../lib/notebooks/animal_sticker_ablation/results/occlusion_n1000.json). Figure: [gallery_occlusion.png](../lib/notebooks/animal_sticker_ablation/figures/gallery_occlusion.png) (raw | EN∩ZH black | EN-only black).
+
+### Always-on black (n=1000)
+
+| Mode | Arm | EN acc | EN ASR | ZH acc | ZH ASR | Clean Δ EN | Clean Δ ZH |
+|------|-----|-------:|-------:|-------:|-------:|-----------:|-----------:|
+| all_sticker | never | 11.0% | 76.5% | 6.5% | 87.7% | — | — |
+| all_sticker | EN∩ZH | 20.4% | 54.0% | 16.7% | 64.9% | −3.7pp | −2.6pp |
+| all_sticker | EN-only | **33.3%** | **27.7%** | **29.8%** | **39.3%** | −14.9pp | −13.6pp |
+| all_sticker | oracle GT | 56.9% | 5.7% | 62.8% | 5.4% | 0 | 0 |
+| mixed | never | 1.3% | 98.7% | 2.2% | 97.6% | — | — |
+| mixed | EN∩ZH | 43.8% | 26.8% | 45.4% | 31.8% | −3.7pp | −2.6pp |
+| mixed | EN-only | 40.6% | 26.5% | 41.6% | 37.4% | −14.9pp | −13.6pp |
+| mixed | oracle GT | 64.3% | 4.9% | 73.2% | 3.4% | 0 | 0 |
+| all_text | never | 4.5% | 95.3% | 6.4% | 93.6% | — | — |
+| all_text | EN∩ZH | **72.9%** | **3.6%** | **76.6%** | **3.8%** | −3.7pp | −2.6pp |
+| all_text | EN-only | 68.1% | 3.4% | 69.6% | 11.5% | −14.9pp | −13.6pp |
+| all_text | oracle GT | 74.6% | 2.6% | 82.2% | 2.4% | 0 | 0 |
+
+### Gated black (n=1000)
+
+| Mode | Arm | EN acc | EN ASR | ZH acc | ZH ASR | Clean Δ EN | fire atk / clean |
+|------|-----|-------:|-------:|-------:|-------:|-----------:|-----------------:|
+| all_sticker | EN∩ZH | 20.6% | 54.2% | 16.8% | 65.1% | −1.8pp | 98.2% / 26.1% |
+| all_sticker | EN-only | 32.9% | 28.5% | 29.5% | 40.2% | −6.1pp | 98.2% / 26.1% |
+| mixed | EN∩ZH | 43.5% | 27.3% | 45.1% | 32.2% | −0.1pp | 98.6% / 0.7% |
+| mixed | EN-only | 40.2% | 27.4% | 41.0% | 38.2% | −0.1pp | 98.6% / 0.7% |
+| all_text | EN∩ZH | 72.9% | 3.7% | 76.5% | 3.9% | −0.1pp | 99.8% / 0.4% |
+| all_text | EN-only | 68.0% | 3.6% | 69.5% | 11.6% | −0.1pp | 99.8% / 0.4% |
+
+Animal-only gate is leakier on clean (fire_clean 26%) than mixed/text (~0–1%) — animal Attn shapes overlap clean more than typographic spikes.
+
+### Verdict
+
+1. **Production EN∩ZH black remains typographic:** `all_text` recovers to EN 72.9% / ZH 76.6% (near oracle). On `all_sticker` it barely moves the needle (EN 20.4%, ASR still 54%).
+2. **EN-only black partially transfers** on animals: EN ASR 76.5% → 27.7%, acc 11% → 33.3% — better than bilingual, but still far below oracle GT (56.9%) and costly on clean (−14.9pp always-on; −6.1pp gated).
+3. **Localization, not fill, is the bottleneck** for animals: oracle GT black cuts ASR to ~6%, so imperfect EN∩ZH / incomplete EN masks leave residual animal hijack.
+4. **`mixed` is mid:** one text box restores usable bilingual repair (EN 43.8%) but still well under typographic `all_text` and under oracle (64.3%).
+
+**Status:** Done.
+
+## 2026-07-27 — Ablation study write-up + attack geometry
+
+**Question:** Consolidate method vs attack component ablations for the paper appendix; close the two open attack-geometry sweeps (font size; number of boxes).
+
+**Doc:** [`ablation_study.md`](ablation_study.md) — single source for fill, gate, single-lang vs 4-lang occlusion, text vs white, sticker/text/hybrid defense, plus new geometry tables.
+
+### Already done (no re-run) — inventory
+
+| Kind | Ablation | Headline |
+|------|----------|----------|
+| Method | Fill type | gated EN MIXED black **79.35%** > mean > blur > neglect |
+| Method | Gate on/off | KO/JA Clean Δ −11pp → ~0 under gate |
+| Method | Single-lang occlusion | EN gated black 72.9%; animal EN-only > EN∩ZH |
+| Method | 4-lang partners | bilingual MIXED black mean **80.84%** |
+| Attack | text vs white vs full | text_only ASR ≈ full; white_only ≈ clean |
+| Attack | sticker / text / hybrid defense | text 72.9% gated; mixed 43.5%; sticker 20.6% |
+
+### New run — font size & box count
+
+Code: [`attack_geometry_ablation/run_ablation.py`](../lib/notebooks/attack_geometry_ablation/run_ablation.py).  
+Results: [`font_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/font_n1000.json), [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json).  
+Setup: EN∩ZH gated/always/never `cc_bbox_black`, thr≥0.95, n=1000, CUDA.
+
+**Font (dual-box, gated black)**
+
+| Font | never EN ASR | gated EN | gated ZH | Clean Δ EN |
+|-----:|-------------:|---------:|---------:|-----------:|
+| 12 | 89.9% | **76.0%** | 83.9% | +0.0 pp |
+| **24** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
+| 40 | 96.9% | 58.3% | 56.3% | −0.4 pp |
+
+**Boxes (font 24, gated black; top_k=2)**
+
+| Boxes | never EN ASR | gated EN | gated ZH | Clean Δ EN |
+|------:|-------------:|---------:|---------:|-----------:|
+| 1 | 94.1% | **75.3%** | 80.7% | −0.1 pp |
+| **2** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
+| 3 | 97.5% | 8.5% | 22.1% | −0.7 pp |
+
+### Verdict
+
+1. **Font 24 stays production.** Larger font 40 is a harder spatial threat (−14.6 pp gated EN); smaller 12 is weaker as an attack and easier to defend.
+2. **Dual-box stays production.** Three boxes defeat `top_k=2` occlusion (gated EN **8.5%**) — capacity limit of the mask recipe, not a reason to change main tables.
+3. Font-24 / boxes-2 cells reproduce production EN gated **72.9%** / ZH **76.5%** — geometry runner is calibrated.
+4. Paper threat-model now explicitly states font size 24; full tables in [`ablation_study.md`](ablation_study.md).
+
+**Status:** Done.
+

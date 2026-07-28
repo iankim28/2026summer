@@ -9,6 +9,7 @@
 
 Folder index and “last used” dates: [`README.md`](README.md).  
 Narrative: `docs/research_diary.md`.  
+Ablation appendix: `docs/ablation_study.md` (method + attack components; geometry: [`attack_geometry_ablation/`](attack_geometry_ablation/)).  
 Meeting briefing: `docs/homework_summary.md`.  
 Baseline leaderboard: `docs/baseline_comparison.md`.
 
@@ -25,6 +26,7 @@ Baseline leaderboard: `docs/baseline_comparison.md`.
 | Heatmap attack detector | [`attack_detector/`](attack_detector/) | Learn clean vs attack from Attn-last features; **gate** occlusion |
 | **Production fill ranking** | [`en_neglect_vs_blur/`](en_neglect_vs_blur/), [`partner_fill_ablation/`](partner_fill_ablation/) | Gated neglect/blur/mean/**black** — **black is production** for EN+ZH/KO/JA |
 | Published baselines | [`paper_baselines/`](paper_baselines/) | Defense-Prefix, OCR+blur, Dyslexify, SamplingTAR |
+| Attack geometry ablation | [`attack_geometry_ablation/`](attack_geometry_ablation/) | Font 12/24/40; boxes 1/2/3 under gated black |
 | Shared sample | [`image_samples/`](image_samples/) | Fixed CIFAR-10 indices + **frozen attack coordinates** |
 | Grid baseline | [`_test_grid/`](_test_grid/) | Conf-drop 4×4 occlusion (negative / cost baseline) |
 
