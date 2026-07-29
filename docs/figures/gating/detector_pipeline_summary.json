@@ -1,0 +1,16 @@
+{
+  "L": "zh",
+  "n_features": 26,
+  "fire_clean": 0.004,
+  "fire_attacked": 0.998,
+  "output": "D:\\ian\\2026summer\\docs\\figures\\gating\\detector_pipeline.png",
+  "test_i": 32,
+  "test_proba": 0.0006666115383688059,
+  "decision": "clean",
+  "threshold": 0.4733603113038565,
+  "primary": "linear_svm",
+  "pca_var_ratio": [
+    0.35155044472337194,
+    0.3181664900487696
+  ]
+}

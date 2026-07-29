@@ -547,7 +547,7 @@ artefact of bottom-crop preprocessing alone.
 
 1. Fix JA model (clean acc should be ~90%+) and re-run the full 4×4 grid.
 2. Quantify **agreement rate** clean vs attacked (fraction of images where all models
-  predict the same class) — the metric from `CODE_GUIDE_separate_langs_typographic.md`.
+  predict the same class) — the metric from `archive/CODE_GUIDE_separate_langs_typographic.md`.
 3. Test whether a **majority-vote or disagreement detector** on the four separate models
   flags typographic attacks with AUC > 0.5 (Q2 analogue for this threat model).
 
@@ -699,7 +699,7 @@ A 4×4 grid: four attack languages (EN, ZH, KO, JA) × four independent classifi
 
 1. **Scale Experiment G training epsilon** — in `lib/notebooks/dual_encoder_divergence.ipynb`, change `DUAL_TRAIN_EPS` from `2` to `4` or `8` and re-run (~5 minutes on local GPU). This is the single highest-leverage action: the architecture already works and the gap is purely a training budget issue.
 2. **Fix JA model loading for Thread B** — install `sentencepiece` and `protobuf` in the venv, or test `trust_remote_code=True` with an older transformers pin. Then re-run `lib/notebooks/typographic_attack_confusion.ipynb` to get a reliable 4×4 grid.
-3. **Compute disagreement-based detection metrics (Thread B Q2 analogue)** — once the JA column is valid, compute the fraction of images where all four models agree on the same class (clean vs attacked), and test a majority-vote or disagreement detector for AUC > 0.5. The methodology is in `docs/CODE_GUIDE_separate_langs_typographic.md`.
+3. **Compute disagreement-based detection metrics (Thread B Q2 analogue)** — once the JA column is valid, compute the fraction of images where all four models agree on the same class (clean vs attacked), and test a majority-vote or disagreement detector for AUC > 0.5. The methodology is in `docs/archive/CODE_GUIDE_separate_langs_typographic.md`.
 4. **Re-run Experiment C with ML_LR=1e-4** — this is lower priority now that Experiment G succeeded, but multi-layer LoRA inside ViT blocks could still outperform output-only adapters if the training is stable.
 5. **Q3 denoiser on dual-encoder G architecture** — the most open-ended item. Worth revisiting only after steps 1–3 are done.
 
@@ -713,8 +713,7 @@ The project was reorganized today (2026-07-04):
 
 ```
 2026summer/
-├── docs/          ← all project markdown (research_diary.md, research_goal.md,
-│                     handoff.md, handoff2.md, mentor_proposal.md, and plan files)
+├── docs/          ← current paper/results markdown; older notes in docs/archive/
 ├── lib/
 │   ├── notebooks/ ← all .ipynb files + results/
 │   └── *.py       ← notebook build and review scripts
@@ -930,7 +929,7 @@ CLYP scores 19% on CIFAR-10, the same functional failure as STL-10. The domain g
 
 1. **Drop JA and reduce to 3×3.** Present the EN/ZH/KO results as the primary Thread B finding. The JA column is not scientifically usable.
 2. **Add disagreement detection metrics** — compute the fraction of images where EN prediction disagrees with the ZH+KO majority under EN attack (clean vs. attacked). This is the Q2 analogue for the typographic threat model.
-3. **Update research_goal.md** to reflect that Thread B results are now on CIFAR-10 (same dataset as Thread A), making cross-thread comparison cleaner.
+3. **Update `archive/research_goal.md`** to reflect that Thread B results are now on CIFAR-10 (same dataset as Thread A), making cross-thread comparison cleaner.
 
 ---
 
@@ -1048,15 +1047,15 @@ Thread B's separate-encoder design produces the disagreement that Thread A's sha
 
 ### Next steps
 
-1. **Compute disagreement detection AUC** — for each image, record whether the four models agree on the same class (clean vs. attacked). Compute AUC of a simple disagreement count detector. This is the Q2 analogue for the typographic threat model, as defined in `docs/CODE_GUIDE_separate_langs_typographic.md`.
-2. **Update** `research_goal.md` — Thread B is now fully functional with 4 working models on CIFAR-10.
+1. **Compute disagreement detection AUC** — for each image, record whether the four models agree on the same class (clean vs. attacked). Compute AUC of a simple disagreement count detector. This is the Q2 analogue for the typographic threat model, as defined in `docs/archive/CODE_GUIDE_separate_langs_typographic.md`.
+2. **Update** `archive/research_goal.md` — Thread B is now fully functional with 4 working models on CIFAR-10.
 3. **Consider running Thread B with the full 8000-image CIFAR-10 test split** rather than 200 images, to get tighter confidence on the disagreement rates.
 
 ---
 
 
 
-## July 5, 2026 — Evening (disagreement AUC + research_goal.md update)
+## July 5, 2026 — Evening (disagreement AUC + archive/research_goal.md update)
 
 **Disagreement detector AUC computed.** Added a new cell to `lib/notebooks/cifar10_typographic_attack_confusion.ipynb` that:
 
@@ -1081,7 +1080,7 @@ AUC 0.574 > 0.5 confirms the hypothesis (disagreement does separate clean from a
 
 Results saved to `lib/notebooks/results/cifar10_confusion_results.json` under the `"detector"` key.
 
-`**docs/research_goal.md` updated.** Added Thread B architecture (separate brains mermaid diagram), a Thread B findings section, and Thread B rows in the "What Was Found" table (Q1: ZH 33% under EN attack; Q2: AUC 0.574). The document now covers both threads in full.
+`**docs/archive/research_goal.md` updated.** Added Thread B architecture (separate brains mermaid diagram), a Thread B findings section, and Thread B rows in the "What Was Found" table (Q1: ZH 33% under EN attack; Q2: AUC 0.574). The document now covers both threads in full.
 
 ---
 
@@ -2298,7 +2297,7 @@ mixed_2000 = 0.5 * mean(EN,L attacked_acc) + 0.5 * mean(EN,L clean_acc_masked)
 
 Script: [`lib/notebooks/attack_detector/compute_mixed_2000.py`](../lib/notebooks/attack_detector/compute_mixed_2000.py)  
 Output: [`…/results/mixed_2000_summary.json`](../lib/notebooks/attack_detector/results/mixed_2000_summary.json)  
-Handoff: [`docs/handoff_gated_mixed_2000.md`](handoff_gated_mixed_2000.md)
+Handoff: [`docs/archive/handoff_gated_mixed_2000.md`](archive/handoff_gated_mixed_2000.md)
 
 ### Mixed 2000 mean acc (EN+L)
 
@@ -2978,6 +2977,60 @@ Setup: EN∩ZH gated/always/never `cc_bbox_black`, thr≥0.95, n=1000, CUDA.
 2. **Dual-box stays production.** Three boxes defeat `top_k=2` occlusion (gated EN **8.5%**) — capacity limit of the mask recipe, not a reason to change main tables.
 3. Font-24 / boxes-2 cells reproduce production EN gated **72.9%** / ZH **76.5%** — geometry runner is calibrated.
 4. Paper threat-model now explicitly states font size 24; full tables in [`ablation_study.md`](ablation_study.md).
+
+**Status:** Done.
+
+## 2026-07-29 — Main table ZH MIXED, 3-box top_k fix, 4-way occlusion
+
+**Question:** (1) Promote language-coverage as the main table and add ZH MIXED for OCR / Defense-Prefix; (2) fold white_only into the sticker/content ablation table; (3) fix 3-box recovery by matching `top_k` to box count; (4) build true EN∩ZH∩KO∩JA occlusion.
+
+**Docs:** [`4_lang_table.md`](4_lang_table.md), [`ablation_study.md`](ablation_study.md).  
+**Code:** [`paper_baselines/compute_mixed_2000.py`](../lib/notebooks/paper_baselines/compute_mixed_2000.py), [`attack_geometry_ablation/run_ablation.py`](../lib/notebooks/attack_geometry_ablation/run_ablation.py), [`four_way_occlusion/run_eval.py`](../lib/notebooks/four_way_occlusion/run_eval.py).
+
+### 1. ZH MIXED for OCR + Defense-Prefix (no GPU re-run)
+
+Derived from existing `comparison_summary_final_n1000` JSONs via `per_lang` in [`mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json):
+
+| Method | EN atk | ZH atk | EN MIXED | ZH MIXED | Scope MIXED |
+|--------|-------:|-------:|---------:|---------:|------------:|
+| OCR + blur | 72.8% | 74.7% | **79.05%** | **82.70%** | **80.88%** (EN+ZH) |
+| Defense-Prefix | 73.8% | 44.5% | **81.65%** | **68.15%** | **74.90%** (EN+ZH) |
+| Ours EN∩ZH black | 72.9% | 76.5% | **79.35%** | **83.95%** | **81.65%** bilingual |
+
+**Reading:** OCR ZH MIXED is competitive with ours; DP wins EN MIXED but collapses on ZH (**68.15%**). Main comparison table is now [`4_lang_table.md`](4_lang_table.md) Table 1 (language coverage).
+
+### 2. Ablation B.1 → B.2 merge
+
+Removed standalone B.1 table; added `white_only` row to the sticker/content localization table (EN ASR 2.3%, IoU 0.083 — glyphs drive hijack, not white pads).
+
+### 3. Box-count re-run with `top_k = num_boxes`
+
+Previous 3-box collapse (gated EN **8.5%**) was mask capacity (`top_k=2` discarding the third CC), not a drawing bug. Re-ran boxes sweep with matched capacity:
+
+| Boxes | top_k | never EN ASR | gated EN | gated ZH | Clean Δ EN |
+|------:|------:|-------------:|---------:|---------:|-----------:|
+| 1 | 1 | 94.1% | **78.2%** | **82.9%** | −0.1 pp |
+| **2** | 2 | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
+| 3 | 3 | 97.5% | **45.9%** | **56.1%** | −0.8 pp |
+
+Results: [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json).  
+**Verdict:** 3-box gated EN **8.5% → 45.9%**. Dual-box / production `top_k=2` still the main protocol.
+
+### 4. Four-way occlusion (EN ∩ ZH ∩ KO ∩ JA)
+
+New experiment: [`four_way_occlusion/`](../lib/notebooks/four_way_occlusion/). Protocol EN+ZH `multi` attack; mask = intersection of all four Attn-last maps → `cc_bbox_black`; gate on EN vs mean(ZH,KO,JA) features. n=1000, CUDA.
+
+| Arm | EN | ZH | KO | JA | Mean atk | Mean MIXED | Clean Δ (EN…JA) |
+|-----|---:|---:|---:|---:|---------:|-----------:|----------------:|
+| never | 4.5% | 6.4% | 11.6% | 6.0% | 7.1% | 48.5% | — |
+| always | 72.1% | 76.5% | 76.6% | 84.6% | **77.5%** | 73.0% | ~−20 pp |
+| **gated** | **72.0%** | **76.4%** | **76.5%** | **84.5%** | **77.4%** | **83.40%** | −0.6 / −0.3 / −0.3 / −0.4 pp |
+
+Per-lang gated MIXED: EN **78.65%**, ZH **83.75%**, KO **82.90%**, JA **88.30%**.  
+Gate fire: atk **99.8%** / clean **2.1%**.  
+JSON: [`four_way_n1000.json`](../lib/notebooks/four_way_occlusion/results/four_way_n1000.json).
+
+**Verdict:** Gated 4-way mean MIXED (**83.40%**) beats pairwise partner-mean bilingual (**80.84%**). Always-on is unusable on clean; gate is required. Production default remains pairwise EN∩L (cost 4); 4-way is the all-language occlusion variant (higher saliency cost).
 
 **Status:** Done.
 

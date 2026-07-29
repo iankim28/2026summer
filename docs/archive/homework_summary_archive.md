@@ -1,6 +1,6 @@
 # Archive — Homework Summary (through July 25, 2026)
 
-**Status:** Archived. Current briefing: [`homework_summary.md`](homework_summary.md) (**July 27 only**).  
+**Status:** Archived. Current briefing: [`homework_summary.md`](../homework_summary.md) (**July 27 only**).  
 **Project:** Defending multilingual CLIP classifiers against typographic (text-overlay) attacks on CIFAR-10.
 
 This file holds all superseded homework briefings in one place:
@@ -17,11 +17,11 @@ This file holds all superseded homework briefings in one place:
 **Project:** Defending multilingual CLIP classifiers against typographic (text-overlay) attacks on CIFAR-10.  
 **Audience:** Quick briefing for professor meeting — what was done **that day**.
 
-> Current briefing: [`homework_summary.md`](homework_summary.md).  
-> Protocol: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).  
-> Baselines: [`baseline_comparison.md`](baseline_comparison.md).  
-> Current stack / failure modes: [`failure_analysis.md`](failure_analysis.md).  
-> Full diary for that day: [`research_diary.md`](research_diary.md) (2026-07-25 entries).
+> Current briefing: [`homework_summary.md`](../homework_summary.md).  
+> Protocol: [`PROTOCOL.md`](../../lib/notebooks/PROTOCOL.md).  
+> Baselines: [`baseline_comparison.md`](../baseline_comparison.md).  
+> Current stack / failure modes: [`failure_analysis.md`](../failure_analysis.md).  
+> Full diary for that day: [`research_diary.md`](../research_diary.md) (2026-07-25 entries).
 
 **Shared protocol for all tables below unless noted:** frozen dual-box CIFAR-10 n=1000 (`CIFAR10_BALANCED_1000_SAMPLE` + `attack_pos`), 224×224, attack = `multi`, thr ≥ 0.95, CUDA.  
 **MIXED2000:** `0.5 * attacked_acc + 0.5 * clean_policy_acc`.
@@ -48,7 +48,7 @@ Gated Attn `cc_bbox`, EN score. Prefer **black**; still below DP EN MIXED **81.6
 | **black** | **72.9%** | **85.8%** | **79.35%** | −2.30pp |
 | Defense-Prefix (bar) | 73.8% | 89.5% | **81.65%** | — |
 
-Full data (oracle, always-on, DP+spatial escalate): [`research_diary.md` § 2026-07-25 — EN neglect vs Gaussian blur](research_diary.md#L2619).
+Full data (oracle, always-on, DP+spatial escalate): [`research_diary.md` § 2026-07-25 — EN neglect vs Gaussian blur](../research_diary.md#L2619).
 
 ---
 
@@ -62,7 +62,7 @@ Best attention-only vs OCR∪Attn (logged only). Did **not** beat DP.
 | gated OCR∪`cc_bbox` black | 73.6% | 3.1% | **79.70%** | −1.95pp |
 | Defense-Prefix (bar) | 73.8% | 16.4% | **81.65%** | — |
 
-Full data (ensembles, pick counts, ceiling math): [`research_diary.md` § 2026-07-25 — Occlusion-only chase of DP EN MIXED2000](research_diary.md#L2685).
+Full data (ensembles, pick counts, ceiling math): [`research_diary.md` § 2026-07-25 — Occlusion-only chase of DP EN MIXED2000](../research_diary.md#L2685).
 
 ---
 
@@ -76,7 +76,7 @@ Fair ZH DP token; EN+ZH mean collapses vs spatial peers.
 | ZH (new) | **44.5%** | 52.5% | +0.4pp | **68.15%** |
 | Mean EN+ZH | **59.2%** | — | +0.45pp | **74.90%** |
 
-Full data (train protocol, Gate A): [`research_diary.md` § 2026-07-25 — ZH Defense-Prefix](research_diary.md#L2510).
+Full data (train protocol, Gate A): [`research_diary.md` § 2026-07-25 — ZH Defense-Prefix](../research_diary.md#L2510).
 
 ---
 
@@ -91,13 +91,13 @@ Occlusion, not head ablation alone, drives recovery. Still below gated black.
 | SamplingTAR | heads | 11.6% | +0.2pp | 48.85% |
 | SamplingTAR | **hybrid** | **67.3%** | −8.3pp | **72.45%** |
 
-Full data (heads, `score_frac`, smoke ladder): [`research_diary.md` § 2026-07-25 — Dyslexify / SamplingTAR hybrids](research_diary.md#L2739).
+Full data (heads, `score_frac`, smoke ladder): [`research_diary.md` § 2026-07-25 — Dyslexify / SamplingTAR hybrids](../research_diary.md#L2739).
 
 ---
 
 ### 5. Detector Phase A/B visualization (ZH / KO / JA)
 
-Gallery: [`docs/figures/attack_detector/gallery.html`](figures/attack_detector/gallery.html).
+Gallery: [`docs/figures/attack_detector/gallery.html`](../figures/attack_detector/gallery.html).
 
 | Partner | PCA NN-cent. test | Test AUC | Fire clean / atk (n=1000) |
 | --- | ---: | ---: | ---: |
@@ -105,16 +105,16 @@ Gallery: [`docs/figures/attack_detector/gallery.html`](figures/attack_detector/g
 | KO | 97.3% | **0.999** | 2.5% / 99.4% |
 | JA | 97.7% | **1.000** | 0.3% / 99.8% |
 
-Full data (thresholds, CMs, figure list): [`research_diary.md` § 2026-07-25 — Phase A/B gated occlusion visualization](research_diary.md#L2562).
+Full data (thresholds, CMs, figure list): [`research_diary.md` § 2026-07-25 — Phase A/B gated occlusion visualization](../research_diary.md#L2562).
 
 ---
 
 ### 6. Failure analysis + paper outline sync
 
-- [`failure_analysis.md`](failure_analysis.md) — locked “ours” as gated `cc_bbox_black`; quote/do-not-claim list (79.35% = MIXED, not atk-only).
-- [`paper_draft.md`](paper_draft.md) — gate = core; fill = black; lead gated Clean Δ + MIXED2000 + EN gated-black.
+- [`failure_analysis.md`](../failure_analysis.md) — locked “ours” as gated `cc_bbox_black`; quote/do-not-claim list (79.35% = MIXED, not atk-only).
+- [`paper_draft.md`](../paper_draft.md) — gate = core; fill = black; lead gated Clean Δ + MIXED2000 + EN gated-black.
 
-No single diary entry for this write-up pass; numbers live in the Jul 25 diary sections above + [`failure_analysis.md`](failure_analysis.md).
+No single diary entry for this write-up pass; numbers live in the Jul 25 diary sections above + [`failure_analysis.md`](../failure_analysis.md).
 
 ---
 
@@ -132,7 +132,7 @@ No single diary entry for this write-up pass; numbers live in the Jul 25 diary s
 | **EN** OpenAI ViT-B/32 | 85.9% | ~4.3–4.5% | **71.6%** |
 | **ZH** ChineseCLIP ViT-B/16 | 91.4% | ~6.4–7.3% | **78.2%** |
 
-Sources: [`baseline_comparison.md`](baseline_comparison.md); diary Latin-script asymmetry (~L894–1032) + `cc_bbox_blur` results.
+Sources: [`baseline_comparison.md`](../baseline_comparison.md); diary Latin-script asymmetry (~L894–1032) + `cc_bbox_blur` results.
 
 **Mechanism (in order of importance)**
 
@@ -173,7 +173,7 @@ Same gated Attn EN∩L `cc_bbox` + Phase-C gate; fills = neglect / blur / mean /
 
 **Production freeze:** gated **`cc_bbox_black` for all langs** (EN + ZH/KO/JA). Quote bilingual black rows above in future tables. Ablation note only: KO blur +0.15pp bilingual; L-only ZH/KO prefer blur; JA L-only prefers neglect — not production.
 
-Full tables: [`research_diary.md` § 2026-07-25 — Partner fill ablation](research_diary.md#L2758); JSON [`partner_fill_ablation/results/`](../lib/notebooks/partner_fill_ablation/results/). Protocol: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md) §7.2.
+Full tables: [`research_diary.md` § 2026-07-25 — Partner fill ablation](../research_diary.md#L2758); JSON [`partner_fill_ablation/results/`](../../lib/notebooks/partner_fill_ablation/results/). Protocol: [`PROTOCOL.md`](../../lib/notebooks/PROTOCOL.md) §7.2.
 
 ---
 
@@ -237,7 +237,7 @@ After locking `cc_bbox_blur` as the defense, evaluation was made fair and paper-
 | ko | 73.20% | **78.50%** | +5.30 |
 | ja | 76.80% | **82.45%** | +5.65 |
 
-DP EN MIXED2000 bar = **81.65%**. Full prior tables/diary: `docs/research_diary.md` (2026-07-20 → 2026-07-24).
+DP EN MIXED2000 bar = **81.65%**. Full prior tables/diary: `../research_diary.md` (2026-07-20 → 2026-07-24).
 
 ---
 
@@ -339,9 +339,9 @@ Ablated threshold floors and mask geometry (dilate, bbox snap) without re-runnin
 
 ## Next steps (as of 2026-07-19 — completed afterward)
 
-> See [`homework_summary.md`](homework_summary.md) for what was finished next: frozen `attack_pos`, thr-floor recovery, attack detector, published baselines.
+> See [`homework_summary.md`](../homework_summary.md) for what was finished next: frozen `attack_pos`, thr-floor recovery, attack detector, published baselines.
 
-1. ~~Start the paper~~ → outline in `docs/paper_draft.md`
+1. ~~Start the paper~~ → outline in `../paper_draft.md`
 2. ~~Write up results~~ → in progress via paper draft + baseline doc
 3. Frozen protocol / detector / baselines — done Jul 20–23 (current summary)
 
@@ -362,7 +362,7 @@ Ablated threshold floors and mask geometry (dilate, bbox snap) without re-runnin
 | 4-lang transfer | `lib/notebooks/four_lang_cc_bbox_blur/` |
 | KO/JA clean damage | `lib/notebooks/ko_ja_clean_damage/` |
 | Improved grid (baseline) | `lib/notebooks/_en_zh/en_zh_multi_uni_attack/_test_grid/` |
-| Full diary | `docs/research_diary.md` (entries 2026-07-16 → 2026-07-19) |
+| Full diary | `../research_diary.md` (entries 2026-07-16 → 2026-07-19) |
 
 ---
 
@@ -414,8 +414,8 @@ These are the **classifiers**, not separate models per attack. Every attack is r
 |---|---|
 | `lib/notebooks/cifar10_typographic_attack_confusion.ipynb` | CIFAR-10 4×4 experiment (llm-jp JA model) |
 | `lib/notebooks/typographic_attack_confusion.ipynb` | STL-10 version |
-| `docs/PLAN_typographic_confusion_matrix.md` | Experiment plan + model table |
-| `docs/CODE_GUIDE_separate_langs_typographic.md` | Code guide for the 4 model wrappers |
+| `PLAN_typographic_confusion_matrix.md` | Experiment plan + model table |
+| `CODE_GUIDE_separate_langs_typographic.md` | Code guide for the 4 model wrappers |
 | `claude_experiments/perlang_models.py` | Reusable model wrapper definitions |
 | `claude_experiments/typographic_attack.py` | `draw_word` + attack matrix logic |
 
@@ -497,5 +497,5 @@ Key insight: **ZH attack has the highest AUC (0.646)** even though it is the wea
 | `lib/notebooks/results/cifar10_perclass_attack_zh.png` | New — per-class bars under ZH attack |
 | `lib/notebooks/results/cifar10_perclass_attack_ko.png` | New — per-class bars under KO attack |
 | `lib/notebooks/results/cifar10_perclass_attack_ja.png` | New — per-class bars under JA attack |
-| `docs/research_goal.md` | Added Thread B section: second mermaid diagram, Q1/Q2 findings rows, Thread B details block |
-| `docs/research_diary.md` | Multiple new entries: AUC results, JA model analysis, detector improvement directions, deeper-analysis results |
+| `research_goal.md` | Added Thread B section: second mermaid diagram, Q1/Q2 findings rows, Thread B details block |
+| `../research_diary.md` | Multiple new entries: AUC results, JA model analysis, detector improvement directions, deeper-analysis results |

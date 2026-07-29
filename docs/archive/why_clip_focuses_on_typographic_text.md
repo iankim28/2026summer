@@ -2,7 +2,7 @@
 
 **Purpose:** Plain-language mechanism note for the paper’s Introduction / Methods.  
 **Scope:** Why CLIP attends to and is swayed by class-name overlays painted on an image.  
-**Deeper sources:** [`../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md`](../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md), [`research_diary.md`](research_diary.md) (Latin saliency + Attn-last), [`paper_draft.md`](paper_draft.md).
+**Deeper sources:** [`../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md`](../../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md), [`research_diary.md`](../research_diary.md) (Latin saliency + Attn-last), [`paper_draft.md`](../paper_draft.md).
 
 ---
 
@@ -61,7 +61,7 @@ Two further checks rule out easy alternatives:
 
 **Mechanism sentence:** typographic success tracks how well the encoder maps in-image words to concepts; that ability is dominated by English vocabulary frequency in web data.
 
-Full tables and scripts: [`../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md`](../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md).
+Full tables and scripts: [`../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md`](../../claude_experiments/TYPOGRAPHIC_MECHANISM_UPGRADE.md).
 
 ### 2.3 Separate per-language CLIPs: Latin is still the universal threat
 
@@ -72,7 +72,7 @@ The defense paper uses **separate** EN / ZH / KO / JA CLIP models (not one share
 
 Why? All four ViTs still saw lots of **Latin / English** co-occurring with image content in web-scale data, so Latin class names remain classification-relevant across the ensemble. Hangul/CJK usually do not, except on models trained to rely on them. ChineseCLIP is partly an exception: it is **less hijacked by Latin** than OpenAI EN CLIP even before defense (higher residual accuracy under EN stickers), consistent with Chinese-caption training giving Latin overlays less label weight.
 
-Optional fairness gloss: a language looking “robust” to typographic attack is often just the encoder **not reading that script well** — the same gap that hurts legitimate multilingual utility. See [`../claude_experiments/RESEARCH_DIRECTION_fairness_security_tradeoff.md`](../claude_experiments/RESEARCH_DIRECTION_fairness_security_tradeoff.md).
+Optional fairness gloss: a language looking “robust” to typographic attack is often just the encoder **not reading that script well** — the same gap that hurts legitimate multilingual utility. See [`../claude_experiments/RESEARCH_DIRECTION_fairness_security_tradeoff.md`](../../claude_experiments/RESEARCH_DIRECTION_fairness_security_tradeoff.md).
 
 ---
 
@@ -96,11 +96,11 @@ That is why blacking out or blurring the sticker region often restores the objec
 
 Intuition: Attn-last reads the hijacked attention **one hop** from the decision. GradCAM must push a gradient through all layers, which blurs the spatial story.
 
-Empirically (EN∩ZH intersection defense setting): Attn-last reached higher defended accuracy with much lower coverage than GradCAM (diary: ~72.6% vs ~33.1% defended, ~7.7% vs ~26.6% coverage — exact protocol in [`research_diary.md`](research_diary.md) / attention-defense notes).
+Empirically (EN∩ZH intersection defense setting): Attn-last reached higher defended accuracy with much lower coverage than GradCAM (diary: ~72.6% vs ~33.1% defended, ~7.7% vs ~26.6% coverage — exact protocol in [`research_diary.md`](../research_diary.md) / attention-defense notes).
 
 ### 3.3 Attack detector: spiky vs spread
 
-Typographic stickers make Attn-last heatmaps **spiky** (mass in a few hot peaks). Clean images look **spread**. That shape difference is what the gated detector uses so occlusion runs mainly when a sticker is present (high fire rate on attack, low on clean). Details: [`../lib/notebooks/attack_detector/`](../lib/notebooks/attack_detector/).
+Typographic stickers make Attn-last heatmaps **spiky** (mass in a few hot peaks). Clean images look **spread**. That shape difference is what the gated detector uses so occlusion runs mainly when a sticker is present (high fire rate on attack, low on clean). Details: [`../lib/notebooks/attack_detector/`](../../lib/notebooks/attack_detector/).
 
 ### 3.4 Text-reading heads help explain, but occlusion is what recovers accuracy
 
@@ -145,4 +145,4 @@ Use this note as a **source**, not as a dump into one section. Split by job:
 
 ### Suggested outline sync target
 
-When drafting prose, expand [`paper_draft.md`](paper_draft.md) §1.1 / §1.2.1 from Layers 1–3, and add a short Methods bullet block **“Why Attn-last localizes stickers”** from Layer 4. This file remains the long-form explanation you compress from.
+When drafting prose, expand [`paper_draft.md`](../paper_draft.md) §1.1 / §1.2.1 from Layers 1–3, and add a short Methods bullet block **“Why Attn-last localizes stickers”** from Layer 4. This file remains the long-form explanation you compress from.

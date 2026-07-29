@@ -32,8 +32,8 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 ```
 
 - Abort if CUDA unavailable — do not fall back to CPU for long runs.
-- Protocol: [`lib/notebooks/PROTOCOL.md`](../lib/notebooks/PROTOCOL.md)
-- Detector code: [`lib/notebooks/attack_detector/`](../lib/notebooks/attack_detector/)
+- Protocol: [`lib/notebooks/PROTOCOL.md`](../../lib/notebooks/PROTOCOL.md)
+- Detector code: [`lib/notebooks/attack_detector/`](../../lib/notebooks/attack_detector/)
 - Sample: `lib/notebooks/image_samples/CIFAR10_BALANCED_1000_SAMPLE.json` (frozen `attack_pos`)
 - Do **not** change detector thresholds / retrain unless asked. This task is reporting.
 
@@ -160,6 +160,6 @@ summary['never_mixed_2000_acc']  = 0.5 * _mean_acc(base_acc) + 0.5 * never_clean
 
 ## 8. Context links
 
-- Briefing: [`docs/homework_summary.md`](homework_summary.md) §4 (gated detector)  
-- Diary: `docs/research_diary.md` — entry `2026-07-22 / 23 — Attack detector`  
+- Briefing: [`../homework_summary.md`](../homework_summary.md) §4 (gated detector)  
+- Diary: `../research_diary.md` — entry `2026-07-22 / 23 — Attack detector`  
 - Existing roll-up: `lib/notebooks/attack_detector/results/comparison_summary.json`

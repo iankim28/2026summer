@@ -1,0 +1,13 @@
+{
+  "L": "zh",
+  "primary": "linear_svm",
+  "threshold": 0.4733603113038565,
+  "val_auc": 0.9998222222222222,
+  "test_auc": 1.0,
+  "fire_clean": 0.004,
+  "fire_attacked": 0.998,
+  "clean_i": 32,
+  "atk_i": 32,
+  "n_features": 26,
+  "output": "D:\\ian\\2026summer\\docs\\figures\\gating\\gating_figure.png"
+}

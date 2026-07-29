@@ -81,9 +81,9 @@ Sources: [`attack_detector/`](../lib/notebooks/attack_detector/), [`paper_draft.
 
 ### A.4 Four-language results (method transfer)
 
-**Question:** Does gated `cc_bbox_black` transfer across ZH / KO / JA partners?
+**Question:** Does gated `cc_bbox_black` transfer across ZH / KO / JA partners? Does a true 4-way EN∩ZH∩KO∩JA mask work?
 
-Full tables: [`4_lang_table.md`](4_lang_table.md). Quote set:
+Full pairwise tables: [`4_lang_table.md`](4_lang_table.md). Quote set:
 
 | Claim | Number |
 |-------|-------:|
@@ -92,48 +92,36 @@ Full tables: [`4_lang_table.md`](4_lang_table.md). Quote set:
 | Ours EN MIXED (gated black) | **79.35%** |
 | Ours EN atk / clean (gated black) | **72.9% / 85.8%** |
 | Gate fire atk / clean (EN∩ZH) | **99.8% / 0.4%** |
+| **Four-way gated mean MIXED / mean atk** | **83.40% / 77.4%** |
 
-Always-on `cc_bbox_blur` 4-lang transfer (design history): [`four_lang_cc_bbox_blur/`](../lib/notebooks/four_lang_cc_bbox_blur/).
+**Four-way occlusion** (EN ∩ ZH ∩ KO ∩ JA Attn-last → gated black; EN+ZH `multi` attack; score all four): [`four_way_occlusion/`](../lib/notebooks/four_way_occlusion/). Gated EN/ZH/KO/JA atk **72.0 / 76.4 / 76.5 / 84.5%**; Clean Δ ≈ **−0.3 to −0.6 pp**; mean MIXED **83.40%**. Always-on Clean Δ ≈ **−20 pp** — gate required. Always-on 4-lang blur transfer (design history): [`four_lang_cc_bbox_blur/`](../lib/notebooks/four_lang_cc_bbox_blur/).
 
-**Verdict:** Production claim is **cross-language spatial defense** under a frozen gate+black stack—not EN-only peer matching.
+**Verdict:** Production claim is **cross-language spatial defense** under a frozen gate+black stack—not EN-only peer matching. Pairwise EN∩L is the default cost-4 recipe; 4-way is the stronger all-language occlusion variant.
 
 ---
 
 ## B. Attack ablations
 
-### B.1 Text-only vs text+white vs full
+### B.1–B.2 Sticker content: white pads, glyphs, animals, hybrid
 
-**Question:** Is the hijack from glyphs or from the white pad?
+**Question:** Is the hijack from glyphs or from the white pad? Does production gated black repair animal stickers, typographic text, and mixed hybrid?
 
-**Setup:** Same GT boxes; modes `full` / `white_only` / `text_only`. Attack+localization only (no defense arms). [`attack_component_ablation/results/summary_n1000.json`](../lib/notebooks/attack_component_ablation/results/summary_n1000.json).
+**Setup:** Same GT boxes where applicable. Modes include `white_only` (blank white pad), `all_text` / `full` (glyphs), `mixed`, `all_sticker` (animal). Attack+localization from [`attack_component_ablation/results/summary_n1000.json`](../lib/notebooks/attack_component_ablation/results/summary_n1000.json) and [`animal_sticker_ablation/results/summary_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json).
+
+**Localization**
 
 | Mode | EN ASR | ZH ASR | EN∩ZH IoU | EN∩ZH det@0.1 |
 |------|-------:|-------:|----------:|--------------:|
-| full | **95.3%** | **93.6%** | **0.691** | **100%** |
 | white_only | 2.3% | 2.1% | 0.083 | 41.1% |
-| text_only | **89.8%** | **84.5%** | **0.669** | **100%** |
-
-Undefended EN acc: white_only **75.5%** vs text_only **9.6%** vs full **4.5%**.
-
-**Verdict:** Letters drive ASR and EN∩ZH localization; blank white pads do not. Threat model = **readable text**.
-
----
-
-### B.2 Defense on sticker / text / hybrid
-
-**Question:** Does production gated black repair animal stickers, typographic text, and mixed hybrid?
-
-**Localization** ([`animal_sticker_ablation/results/summary_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json)):
-
-| Mode | EN ASR | ZH ASR | EN∩ZH IoU | EN∩ZH det@0.1 |
-|------|-------:|-------:|----------:|--------------:|
 | all_sticker | **76.6%** | **87.7%** | 0.117 | 51.1% |
 | mixed | **98.7%** | **97.6%** | 0.310 | **99.8%** |
 | all_text | **95.3%** | **93.6%** | **0.691** | **100%** |
 
+Undefended EN acc: white_only **75.5%** vs text_only **9.6%** vs full **4.5%**. Letters drive ASR and EN∩ZH localization; blank white pads do not. Threat model = **readable text**.
+
 **Gated black recovery** (see A.3 table): `all_text` → EN **72.9%**; `mixed` → **43.5%**; `all_sticker` → **20.6%** (EN-only **32.9%**).
 
-**Verdict:** Method is strong on typographic dual-box; hybrid is partial; animal-only is a limitation (intersection is text-favoring).
+**Verdict:** Method is strong on typographic dual-box; hybrid is partial; animal-only is a limitation (intersection is text-favoring). Glyphs—not white pads—cause the hijack.
 
 ---
 
@@ -161,17 +149,19 @@ Always-on EN: 76.7% / **72.9%** / 58.4% (12 / 24 / 40). Font-24 gated matches pr
 
 **Question:** How does attack strength and gated recovery change with 1 / 2 / 3 text boxes?
 
-**Setup:** `FONT_SIZE=24`, EN∩ZH black. **1** = frozen EN anchor only; **2** = frozen dual EN+ZH (protocol); **3** = dual + seeded third EN box (not in frozen JSON). Mask still uses production `top_k=2`. Results: [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json).
+**Setup:** `FONT_SIZE=24`, EN∩ZH black. **1** = frozen EN anchor only; **2** = frozen dual EN+ZH (protocol); **3** = dual + seeded third EN box (not in frozen JSON). **Mask capacity matches the threat:** `top_k = num_boxes` (1→1, 2→2, 3→3). Results: [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json).
 
 **Gated black (n=1000)**
 
-| Boxes | never EN (acc/ASR) | gated EN | gated ZH | Clean Δ EN | fire atk / clean |
-|------:|-------------------:|---------:|---------:|-----------:|-----------------:|
-| 1 | 5.7% / 94.1% | **75.3%** | **80.7%** | −0.1 pp | 100% / 0.6% |
-| **2** | 4.5% / 95.3% | **72.9%** | **76.5%** | −0.1 pp | 99.8% / 0.4% |
-| 3 | 2.4% / 97.5% | 8.5% | 22.1% | −0.7 pp | 99.5% / 4.3% |
+| Boxes | top_k | never EN (acc/ASR) | gated EN | gated ZH | Clean Δ EN | fire atk / clean |
+|------:|------:|-------------------:|---------:|---------:|-----------:|-----------------:|
+| 1 | 1 | 5.7% / 94.1% | **78.2%** | **82.9%** | −0.1 pp | 100% / 0.6% |
+| **2** | 2 | 4.5% / 95.3% | **72.9%** | **76.5%** | −0.1 pp | 99.8% / 0.4% |
+| 3 | 3 | 2.4% / 97.5% | **45.9%** | **56.1%** | −0.8 pp | 99.5% / 4.3% |
 
-**Verdict:** Dual-box (protocol) is the intended threat — strong ASR with recoverable gated black. One EN box is slightly easier to defend. **Three boxes break production `top_k=2` occlusion** (gated EN collapses to **8.5%**, ASR still ~90%) — a known capacity limit, not a protocol change. Main results stay at **NUM_BOXES=2**.
+Always-on EN: 78.2% / 72.9% / 46.0% (1 / 2 / 3). Font-24 dual-box gated matches production EN **72.9%**.
+
+**Verdict:** Dual-box (protocol) is the intended threat — strong ASR with recoverable gated black. One EN box is slightly easier to defend. **Three boxes with matched `top_k=3` recover gated EN to 45.9%** (vs **8.5%** when production `top_k=2` discarded the third CC). Still harder than dual-box; main results stay at **NUM_BOXES=2** / production `top_k=2`.
 
 ---
 
@@ -182,8 +172,7 @@ Always-on EN: 76.7% / **72.9%** / 58.4% (12 / 24 / 40). Font-24 gated matches pr
 | Fill type | method | Done |
 | Gate on/off | method | Done |
 | Single-lang occlusion | method | Done |
-| Four-lang results | method | Done |
-| Text vs white vs full | attack | Done |
-| Sticker / text / hybrid defense | attack | Done |
+| Four-lang results | method | Done (pairwise + 4-way) |
+| Text vs white / sticker / hybrid | attack | Done |
 | Font size | attack | **Done** (`attack_geometry_ablation`) |
 | Number of boxes | attack | **Done** (`attack_geometry_ablation`) |

@@ -24,6 +24,7 @@
     2,
     3
   ],
+  "top_k_policy": "top_k = num_boxes (capacity matched to threat)",
   "cells": {
     "boxes1": {
       "arms": {
@@ -40,26 +41,26 @@
           "mean_gt_coverage": 0.05616617506377551
         },
         "always_en_cap_zh": {
-          "en_acc": 0.753,
-          "en_asr": 0.026,
-          "zh_acc": 0.807,
-          "zh_asr": 0.02,
-          "clean_en_acc": 0.822,
-          "clean_zh_acc": 0.888,
-          "clean_delta_en": -0.03700000000000003,
-          "clean_delta_zh": -0.026000000000000023,
-          "mean_mask_coverage": 0.09148429528061225
+          "en_acc": 0.782,
+          "en_asr": 0.028,
+          "zh_acc": 0.829,
+          "zh_asr": 0.024,
+          "clean_en_acc": 0.831,
+          "clean_zh_acc": 0.897,
+          "clean_delta_en": -0.028000000000000025,
+          "clean_delta_zh": -0.017000000000000015,
+          "mean_mask_coverage": 0.07457649075255103
         },
         "gated_en_cap_zh": {
-          "en_acc": 0.753,
-          "en_asr": 0.026,
-          "zh_acc": 0.807,
-          "zh_asr": 0.02,
+          "en_acc": 0.782,
+          "en_asr": 0.028,
+          "zh_acc": 0.829,
+          "zh_asr": 0.024,
           "clean_en_acc": 0.858,
           "clean_zh_acc": 0.914,
           "clean_delta_en": -0.0010000000000000009,
           "clean_delta_zh": 0.0,
-          "mean_mask_coverage": 0.09148429528061225,
+          "mean_mask_coverage": 0.07457649075255103,
           "defended_frac_atk": 1.0,
           "defended_frac_clean": 0.006,
           "fire_attacked": 1.0,
@@ -73,7 +74,8 @@
         "fire_clean": 0.006,
         "val_auc": 1.0,
         "test_auc": 1.0
-      }
+      },
+      "top_k": 1
     },
     "boxes2": {
       "arms": {
@@ -123,7 +125,8 @@
         "fire_clean": 0.004,
         "val_auc": 0.9998222222222222,
         "test_auc": 1.0
-      }
+      },
+      "top_k": 2
     },
     "boxes3": {
       "arms": {
@@ -140,26 +143,26 @@
           "mean_gt_coverage": 0.15520910395408163
         },
         "always_en_cap_zh": {
-          "en_acc": 0.085,
-          "en_asr": 0.898,
-          "zh_acc": 0.222,
-          "zh_asr": 0.767,
-          "clean_en_acc": 0.822,
-          "clean_zh_acc": 0.888,
-          "clean_delta_en": -0.03700000000000003,
-          "clean_delta_zh": -0.026000000000000023,
-          "mean_mask_coverage": 0.06886218510841838
+          "en_acc": 0.46,
+          "en_asr": 0.325,
+          "zh_acc": 0.562,
+          "zh_asr": 0.25,
+          "clean_en_acc": 0.811,
+          "clean_zh_acc": 0.876,
+          "clean_delta_en": -0.04799999999999993,
+          "clean_delta_zh": -0.038000000000000034,
+          "mean_mask_coverage": 0.09141460060586735
         },
         "gated_en_cap_zh": {
-          "en_acc": 0.085,
-          "en_asr": 0.898,
-          "zh_acc": 0.221,
-          "zh_asr": 0.768,
-          "clean_en_acc": 0.852,
-          "clean_zh_acc": 0.911,
-          "clean_delta_en": -0.007000000000000006,
-          "clean_delta_zh": -0.0030000000000000027,
-          "mean_mask_coverage": 0.06886218510841838,
+          "en_acc": 0.459,
+          "en_asr": 0.326,
+          "zh_acc": 0.561,
+          "zh_asr": 0.251,
+          "clean_en_acc": 0.851,
+          "clean_zh_acc": 0.91,
+          "clean_delta_en": -0.008000000000000007,
+          "clean_delta_zh": -0.0040000000000000036,
+          "mean_mask_coverage": 0.09141460060586735,
           "defended_frac_atk": 0.995,
           "defended_frac_clean": 0.043,
           "fire_attacked": 0.995,
@@ -173,8 +176,9 @@
         "fire_clean": 0.043,
         "val_auc": 0.9976,
         "test_auc": 0.9957777777777778
-      }
+      },
+      "top_k": 3
     }
   },
-  "note": "Box-count sweep at FONT_SIZE=24. boxes=1 uses frozen EN anchor only; boxes=2 is protocol dual EN+ZH; boxes=3 adds seeded third EN box."
+  "note": "Box-count sweep at FONT_SIZE=24. boxes=1 uses frozen EN anchor only; boxes=2 is protocol dual EN+ZH; boxes=3 adds seeded third EN box. Mask top_k equals num_boxes so three stickers are not capacity-capped."
 }

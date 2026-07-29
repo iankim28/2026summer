@@ -68,7 +68,7 @@ One-sentence framing: *CLIP is distracted by readable text in the image; our def
 - On the same protocol: spatial gated defense leads bilingual means; **OCR+blur** is the closest spatial peer; **Defense-Prefix** is strong EN-only (EN MIXED2000 **81.65%**, ours **79.35%**, gap **−2.30 pp**) but weak once ZH is included (DP EN+ZH mean **59.2%**); **Dyslexify / SamplingTAR** heads-only are weak negatives; their attn-blur hybrids (~67% EN) still trail ours.
 - Provide an additional **negative baseline**: coarse grid occlusion — even with **confidence-drop scoring** or **exhaustive** 2-patch search — remains weaker and much more expensive than attention.
 - Show that Attn-last / EN∩ZH localizes **glyphs**, not blank white pads (§1.2.2, §3.2.1); gated black recovers typographic stickers well, hybrid partially, animal-only poorly (§3.2.2).
-- Report attack-geometry sensitivity: production **font 24 / 2 boxes**; font 40 and 3-box attacks stress the `top_k=2` recipe (§3.11).
+- Report attack-geometry sensitivity: production **font 24 / 2 boxes**; font 40 and 3-box attacks are harder; 3-box recovery uses matched `top_k=3` (§3.11).
 
 ### 1.6 Paper roadmap (one sentence)
 - Section 2 methods → Section 3 results (main avg leaderboard §3.5; lang detail; glyph/animal checks; gated Clean Δ + MIXED2000; fill ranking; geometry ablations) → Section 4 conclusion / limitations. Full ablation appendix: [`ablation_study.md`](ablation_study.md).
@@ -121,9 +121,9 @@ One-sentence framing: *CLIP is distracted by readable text in the image; our def
 - For each partner `L ∈ {ZH, KO, JA}`, evaluate all three attack types under the same EN ∩ L defense.
 - Earlier single-box 4×4 confusion matrices (attack language × model) provide attack-landscape background.
 
-![dual-box attack types Pure E / E+L / Pure L](../lib/notebooks/four_lang_cc_bbox_blur/results/attack_types_strip.png)
+![dual-box attack types Pure E / E+L / Pure L](figures/dataset/dataset_figure.png)
 
-*Figure: dual-box typographic attack geometry — Pure E / E+L / Pure L (partner L = ZH here; same layout for KO/JA).*
+*Figure: evaluation protocol — four CIFAR-10 classes (distinct frozen `attack_pos`) × Clean / Pure E / E+L / Pure L (partner L = ZH shown; identical geometry for KO/JA). Paper asset: [`docs/figures/dataset/`](figures/dataset/).*
 
 #### 2.3.1 English-centric attack design (pointer)
 - Rationale already stated in **§1.2.1**; Methods only operationalizes it: slot 0 is always the EN box position; Pure E / E+L / Pure L matrix uses the same frozen geometry for every partner L.
@@ -176,6 +176,10 @@ Describe as a fixed sequence for any partner `L ∈ {ZH, KO, JA}`. Production po
 7. **Reclassify** both models on the defended image.
 
 Name the full production stack: gated **`cc_bbox_black`** (Attn-last intersection + `cc_bbox` + black fill + detector gate). Always-on `cc_bbox_blur` is retained as localization/transfer ablation.
+
+![Method overview — gated cc_bbox_black](figures/method/method_overview.png)
+
+*Figure 2. Method overview. (a) Attn-last EN ∩ L localization → thr / dilate / `cc_bbox`. (b) Attack-detector gate → black fill (attacked) or skip (clean) → reclassify. CLIP encoders frozen; L = ZH shown (same for KO / JA). Script: [`figures/method/make_method_figure.py`](figures/method/make_method_figure.py).*
 
 ![cc_bbox full stage grid](../lib/notebooks/four_lang_cc_bbox_blur/results/pipeline_examples.png)
 
@@ -376,7 +380,7 @@ Ours avg MIXED = mean of partner bilingual black **81.65 / 78.35 / 82.53%**. Our
 | EN∩KO | 65.6% | 73.1% | 69.4% | 75.45% | **78.35%** | 99.4% / 2.5% |
 | EN∩JA | 68.9% | 82.8% | 75.9% | 77.40% | **82.53%** | 99.8% / 0.3% |
 
-Baseline per-lang cells (OCR/DP EN+ZH; hybrids EN-only): [`4_lang_table.md`](4_lang_table.md) Table 2b.
+Baseline per-lang cells (OCR/DP EN+ZH with ZH MIXED; hybrids EN-only): [`4_lang_table.md`](4_lang_table.md) Table 1.
 
 #### Talking points
 - **Do not claim** occlusion-only beats DP on EN MIXED2000 — gated black EN **79.35%** is **−2.30 pp** vs DP EN **81.65%**.
@@ -447,6 +451,16 @@ Baseline per-lang cells (OCR/DP EN+ZH; hybrids EN-only): [`4_lang_table.md`](4_l
 | EN ASR (after defense) | 3.7% |
 | Gate fire (atk / clean) | 99.8% / 0.4% |
 
+- **Qualitative grids** (Attacked vs Ours): recoveries [`qualitative_figure.png`](figures/qualitative/qualitative_figure.png); failures [`qualitative_failures.png`](figures/qualitative/qualitative_failures.png). Script: [`make_qualitative_figure.py`](figures/qualitative/make_qualitative_figure.py).
+
+![Qualitative recoveries — gated cc_bbox_black](figures/qualitative/qualitative_figure.png)
+
+*Figure. Qualitative recoveries of gated `cc_bbox_black` on dual-box E+L attacks (ZH / KO / JA). % = CLIP top-1 softmax classification probability.*
+
+![Qualitative failures — gated cc_bbox_black](figures/qualitative/qualitative_failures.png)
+
+*Figure. Qualitative residual failure cases after detector-gated black fill (one per partner).*
+
 - **Fill ranking (gated EN MIXED2000):** neglect **73.20%** < blur **77.90%** < mean **78.15%** < **black 79.35%** (+1.45 pp vs gated blur; +3.0 pp EN atk).
 - Defend coverage (full n=1000): attacked 99.4–99.8%; clean false-occlude 0.3–2.5% (KO highest).
 - Biggest win: KO/JA Clean Δ **≈ −11 pp → ~0** with <0.5 pp attacked-acc sacrifice; MIXED2000 makes gated the clear winner over always-on.
@@ -466,7 +480,7 @@ Baseline per-lang cells (OCR/DP EN+ZH; hybrids EN-only): [`4_lang_table.md`](4_l
 
 ### 3.10 Summary table for the reader (results closer)
 - **Main table:** §3.5 Table A (averages) — ours vs OCR / DP / SamplingTAR hybrid / Dyslexify hybrid.
-- **Detail table:** §3.5 Table B + [`4_lang_table.md`](4_lang_table.md) Table 2b.
+- **Detail table:** §3.5 Table B + [`4_lang_table.md`](4_lang_table.md) Table 1.
 - **Appendix:** [`ablation_study.md`](ablation_study.md) — fill, gate, glyphs vs pads, sticker/hybrid defense, font, boxes.
 - Highlight recommended config: **Attn-last + `cc_bbox` + black fill + detector gate**; thr ≥ 0.95; **font 24 / NUM_BOXES=2**.
 
@@ -482,15 +496,15 @@ Full tables: [`ablation_study.md`](ablation_study.md) §B.3–B.4. Code: [`attac
 | **24** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
 | 40 | 96.9% | 58.3% | 56.3% | −0.4 pp |
 
-**Boxes (font 24; mask `top_k=2`)**
+**Boxes (font 24; `top_k = num_boxes`)**
 
 | Boxes | never EN ASR | gated EN | gated ZH | Clean Δ EN |
 |------:|-------------:|---------:|---------:|-----------:|
-| 1 | 94.1% | **75.3%** | 80.7% | −0.1 pp |
+| 1 | 94.1% | **78.2%** | 82.9% | −0.1 pp |
 | **2** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
-| 3 | 97.5% | 8.5% | 22.1% | −0.7 pp |
+| 3 | 97.5% | **45.9%** | **56.1%** | −0.8 pp |
 
-**Claims:** Font **24** and **2 boxes** stay production (font-24 / boxes-2 cells reproduce EN gated **72.9%**). Font 40 is a harder spatial threat (−14.6 pp gated EN). Three boxes defeat `top_k=2` occlusion (gated EN **8.5%**) — capacity limit of the mask recipe, not a reason to change main tables. Mention font size 24 explicitly in the threat-model paragraph.
+**Claims:** Font **24** and **2 boxes** stay production (font-24 / boxes-2 cells reproduce EN gated **72.9%**). Font 40 is a harder spatial threat (−14.6 pp gated EN). Three boxes with matched `top_k=3` recover gated EN to **45.9%** (was **8.5%** under production `top_k=2`). Mention font size 24 explicitly in the threat-model paragraph.
 
 ---
 
@@ -515,7 +529,7 @@ Full tables: [`ablation_study.md`](ablation_study.md) §B.3–B.4. Code: [`attac
 - Residual gap to clean under attack (~**13 pp** EN: 72.9% vs ~85.9%) unsolved — black fill and gating remove clean cost / improve atk, but do not close the residual; oracle GT+black only **74.6%** EN atk.
 - Occlusion-only does **not** beat Defense-Prefix on EN MIXED2000 (−2.30 pp).
 - EN∩ZH is a **glyph** localizer: blank white pads and animal-only stickers are poorly co-localized / poorly repaired (gated animal EN **20.6%**; EN-only **32.9%** vs oracle **56.9%**). Do not claim universal anomaly detection.
-- Three simultaneous stickers defeat production `top_k=2` occlusion (gated EN **8.5%**) — known capacity limit.
+- Three simultaneous stickers need matched `top_k=3` for recovery (gated EN **45.9%**); production stays dual-box / `top_k=2`.
 - Font 40 drops gated EN by **−14.6 pp** vs protocol 24 — larger glyphs are harder for the current mask budget.
 - Dyslexify / SamplingTAR are style ports (open_clip ViT-B/32 openai), not identical paper checkpoints.
 - Grid / hybrid search not competitive enough to recommend despite scoring and exhaustive-search fixes.

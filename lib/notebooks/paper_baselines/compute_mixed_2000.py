@@ -47,6 +47,25 @@ def mean_lang(d: dict, key: str) -> float:
     return sum(v[key] for v in d.values()) / len(d)
 
 
+def per_lang_mixed(g: dict) -> dict:
+    """Per-language MIXED2000 = 0.5 * atk_acc + 0.5 * clean_policy_acc."""
+    defense = g["defense"]
+    clean = g["clean_degradation"]
+    out = {}
+    for lang in defense:
+        if lang not in clean:
+            continue
+        atk = float(defense[lang]["acc"])
+        cln = float(clean[lang]["masked_acc"])
+        out[lang] = {
+            "attacked_acc": atk,
+            "clean_policy_acc": cln,
+            "mixed_2000": 0.5 * atk + 0.5 * cln,
+            "clean_delta": float(clean[lang].get("delta_acc", cln - clean[lang]["baseline_acc"])),
+        }
+    return out
+
+
 def policies_from_summary(g: dict) -> dict:
     """never / always from a baseline (or ours) comparison_summary-style JSON."""
     defense = g["defense"]
@@ -118,7 +137,13 @@ def main() -> None:
         g = json.loads(path.read_text(encoding="utf-8"))
         scope = scope_label(g)
         policies = policies_from_summary(g)
+        per_lang = per_lang_mixed(g)
         print_method(display, scope, policies)
+        if per_lang:
+            bits = ", ".join(
+                f"{lang.upper()}={fmt_pct(v['mixed_2000'])}" for lang, v in per_lang.items()
+            )
+            print(f"  per-lang MIXED2000: {bits}")
         methods.append(
             {
                 "method": method_id,
@@ -126,6 +151,7 @@ def main() -> None:
                 "scope": scope,
                 "source": str(path.relative_to(NOTEBOOKS)),
                 "policies": policies,
+                "per_lang": per_lang,
             }
         )
 
@@ -200,6 +226,8 @@ def main() -> None:
             "on the same 1000 CIFAR indices (1000 clean + 1000 multi-attacked = 2000 "
             "equal-weight eval). Lang mean is over keys present in each JSON "
             "(EN+ZH for ocr_blur / our ZH ref; EN-only otherwise). "
+            "per_lang[lang].mixed_2000 = 0.5 * defense[lang].acc + 0.5 * "
+            "clean_degradation[lang].masked_acc (ZH MIXED for OCR/DP without re-run). "
             "Our ref uses attack_detector mixed_2000 ZH (Phase C always atk=74.0%), "
             "not older heatmap confusion_results (atk=74.9%)."
         ),

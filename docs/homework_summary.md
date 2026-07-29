@@ -3,9 +3,10 @@
 **Project:** Defending multilingual CLIP classifiers against typographic (text-overlay) attacks on CIFAR-10.  
 **Audience:** Quick briefing for professor meeting — what was done **today**.
 
-> Older briefings: [`homework_summary_archive.md`](homework_summary_archive.md) (Jul 25 + earlier).  
+> Older briefings: [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) (Jul 25 + earlier).  
 > Ablation appendix: [`ablation_study.md`](ablation_study.md).  
 > Main results tables: [`4_lang_table.md`](4_lang_table.md).  
+> All tables index: [`tables_index.md`](tables_index.md).  
 > Paper outline: [`paper_draft.md`](paper_draft.md).  
 > Protocol: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).  
 > Full diary for today: [`research_diary.md`](research_diary.md) ([animal occlusion](research_diary.md#L2889), [ablation + geometry](research_diary.md#L2936)).
@@ -30,7 +31,7 @@ Today closed the **ablation checklist**: measured production **black occlusion**
 | Gate on vs always-on (document only) | method | **Done** | [`ablation_study.md`](ablation_study.md) §A.2 |
 | Single-lang occlusion (document only) | method | **Done** | [`ablation_study.md`](ablation_study.md) §A.3 |
 | Four-lang main results (document only) | method | **Done** | [`4_lang_table.md`](4_lang_table.md); [`ablation_study.md`](ablation_study.md) §A.4 |
-| Text vs white vs full (document only) | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.1 |
+| Text vs white / sticker / hybrid | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.1–B.2 |
 | Font size 12 / 24 / 40 | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.3; [diary](research_diary.md#L2936) |
 | Number of boxes 1 / 2 / 3 | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.4; [diary](research_diary.md#L2936) |
 | Paper sync (main + ablations + geometry) | writing | **Done** | [`paper_draft.md`](paper_draft.md) |
@@ -72,8 +73,7 @@ New appendix source [`ablation_study.md`](ablation_study.md) consolidates alread
 | A.2 | Gate on/off — KO/JA Clean Δ −11pp → ~0 |
 | A.3 | Single-lang / EN-only vs EN∩L |
 | A.4 | Four-lang transfer → [`4_lang_table.md`](4_lang_table.md) |
-| B.1 | Text vs white vs full — glyphs drive ASR |
-| B.2 | Sticker / text / hybrid defense |
+| B.1–B.2 | Glyphs vs white pads; sticker / text / hybrid defense |
 | B.3–B.4 | Font size; number of boxes |
 
 Diary inventory: [`research_diary.md` § 2026-07-27 — Ablation study write-up + attack geometry](research_diary.md#L2936).
@@ -100,15 +100,15 @@ Dual-box, gated black, font ∈ {12, **24**, 40}.
 
 ### 4. Number of boxes (attack geometry)
 
-Font 24, boxes ∈ {1, **2**, 3}; mask still `top_k=2`.
+Font 24, boxes ∈ {1, **2**, 3}; **`top_k = num_boxes`** (capacity matched to threat).
 
 | Boxes | never EN ASR | gated EN | gated ZH | Clean Δ EN |
 | ---: | ---: | ---: | ---: | ---: |
-| 1 | 94.1% | **75.3%** | 80.7% | −0.1 pp |
+| 1 | 94.1% | **78.2%** | 82.9% | −0.1 pp |
 | **2** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
-| 3 | 97.5% | 8.5% | 22.1% | −0.7 pp |
+| 3 | 97.5% | **45.9%** | **56.1%** | −0.8 pp |
 
-**Verdict:** Dual-box stays production. Three boxes break `top_k=2` (gated EN **8.5%**) — capacity limit, not a protocol change.
+**Verdict:** Dual-box stays production. With matched `top_k=3`, three boxes recover gated EN to **45.9%** (was **8.5%** under production `top_k=2`).
 
 - Doc: [`ablation_study.md` §B.4](ablation_study.md)  
 - Results: [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json)  
@@ -136,7 +136,7 @@ Font 24, boxes ∈ {1, **2**, 3}; mask still `top_k=2`.
 | Gated animal EN∩ZH / EN-only | **20.6% / 32.9%** |
 | Animal oracle GT black EN | **56.9%** |
 | Font 12 / **24** / 40 gated EN | **76.0% / 72.9% / 58.3%** |
-| Boxes 1 / **2** / 3 gated EN | **75.3% / 72.9% / 8.5%** |
+| Boxes 1 / **2** / 3 gated EN | **78.2% / 72.9% / 45.9%** |
 | Ours avg bilingual MIXED (ZH/KO/JA) | **80.84%** ([`4_lang_table.md`](4_lang_table.md)) |
 | Production geometry | **font 24 / NUM_BOXES=2** |
 
@@ -152,7 +152,7 @@ Font 24, boxes ∈ {1, **2**, 3}; mask still `top_k=2`.
 
 ## One breath
 
-> Ablation checklist closed. Gated black recovers **typographic** dual-box (EN **72.9%**), partially hybrid (**43.5%**), poorly animal-only (**20.6%**; EN-only **32.9%** vs oracle **56.9%**). Font **24** / **2 boxes** stay production; font 40 (−14.6 pp) and 3 boxes (gated EN **8.5%**) are known stress cases. Full tables live in [`ablation_study.md`](ablation_study.md) and [`4_lang_table.md`](4_lang_table.md); narrative in the [Jul 27 diary](research_diary.md#L2889).
+> Ablation checklist closed. Gated black recovers **typographic** dual-box (EN **72.9%**), partially hybrid (**43.5%**), poorly animal-only (**20.6%**; EN-only **32.9%** vs oracle **56.9%**). Font **24** / **2 boxes** stay production; font 40 (−14.6 pp) is a known stress case; 3 boxes with matched `top_k=3` recover gated EN **45.9%**. Full tables live in [`ablation_study.md`](ablation_study.md) and [`4_lang_table.md`](4_lang_table.md); narrative in the [Jul 27 diary](research_diary.md#L2889).
 
 ---
 
@@ -166,4 +166,4 @@ Font 24, boxes ∈ {1, **2**, 3}; mask still `top_k=2`.
 | Animal occlusion JSON / gallery | [`animal_sticker_ablation/results/occlusion_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/occlusion_n1000.json), [`gallery_occlusion.png`](../lib/notebooks/animal_sticker_ablation/figures/gallery_occlusion.png) |
 | Font / boxes JSON | [`attack_geometry_ablation/results/`](../lib/notebooks/attack_geometry_ablation/results/) |
 | Diary (today) | [`research_diary.md`](research_diary.md) ([#L2889](research_diary.md#L2889), [#L2936](research_diary.md#L2936)) |
-| Archive (Jul 25 + earlier) | [`homework_summary_archive.md`](homework_summary_archive.md) |
+| Archive (Jul 25 + earlier) | [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) |

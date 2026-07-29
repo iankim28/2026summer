@@ -1,0 +1,62 @@
+{
+  "columns": [
+    "(a) Clean",
+    "(b) Pure E (EN+EN)",
+    "(c) E + L (EN+ZH)",
+    "(d) Pure L (ZH+ZH)"
+  ],
+  "rows": [
+    {
+      "i": 32,
+      "true": "dog",
+      "target": "ship",
+      "xy_en": [
+        60,
+        31
+      ],
+      "xy_l": [
+        36,
+        131
+      ]
+    },
+    {
+      "i": 11,
+      "true": "airplane",
+      "target": "truck",
+      "xy_en": [
+        17,
+        62
+      ],
+      "xy_l": [
+        2,
+        151
+      ]
+    },
+    {
+      "i": 116,
+      "true": "frog",
+      "target": "cat",
+      "xy_en": [
+        35,
+        31
+      ],
+      "xy_l": [
+        87,
+        160
+      ]
+    },
+    {
+      "i": 74,
+      "true": "truck",
+      "target": "bird",
+      "xy_en": [
+        51,
+        179
+      ],
+      "xy_l": [
+        9,
+        25
+      ]
+    }
+  ]
+}

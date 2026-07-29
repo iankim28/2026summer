@@ -73,6 +73,8 @@ RESULTS = HERE / "results"
 FIGURES = HERE / "figures"
 THR = 0.95
 DILATE = 3
+# Default top_k for font sweep / clean masks (protocol dual-box). Box sweep
+# overrides per cell: top_k = num_boxes so capacity matches the threat.
 TOP_K = 2
 FILL = "black"
 FONT_SIZES = (12, 24, 40)
@@ -160,9 +162,9 @@ def compute_cams(en, zh, en_txt, zh_txt, images, label=""):
     return cams_en, cams_zh
 
 
-def build_masks(cams_en, cams_zh):
+def build_masks(cams_en, cams_zh, top_k: int = TOP_K):
     return [
-        build_cc_bbox_mask(ce, cz, threshold=THR, dilate=DILATE, top_k=TOP_K)
+        build_cc_bbox_mask(ce, cz, threshold=THR, dilate=DILATE, top_k=top_k)
         for ce, cz in zip(cams_en, cams_zh)
     ]
 
@@ -253,12 +255,15 @@ def eval_cell(
     target,
     never_clean_en,
     never_clean_zh,
+    top_k: int = TOP_K,
 ):
-    print(f"\n--- cell={label} ---", flush=True)
+    print(f"\n--- cell={label} top_k={top_k} ---", flush=True)
     cams_atk_en, cams_atk_zh = compute_cams(
         en, zh, en_txt, zh_txt, imgs, label=label
     )
-    masks = build_masks(cams_atk_en, cams_atk_zh)
+    masks = build_masks(cams_atk_en, cams_atk_zh, top_k=top_k)
+    # Rebuild clean masks at the same top_k so Clean Δ matches attack capacity.
+    masks_clean_k = build_masks(cams_clean_en, cams_clean_zh, top_k=top_k)
     gate = train_mode_gate(
         cams_clean_en, cams_clean_zh, cams_atk_en, cams_atk_zh, len(imgs)
     )
@@ -283,8 +288,8 @@ def eval_cell(
 
     atk_en, cov = classify_always(en, en_txt, imgs, masks)
     atk_zh, _ = classify_always(zh, zh_txt, imgs, masks)
-    cln_en, _ = classify_always(en, en_txt, clean_imgs, masks_clean)
-    cln_zh, _ = classify_always(zh, zh_txt, clean_imgs, masks_clean)
+    cln_en, _ = classify_always(en, en_txt, clean_imgs, masks_clean_k)
+    cln_zh, _ = classify_always(zh, zh_txt, clean_imgs, masks_clean_k)
     arms["always_en_cap_zh"] = {
         **score_arm(atk_en, atk_zh, true, target),
         **score_clean_delta(cln_en, cln_zh, true, never_clean_en, never_clean_zh, target),
@@ -298,10 +303,10 @@ def eval_cell(
         zh, zh_txt, imgs, masks, gate["gate_attacked"]
     )
     cln_en, def_frac_cln = classify_gated(
-        en, en_txt, clean_imgs, masks_clean, gate["gate_clean"]
+        en, en_txt, clean_imgs, masks_clean_k, gate["gate_clean"]
     )
     cln_zh, _ = classify_gated(
-        zh, zh_txt, clean_imgs, masks_clean, gate["gate_clean"]
+        zh, zh_txt, clean_imgs, masks_clean_k, gate["gate_clean"]
     )
     arms["gated_en_cap_zh"] = {
         **score_arm(atk_en, atk_zh, true, target),
@@ -332,6 +337,7 @@ def eval_cell(
             "val_auc": gate["val_auc"],
             "test_auc": gate["test_auc"],
         },
+        "top_k": int(top_k),
         "images": imgs,
         "masks": masks,
     }
@@ -369,7 +375,11 @@ def strip_images(summary_cells: dict) -> dict:
     """Drop PIL/mask blobs before JSON write."""
     out = {}
     for k, v in summary_cells.items():
-        out[k] = {"arms": v["arms"], "detector": v["detector"]}
+        out[k] = {
+            "arms": v["arms"],
+            "detector": v["detector"],
+            "top_k": v.get("top_k", TOP_K),
+        }
     return out
 
 
@@ -455,6 +465,7 @@ def run(n: int, sweep: str, save_gallery_flag: bool = True):
         for nb in BOX_COUNTS:
             imgs, rects = build_attack(data, fonts, num_boxes=nb)
             label = f"boxes{nb}"
+            # Match mask capacity to the number of stickers (1→1, 2→2, 3→3).
             cell = eval_cell(
                 label,
                 imgs,
@@ -471,6 +482,7 @@ def run(n: int, sweep: str, save_gallery_flag: bool = True):
                 target,
                 never_clean_en,
                 never_clean_zh,
+                top_k=nb,
             )
             cells[label] = cell
         if save_gallery_flag:
@@ -480,10 +492,12 @@ def run(n: int, sweep: str, save_gallery_flag: bool = True):
             "sweep": "boxes",
             "font_size": 24,
             "box_counts": list(BOX_COUNTS),
+            "top_k_policy": "top_k = num_boxes (capacity matched to threat)",
             "cells": strip_images(cells),
             "note": (
                 "Box-count sweep at FONT_SIZE=24. boxes=1 uses frozen EN anchor only; "
-                "boxes=2 is protocol dual EN+ZH; boxes=3 adds seeded third EN box."
+                "boxes=2 is protocol dual EN+ZH; boxes=3 adds seeded third EN box. "
+                "Mask top_k equals num_boxes so three stickers are not capacity-capped."
             ),
         }
         write_summary(RESULTS / f"boxes_n{data['n']}.json", summary)
