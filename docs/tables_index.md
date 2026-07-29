@@ -24,29 +24,19 @@
 
 ### Table 2 — Attack details
 
-#### Font size
+Gated = EN∩ZH `cc_bbox_black`. Em dash (—) = gated arm not run for that setting.
 
-| Font | never EN (acc/ASR) | gated EN | gated ZH | Clean Δ EN |
-|------|-------------------:|---------:|---------:|-----------:|
-| 12 | 9.8% / 89.9% | **76.0%** | **83.9%** | +0.0 pp |
-| **24** (production) | 4.5% / 95.3% | **72.9%** | **76.5%** | −0.1 pp |
-| 40 | 3.0% / 96.9% | 58.3% | 56.3% | −0.4 pp |
-
-#### Text only vs text + white background
-
-| Mode | EN ASR | ZH ASR | EN∩ZH IoU | EN∩ZH det@0.1 | Undefended EN acc |
-|------|-------:|-------:|----------:|--------------:|------------------:|
-| white_only (pad, no letters) | 2.3% | 2.1% | 0.083 | 41.1% | **75.5%** |
-| text_only (letters, no pad) | **89.8%** | **84.5%** | **0.669** | **100%** | 9.6% |
-| full (white pad + letters) | **95.3%** | **93.6%** | **0.691** | **100%** | 4.5% |
-
-#### Number of boxes
-
-| Boxes | top_k | never EN (acc/ASR) | gated EN | gated ZH | Clean Δ EN |
-|------:|------:|-------------------:|---------:|---------:|-----------:|
-| 1 | 1 | 5.7% / 94.1% | **78.2%** | **82.9%** | −0.1 pp |
-| **2** (production) | 2 | 4.5% / 95.3% | **72.9%** | **76.5%** | −0.1 pp |
-| 3 | 3 | 2.4% / 97.5% | **45.9%** | **56.1%** | −0.8 pp |
+| Ablation | Setting | EN acc (no def) | EN acc (gated) | ZH acc (gated) |
+|----------|---------|----------------:|---------------:|---------------:|
+| Font size | 12 | 9.8% | **76.0%** | **83.9%** |
+| Font size | **24** (production) | 4.5% | **72.9%** | **76.5%** |
+| Font size | 40 | 3.0% | 58.3% | 56.3% |
+| Text vs white bg | white_only (pad, no letters) | **75.5%** | — | — |
+| Text vs white bg | text_only (letters, no pad) | 9.6% | — | — |
+| Text vs white bg | full (white pad + letters) | 4.5% | **72.9%** | **76.5%** |
+| Number of boxes | 1 (`top_k=1`) | 5.7% | **78.2%** | **82.9%** |
+| Number of boxes | **2** (production, `top_k=2`) | 4.5% | **72.9%** | **76.5%** |
+| Number of boxes | 3 (`top_k=3`) | 2.4% | **45.9%** | **56.1%** |
 
 ---
 
