@@ -1,0 +1,179 @@
+{
+  "method": "content_occlusion_cc_bbox_black",
+  "n": 100,
+  "threshold": 0.95,
+  "dilate": 3,
+  "top_k": 2,
+  "fill": "black",
+  "partner": "zh",
+  "attack": "multi",
+  "modes": [
+    "full",
+    "white_only",
+    "text_only"
+  ],
+  "arms_list": [
+    "never",
+    "always_en_cap_zh",
+    "gated_en_cap_zh"
+  ],
+  "clean_never": {
+    "en_acc": 0.81,
+    "zh_acc": 0.86
+  },
+  "device": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.11.0+cu128",
+  "cells": {
+    "full": {
+      "arms": {
+        "never": {
+          "en_acc": 0.07,
+          "en_asr": 0.93,
+          "zh_acc": 0.03,
+          "zh_asr": 0.97,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.0,
+          "mean_gt_coverage": 0.10103874362244895
+        },
+        "always_en_cap_zh": {
+          "en_acc": 0.66,
+          "en_asr": 0.05,
+          "zh_acc": 0.75,
+          "zh_asr": 0.04,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.08558414381377552
+        },
+        "gated_en_cap_zh": {
+          "en_acc": 0.66,
+          "en_asr": 0.05,
+          "zh_acc": 0.75,
+          "zh_asr": 0.04,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.08558414381377552,
+          "defended_frac_atk": 1.0,
+          "defended_frac_clean": 0.0,
+          "fire_attacked": 1.0,
+          "fire_clean": 0.0
+        }
+      },
+      "detector": {
+        "primary": "logistic",
+        "threshold": 0.5142089443305204,
+        "fire_attacked": 1.0,
+        "fire_clean": 0.0,
+        "val_auc": 1.0,
+        "test_auc": 1.0
+      }
+    },
+    "white_only": {
+      "arms": {
+        "never": {
+          "en_acc": 0.68,
+          "en_asr": 0.03,
+          "zh_acc": 0.84,
+          "zh_asr": 0.02,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.0,
+          "mean_gt_coverage": 0.10103874362244895
+        },
+        "always_en_cap_zh": {
+          "en_acc": 0.64,
+          "en_asr": 0.05,
+          "zh_acc": 0.72,
+          "zh_asr": 0.01,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.06845284598214285
+        },
+        "gated_en_cap_zh": {
+          "en_acc": 0.64,
+          "en_asr": 0.05,
+          "zh_acc": 0.72,
+          "zh_asr": 0.01,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.06845284598214285,
+          "defended_frac_atk": 0.99,
+          "defended_frac_clean": 0.97,
+          "fire_attacked": 0.99,
+          "fire_clean": 0.97
+        }
+      },
+      "detector": {
+        "primary": "linear_svm",
+        "threshold": 0.339670066711208,
+        "fire_attacked": 0.99,
+        "fire_clean": 0.97,
+        "val_auc": 0.5111111111111111,
+        "test_auc": 0.5244444444444444
+      }
+    },
+    "text_only": {
+      "arms": {
+        "never": {
+          "en_acc": 0.13,
+          "en_asr": 0.86,
+          "zh_acc": 0.1,
+          "zh_asr": 0.88,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.0,
+          "mean_gt_coverage": 0.10103874362244895
+        },
+        "always_en_cap_zh": {
+          "en_acc": 0.67,
+          "en_asr": 0.06,
+          "zh_acc": 0.82,
+          "zh_asr": 0.04,
+          "clean_en_acc": 0.77,
+          "clean_zh_acc": 0.84,
+          "clean_delta_en": -0.040000000000000036,
+          "clean_delta_zh": -0.020000000000000018,
+          "mean_mask_coverage": 0.08736607142857142
+        },
+        "gated_en_cap_zh": {
+          "en_acc": 0.67,
+          "en_asr": 0.06,
+          "zh_acc": 0.82,
+          "zh_asr": 0.04,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "mean_mask_coverage": 0.08736607142857142,
+          "defended_frac_atk": 1.0,
+          "defended_frac_clean": 0.03,
+          "fire_attacked": 1.0,
+          "fire_clean": 0.03
+        }
+      },
+      "detector": {
+        "primary": "logistic",
+        "threshold": 0.2582093155963366,
+        "fire_attacked": 1.0,
+        "fire_clean": 0.03,
+        "val_auc": 1.0,
+        "test_auc": 1.0
+      }
+    }
+  },
+  "note": "Gated black recovery on full / white_only / text_only dual-box modes. Gate trained per-mode on clean vs mode-attacked Attn-last features."
+}

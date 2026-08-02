@@ -186,7 +186,7 @@ Method overview
 - Column headers should be self-explanatory (or defined once in the caption / a short note).
 - Prefer one idea per table; split leaderboards vs ablations when mixing hurts readability.
 - Numbers: consistent decimals; highlight the main metric (e.g. MIXED2000, Clean Δ) in caption, not with decorative formatting overload.
-- Source tables for the draft: `[4_lang_table.md](4_lang_table.md)`, `[ablation_study.md](ablation_study.md)`.
+- Source tables for the draft: `[tables_index.md](tables_index.md)` (paper Tables 1–4), `[4_lang_table.md](4_lang_table.md)`, `[ablation_study.md](ablation_study.md)`.
 
 
 
@@ -210,5 +210,8 @@ Method overview
 | 3   | Dataset                                              | [x]   |
 | 4   | Qualitative results                                  | [x]   |
 | 5   | Gating decision boundaries                           | [x]   |
+
+
+**Figures frozen for draft (2026-07-30):** All five paper figures above use production **black** fill (not blur-era). Optional extra asset [`figures/gating/detector_pipeline.png`](figures/gating/detector_pipeline.png) is **out of the main paper set** (keep as appendix / slide material only). Tables locked in [`tables_index.md`](tables_index.md).
 
 

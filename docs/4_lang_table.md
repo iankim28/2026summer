@@ -8,7 +8,7 @@
 **Bilingual MIXED2000 (partner L):** `0.5 * mean(EN,L atk) + 0.5 * mean(EN,L clean_policy)`.  
 **Per-lang MIXED (baselines):** `0.5 * lang_atk + 0.5 * lang_clean_policy` from [`mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json) `per_lang`.
 
-Sources: [`baseline_comparison.md`](baseline_comparison.md), [`partner_fill_ablation/results/leaderboard.json`](../lib/notebooks/partner_fill_ablation/results/leaderboard.json), [`en_neglect_vs_blur/results/gated_n1000.json`](../lib/notebooks/en_neglect_vs_blur/results/gated_n1000.json), [`paper_baselines/results/mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json).
+Sources: [`baseline_comparison.md`](baseline_comparison.md), [`partner_fill_ablation/results/leaderboard.json`](../lib/notebooks/partner_fill_ablation/results/leaderboard.json), [`en_neglect_vs_blur/results/gated_n1000.json`](../lib/notebooks/en_neglect_vs_blur/results/gated_n1000.json), [`paper_baselines/results/mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json), [`four_way_occlusion/results/four_way_n1000.json`](../lib/notebooks/four_way_occlusion/results/four_way_n1000.json) (`arms.never` = Raw CLIP).
 
 ---
 
@@ -18,6 +18,7 @@ Primary comparison. Prefer **per-lang MIXED** when a language is evaluated; Em d
 
 | Method | EN atk | ZH atk | KO | JA | Mean atk | EN MIXED | ZH MIXED | Scope MIXED | Cost |
 |--------|-------:|-------:|:--:|:--:|---------:|---------:|---------:|------------:|-----:|
+| Raw CLIP (no defense) | 4.5% | 6.4% | 11.6% | 6.0% | **7.1%** | 45.2% | 48.9% | **48.5%** (4-lang) | 1 |
 | OCR + blur | 72.8% | 74.7% | — | — | **73.8%** | **79.05%** | **82.70%** | **80.88%** (EN+ZH) | 3 |
 | Defense-Prefix | **73.8%** | 44.5% | — | — | **59.2%** | **81.65%** | **68.15%** | **74.90%** (EN+ZH) | 2 |
 | SamplingTAR hybrid | 67.3% | — | — | — | 67.3% | 72.45% | — | 72.45% (EN) | 3 |
@@ -34,6 +35,7 @@ Primary comparison. Prefer **per-lang MIXED** when a language is evaluated; Em d
 
 **Reading the table**
 
+- Raw CLIP collapses under dual-box `multi` (mean atk **7.1%**; Scope MIXED **48.5%**) — the undefended floor for all comparisons.
 - OCR ZH MIXED (**82.70%**) is competitive with ours ZH (**83.95%**); bilingual Scope MIXED is nearly tied (**80.88%** vs ours **81.65%**).
 - Defense-Prefix wins **EN MIXED** (**81.65%** vs our EN **79.35%**) but **collapses on ZH MIXED** (**68.15%**), dragging EN+ZH Scope MIXED to **74.90%**.
 - Ours leads once partner languages are in scope (partner mean bilingual MIXED **80.84%** vs DP EN+ZH **74.90%**).
@@ -87,6 +89,7 @@ One row per method. Scope differs — always read with Table 1.
 
 | Claim | Number |
 |-------|-------:|
+| Raw CLIP mean atk / Scope MIXED (4-lang) | **7.1% / 48.5%** |
 | Ours avg bilingual MIXED (ZH/KO/JA black) | **80.84%** |
 | Ours EN MIXED (gated black) | **79.35%** |
 | Ours ZH MIXED (gated black) | **83.95%** |

@@ -19,7 +19,7 @@ Superseded handoff, planning, and early-project notes. Current paper/results doc
 
 | File | What it was |
 | --- | --- |
-| [`homework_summary_archive.md`](homework_summary_archive.md) | Homework briefings through Jul 25 |
+| [`homework_summary_archive.md`](homework_summary_archive.md) | Homework briefings through Jul 27 (Parts E–B) |
 | [`handoff.md`](handoff.md) | Early Thread A agent handoff |
 | [`handoff2.md`](handoff2.md) | Thread A handoff v2 |
 | [`handoff_gated_mixed_2000.md`](handoff_gated_mixed_2000.md) | MIXED2000 reporting task handoff |

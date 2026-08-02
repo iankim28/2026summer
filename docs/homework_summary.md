@@ -1,15 +1,15 @@
-# Homework Summary — July 27, 2026
+# Homework Summary — August 1, 2026
 
 **Project:** Defending multilingual CLIP classifiers against typographic (text-overlay) attacks on CIFAR-10.  
-**Audience:** Quick briefing for professor meeting — what was done **today**.
+**Audience:** Quick briefing for professor meeting — what was done since the Jul 27 briefing (Jul 29–30 table lock + paper prep).
 
-> Older briefings: [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) (Jul 25 + earlier).  
-> Ablation appendix: [`ablation_study.md`](ablation_study.md).  
-> Main results tables: [`4_lang_table.md`](4_lang_table.md).  
-> All tables index: [`tables_index.md`](tables_index.md).  
-> Paper outline: [`paper_draft.md`](paper_draft.md).  
+> Older briefings: [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) (Jul 27 + earlier).  
+> **Paper tables (locked):** [`tables_index.md`](tables_index.md).  
+> Main / ablation detail: [`4_lang_table.md`](4_lang_table.md), [`ablation_study.md`](ablation_study.md).  
+> Paper draft: [`paper_draft.md`](paper_draft.md).  
+> Figures: [`paper_figures_and_notes.md`](paper_figures_and_notes.md).  
 > Protocol: [`PROTOCOL.md`](../lib/notebooks/PROTOCOL.md).  
-> Full diary for today: [`research_diary.md`](research_diary.md) ([animal occlusion](research_diary.md#L2889), [ablation + geometry](research_diary.md#L2936)).
+> Diary: [`research_diary.md`](research_diary.md) ([Jul 29](research_diary.md#L2983)).
 
 **Shared protocol unless noted:** frozen dual-box CIFAR-10 n=1000 (`CIFAR10_BALANCED_1000_SAMPLE` + `attack_pos`), 224×224, attack = `multi`, thr ≥ 0.95, CUDA.  
 **Ours:** gated Attn-last EN∩L `cc_bbox_black`.
@@ -18,141 +18,114 @@
 
 ## One-paragraph overview
 
-Today closed the **ablation checklist**: measured production **black occlusion** on animal / mixed / text stickers; consolidated method + attack ablations into [`ablation_study.md`](ablation_study.md); ran the two open geometry sweeps (**font 12/24/40**, **boxes 1/2/3**); and synced [`paper_draft.md`](paper_draft.md) to [`4_lang_table.md`](4_lang_table.md) + the new appendix. Headline: gated black stays **typographic** (text EN **72.9%**); hybrid partial (**43.5%**); animal-only weak (EN∩ZH **20.6%**, EN-only **32.9%**). Production threat model stays **font 24 / 2 boxes** — font 40 and 3 boxes stress the recipe.
+Since Jul 27 we **locked the paper tables** and started writing. Jul 29 added ZH MIXED for OCR/DP, fixed 3-box recovery with matched `top_k`, and ran true **4-way** EN∩ZH∩KO∩JA occlusion (gated mean MIXED **83.4%**). Jul 30 filled the last table gaps: **Raw CLIP** on the main table, gated **text_only / white_only** black occlusion, Tables 1–4 reshaped in [`tables_index.md`](tables_index.md) (1-decimal, production bolding, slim Table 1 + clearer Table 4 candidates), figures marked frozen for draft, and [`paper_draft.md`](paper_draft.md) §1 expanded to first-pass prose with an abstract draft.
 
 ---
 
-## Checklist done today
+## Checklist done (Jul 29–30)
 
 | Item | Kind | Status | Where |
 | --- | --- | --- | --- |
-| Animal / hybrid / text black occlusion | attack + method | **Done** | [`ablation_study.md`](ablation_study.md) §A.3 / §B.2; [diary](research_diary.md#L2889) |
-| Fill type (document only) | method | **Done** | [`ablation_study.md`](ablation_study.md) §A.1 |
-| Gate on vs always-on (document only) | method | **Done** | [`ablation_study.md`](ablation_study.md) §A.2 |
-| Single-lang occlusion (document only) | method | **Done** | [`ablation_study.md`](ablation_study.md) §A.3 |
-| Four-lang main results (document only) | method | **Done** | [`4_lang_table.md`](4_lang_table.md); [`ablation_study.md`](ablation_study.md) §A.4 |
-| Text vs white / sticker / hybrid | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.1–B.2 |
-| Font size 12 / 24 / 40 | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.3; [diary](research_diary.md#L2936) |
-| Number of boxes 1 / 2 / 3 | attack | **Done** | [`ablation_study.md`](ablation_study.md) §B.4; [diary](research_diary.md#L2936) |
-| Paper sync (main + ablations + geometry) | writing | **Done** | [`paper_draft.md`](paper_draft.md) |
+| ZH MIXED for OCR + Defense-Prefix | results / docs | **Done** | [`4_lang_table.md`](4_lang_table.md); [`mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json) |
+| 3-box re-run with `top_k = num_boxes` | attack | **Done** | gated EN **45.9%**; [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json) |
+| Four-way occlusion EN∩ZH∩KO∩JA | method | **Done** | gated mean MIXED **83.4%**; [`four_way_occlusion/`](../lib/notebooks/four_way_occlusion/) |
+| Raw CLIP row on main table | tables | **Done** | mean atk **7.1%**; [`tables_index.md`](tables_index.md) Table 1 |
+| Gated black on white_only / text_only / full | attack | **Done** | [`content_occlusion_n1000.json`](../lib/notebooks/attack_component_ablation/results/content_occlusion_n1000.json) |
+| Paper Tables 1–4 locked + polish | writing | **Done** | [`tables_index.md`](tables_index.md) (slim T1, clearer T4, 1-dec, bold rule) |
+| Figures frozen for draft | figures | **Done** | [`paper_figures_and_notes.md`](paper_figures_and_notes.md); `detector_pipeline.png` optional/out |
+| Abstract + §1 first-pass prose | writing | **Done** | [`paper_draft.md`](paper_draft.md) |
 
 ---
 
 ## What was done
 
-### 1. Animal-sticker black occlusion recovery
+### 1. Main-table language coverage + ZH MIXED (Jul 29)
 
-**Question:** Does gated `cc_bbox_black` repair animal / mixed / text? Does EN-only close the bilingual miss on animals?
+Promoted language-coverage as Table 1; derived OCR/DP **ZH MIXED** from existing finals (no GPU re-run).
 
-**Gated black (n=1000)**
+| Method | EN MIXED | ZH MIXED | Scope MIXED |
+| --- | ---: | ---: | ---: |
+| OCR + blur | 79.1% | 82.7% | 80.9% (EN+ZH) |
+| Defense-Prefix | 81.7% | 68.2% | 74.9% (EN+ZH) |
+| **Ours EN∩ZH black** | **79.4%** | **84.0%** | **81.7%** bilingual |
 
-| Mode | Arm | EN acc | EN ASR | Clean Δ EN |
-| --- | --- | ---: | ---: | ---: |
-| all_text | EN∩ZH | **72.9%** | 3.7% | −0.1 pp |
-| all_text | EN-only | 68.0% | 3.6% | −0.1 pp |
-| mixed | EN∩ZH | **43.5%** | 27.3% | −0.1 pp |
-| mixed | EN-only | 40.2% | 27.4% | −0.1 pp |
-| all_sticker | EN∩ZH | 20.6% | 54.2% | −1.8 pp |
-| all_sticker | EN-only | **32.9%** | **28.5%** | −6.1 pp |
-
-**Verdict:** Production EN∩ZH black is **typographic**. EN-only helps animals more but costs clean accuracy and still trails oracle GT black (animal EN **56.9%**) — localization is the bottleneck, not fill.
-
-- Doc: [`ablation_study.md` §A.3 / §B.2](ablation_study.md)  
-- Diary: [`research_diary.md` § 2026-07-27 — Animal-sticker black occlusion](research_diary.md#L2889)  
-- Code / JSON / figure: [`run_occlusion.py`](../lib/notebooks/animal_sticker_ablation/run_occlusion.py), [`occlusion_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/occlusion_n1000.json), [`gallery_occlusion.png`](../lib/notebooks/animal_sticker_ablation/figures/gallery_occlusion.png)
+DP still wins EN MIXED; collapses on ZH. Diary: [2026-07-29](research_diary.md#L2983).
 
 ---
 
-### 2. Ablation study write-up (method + attack)
+### 2. Four-way occlusion (Jul 29)
 
-New appendix source [`ablation_study.md`](ablation_study.md) consolidates already-finished numbers (no re-run) plus today’s geometry:
+True EN ∩ ZH ∩ KO ∩ JA Attn-last → gated `cc_bbox_black` ([`four_way_occlusion/`](../lib/notebooks/four_way_occlusion/)).
 
-| Section | Ablation |
+| Arm | Mean atk | Mean MIXED | Clean Δ |
+| --- | ---: | ---: | --- |
+| never (Raw CLIP) | 7.1% | 48.5% | — |
+| always | 77.5% | 73.0% | ~−20 pp |
+| **gated** | **77.4%** | **83.4%** | ≈ −0.3 to −0.6 pp |
+
+Production default stays pairwise EN∩L (cost 4); 4-way is the all-language variant.
+
+---
+
+### 3. Content occlusion — text vs white gated (Jul 30)
+
+New runner [`attack_component_ablation/run_occlusion.py`](../lib/notebooks/attack_component_ablation/run_occlusion.py); n=1000 CUDA. `full` matched production **72.9 / 76.5**.
+
+| Mode | EN (no def) | EN gated | ZH gated |
+| --- | ---: | ---: | ---: |
+| white_only | 75.5% | 70.9% | 75.0% |
+| text_only | 9.6% | **75.8%** | **82.7%** |
+| **full** (production) | 4.5% | **72.9%** | **76.5%** |
+
+Glyphs drive hijack and recovery; blank pads do not.
+
+---
+
+### 4. Paper tables locked ([`tables_index.md`](tables_index.md))
+
+| Paper table | Content |
 | --- | --- |
-| A.1 | Fill type — black > mean > blur > neglect |
-| A.2 | Gate on/off — KO/JA Clean Δ −11pp → ~0 |
-| A.3 | Single-lang / EN-only vs EN∩L |
-| A.4 | Four-lang transfer → [`4_lang_table.md`](4_lang_table.md) |
-| B.1–B.2 | Glyphs vs white pads; sticker / text / hybrid defense |
-| B.3–B.4 | Font size; number of boxes |
+| **Table 1** | Raw CLIP + baselines + Ours (full + slim candidate) |
+| **Table 2** | Font / text vs white / #boxes (shared columns) |
+| **Table 3** | Sticker / text / hybrid with Raw CLIP |
+| **Table 4** | #langs / gate / fill (original + clearer Score candidate) |
 
-Diary inventory: [`research_diary.md` § 2026-07-27 — Ablation study write-up + attack geometry](research_diary.md#L2936).
+Polish: **1 decimal**; bold = Ours rows + Raw floor (T1) or **production setting** (ablations), not every column max. Recommended body set: **T1 slim + T2 + T3 + T4 clearer**.
 
 ---
 
-### 3. Font size (attack geometry)
+### 5. Figures + writing start
 
-Dual-box, gated black, font ∈ {12, **24**, 40}.
-
-| Font | never EN ASR | gated EN | gated ZH | Clean Δ EN |
-| ---: | ---: | ---: | ---: | ---: |
-| 12 | 89.9% | **76.0%** | 83.9% | +0.0 pp |
-| **24** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
-| 40 | 96.9% | 58.3% | 56.3% | −0.4 pp |
-
-**Verdict:** Font **24** stays production. Font 40 drops gated EN **−14.6 pp**.
-
-- Doc: [`ablation_study.md` §B.3](ablation_study.md)  
-- Diary: [geometry section](research_diary.md#L2936)  
-- Results: [`font_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/font_n1000.json)
-
----
-
-### 4. Number of boxes (attack geometry)
-
-Font 24, boxes ∈ {1, **2**, 3}; **`top_k = num_boxes`** (capacity matched to threat).
-
-| Boxes | never EN ASR | gated EN | gated ZH | Clean Δ EN |
-| ---: | ---: | ---: | ---: | ---: |
-| 1 | 94.1% | **78.2%** | 82.9% | −0.1 pp |
-| **2** | **95.3%** | **72.9%** | **76.5%** | −0.1 pp |
-| 3 | 97.5% | **45.9%** | **56.1%** | −0.8 pp |
-
-**Verdict:** Dual-box stays production. With matched `top_k=3`, three boxes recover gated EN to **45.9%** (was **8.5%** under production `top_k=2`).
-
-- Doc: [`ablation_study.md` §B.4](ablation_study.md)  
-- Results: [`boxes_n1000.json`](../lib/notebooks/attack_geometry_ablation/results/boxes_n1000.json)  
-- Code: [`attack_geometry_ablation/run_ablation.py`](../lib/notebooks/attack_geometry_ablation/run_ablation.py)
-
----
-
-### 5. Paper draft sync
-
-[`paper_draft.md`](paper_draft.md) now pulls:
-
-- Main avg + lang detail from [`4_lang_table.md`](4_lang_table.md) (§3.5)
-- Animal / hybrid / text occlusion (§3.2.2)
-- Font + boxes geometry (§3.11); threat model states **font 24**
-- Appendix pointer → [`ablation_study.md`](ablation_study.md)
+- Five paper figures marked **frozen for draft** (black fill); `detector_pipeline.png` out of main set — [`paper_figures_and_notes.md`](paper_figures_and_notes.md).
+- [`paper_draft.md`](paper_draft.md): abstract draft + §1 first-pass prose; §2–§3 still outline-heavy with locked table pointers.
 
 ---
 
 ## Numbers to quote in a meeting
 
 | Claim | Number |
-| --- | --- |
-| Gated text (all_text) EN / ZH | **72.9% / 76.5%** |
-| Gated mixed EN | **43.5%** |
-| Gated animal EN∩ZH / EN-only | **20.6% / 32.9%** |
-| Animal oracle GT black EN | **56.9%** |
-| Font 12 / **24** / 40 gated EN | **76.0% / 72.9% / 58.3%** |
-| Boxes 1 / **2** / 3 gated EN | **78.2% / 72.9% / 45.9%** |
-| Ours avg bilingual MIXED (ZH/KO/JA) | **80.84%** ([`4_lang_table.md`](4_lang_table.md)) |
-| Production geometry | **font 24 / NUM_BOXES=2** |
+| --- | ---: |
+| Raw CLIP mean atk / Scope MIXED | **7.1% / 48.5%** |
+| Ours EN∩ZH atk / EN MIXED / bilingual MIXED | **72.9% / 79.4% / 81.7%** |
+| OCR / DP Scope MIXED (EN+ZH) | **80.9% / 74.9%** |
+| Four-way gated mean MIXED | **83.4%** |
+| text_only / full gated EN | **75.8% / 72.9%** |
+| Partner bilingual MIXED ZH / KO / JA | **81.7 / 78.4 / 82.5%** |
+| Production geometry | **font 24 / 2 boxes / black / gated** |
 
 ---
 
 ## Next steps
 
-1. Write prose (title/abstract, Related Work) from the synced outline.
-2. Regenerate pipeline figures with **black** fill.
-3. Optional only: stronger animal / multi-sticker localization — not required for the typographic main claim.
+1. Expand §2–§3 outline → full prose; draft Related Work; lock title/abstract.
+2. Put **T1 slim + T2 + T3 + T4 clearer** into the paper body; full T1 in appendix if needed.
+3. Optional only: animal / multi-sticker localization — not required for typographic main claim.
 
 ---
 
 ## One breath
 
-> Ablation checklist closed. Gated black recovers **typographic** dual-box (EN **72.9%**), partially hybrid (**43.5%**), poorly animal-only (**20.6%**; EN-only **32.9%** vs oracle **56.9%**). Font **24** / **2 boxes** stay production; font 40 (−14.6 pp) is a known stress case; 3 boxes with matched `top_k=3` recover gated EN **45.9%**. Full tables live in [`ablation_study.md`](ablation_study.md) and [`4_lang_table.md`](4_lang_table.md); narrative in the [Jul 27 diary](research_diary.md#L2889).
+> Paper tables are locked. Raw CLIP collapses to **7.1%** mean atk; gated black recovers EN∩ZH to **72.9%** atk / **81.7%** bilingual MIXED; 4-way gated reaches **83.4%** mean MIXED; text_only gated (**75.8%**) ≈ full — glyphs, not pads. Figures frozen; §1 prose started. Canonical tables: [`tables_index.md`](tables_index.md).
 
 ---
 
@@ -160,10 +133,11 @@ Font 24, boxes ∈ {1, **2**, 3}; **`top_k = num_boxes`** (capacity matched to t
 
 | Work | Path |
 | --- | --- |
-| Ablation appendix | [`docs/ablation_study.md`](ablation_study.md) |
-| Main 4-lang tables | [`docs/4_lang_table.md`](4_lang_table.md) |
-| Paper outline | [`docs/paper_draft.md`](paper_draft.md) |
-| Animal occlusion JSON / gallery | [`animal_sticker_ablation/results/occlusion_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/occlusion_n1000.json), [`gallery_occlusion.png`](../lib/notebooks/animal_sticker_ablation/figures/gallery_occlusion.png) |
-| Font / boxes JSON | [`attack_geometry_ablation/results/`](../lib/notebooks/attack_geometry_ablation/results/) |
-| Diary (today) | [`research_diary.md`](research_diary.md) ([#L2889](research_diary.md#L2889), [#L2936](research_diary.md#L2936)) |
-| Archive (Jul 25 + earlier) | [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) |
+| Paper tables | [`docs/tables_index.md`](tables_index.md) |
+| 4-lang / ablation detail | [`4_lang_table.md`](4_lang_table.md), [`ablation_study.md`](ablation_study.md) |
+| Paper draft | [`docs/paper_draft.md`](paper_draft.md) |
+| Figures checklist | [`docs/paper_figures_and_notes.md`](paper_figures_and_notes.md) |
+| Content occlusion JSON | [`attack_component_ablation/results/content_occlusion_n1000.json`](../lib/notebooks/attack_component_ablation/results/content_occlusion_n1000.json) |
+| Four-way JSON | [`four_way_occlusion/results/four_way_n1000.json`](../lib/notebooks/four_way_occlusion/results/four_way_n1000.json) |
+| Diary (Jul 29) | [`research_diary.md`](research_diary.md#L2983) |
+| Archive (Jul 27 + earlier) | [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) |

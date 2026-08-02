@@ -106,7 +106,7 @@ Full pairwise tables: [`4_lang_table.md`](4_lang_table.md). Quote set:
 
 **Question:** Is the hijack from glyphs or from the white pad? Does production gated black repair animal stickers, typographic text, and mixed hybrid?
 
-**Setup:** Same GT boxes where applicable. Modes include `white_only` (blank white pad), `all_text` / `full` (glyphs), `mixed`, `all_sticker` (animal). Attack+localization from [`attack_component_ablation/results/summary_n1000.json`](../lib/notebooks/attack_component_ablation/results/summary_n1000.json) and [`animal_sticker_ablation/results/summary_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json).
+**Setup:** Same GT boxes where applicable. Modes include `white_only` (blank white pad), `text_only` / `full` / `all_text` (glyphs), `mixed`, `all_sticker` (animal). Attack+localization from [`attack_component_ablation/results/summary_n1000.json`](../lib/notebooks/attack_component_ablation/results/summary_n1000.json) and [`animal_sticker_ablation/results/summary_n1000.json`](../lib/notebooks/animal_sticker_ablation/results/summary_n1000.json). Gated black on white/text/full: [`content_occlusion_n1000.json`](../lib/notebooks/attack_component_ablation/results/content_occlusion_n1000.json). Paper tables: [`tables_index.md`](tables_index.md) Tables 2–3.
 
 **Localization**
 
@@ -117,9 +117,17 @@ Full pairwise tables: [`4_lang_table.md`](4_lang_table.md). Quote set:
 | mixed | **98.7%** | **97.6%** | 0.310 | **99.8%** |
 | all_text | **95.3%** | **93.6%** | **0.691** | **100%** |
 
-Undefended EN acc: white_only **75.5%** vs text_only **9.6%** vs full **4.5%**. Letters drive ASR and EN∩ZH localization; blank white pads do not. Threat model = **readable text**.
+**Gated black — text vs white background** (EN∩ZH, n=1000)
 
-**Gated black recovery** (see A.3 table): `all_text` → EN **72.9%**; `mixed` → **43.5%**; `all_sticker` → **20.6%** (EN-only **32.9%**).
+| Mode | EN acc (no def) | EN acc (gated) | ZH acc (gated) | fire atk / clean |
+|------|----------------:|---------------:|---------------:|-----------------:|
+| white_only | **75.5%** | 70.9% | 75.0% | 98.4% / 92.5% |
+| text_only | 9.6% | **75.8%** | **82.7%** | 99.9% / 5.4% |
+| full | 4.5% | **72.9%** | **76.5%** | 99.8% / 0.4% |
+
+Letters drive ASR and EN∩ZH localization; blank white pads do not (and the gate fires heavily on clean for `white_only` because pad-only heatmaps are not attack-like). Threat model = **readable text**.
+
+**Gated black recovery — sticker / hybrid / text** (see A.3 / [`tables_index.md`](tables_index.md) Table 3): Raw CLIP EN text **4.5%** / mixed **1.3%** / sticker **11.0%**; gated EN∩ZH **72.9% / 43.5% / 20.6%** (EN-only animal **32.9%**).
 
 **Verdict:** Method is strong on typographic dual-box; hybrid is partial; animal-only is a limitation (intersection is text-favoring). Glyphs—not white pads—cause the hijack.
 
@@ -173,6 +181,8 @@ Always-on EN: 78.2% / 72.9% / 46.0% (1 / 2 / 3). Font-24 dual-box gated matches 
 | Gate on/off | method | Done |
 | Single-lang occlusion | method | Done |
 | Four-lang results | method | Done (pairwise + 4-way) |
-| Text vs white / sticker / hybrid | attack | Done |
+| Text vs white / sticker / hybrid | attack | Done (gated white/text/full in `content_occlusion_n1000.json`) |
 | Font size | attack | **Done** (`attack_geometry_ablation`) |
 | Number of boxes | attack | **Done** (`attack_geometry_ablation`) |
+
+Paper table layout (Tables 1–4): [`tables_index.md`](tables_index.md).
