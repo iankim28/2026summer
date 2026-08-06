@@ -18,16 +18,16 @@
 | Method | EN acc / mixed acc | ZH acc / mixed acc | KO acc / mixed acc | JA acc / mixed acc | Mean acc (attacked) | Mean mixed acc | Clean Δ EN | Cost |
 |--------|-------------------:|-------------------:|-------------------:|-------------------:|--------------------:|---------------:|-----------:|-----:|
 | No defense (Raw CLIP) | 4.5 / 45.2 | 6.4 / 48.9 | 11.6 / 50.6 | 6.0 / 49.3 | **7.1%** | **48.5%** | 0.0 pp | 1 |
-| 4×4 grid occlusion | 47.8 / 63.9† | 49.2 / 65.1† | 49.0 / 61.0† | 50.0 / 67.5† | 49.0%† | 64.4%† | −1.0 pp† | 62 |
+| 4×4 grid occlusion | 47.8 / 65.3 | 49.2 / 66.8 | 52.8 / 65.8 | 55.1 / 70.8 | 51.2% | 67.2% | −3.2 pp | 62 |
 | OCR + blur | 72.8 / 79.1 | 74.7 / 82.7 | 80.2 / 84.5 | 87.6 / 89.7 | **78.8%** | **84.0%** | −0.6 pp | 3 |
-| Defense-Prefix | 73.8 / 81.7 | 81.4 / 86.2 | 66.0 / 77.0† | 88.0 / 89.5† | 77.3%† | 83.6%† | +0.5 pp | 2 |
-| SamplingTAR + blur | 67.3 / 72.5 | 68.0 / 77.5† | 66.0 / 72.5† | 41.0 / 62.0† | 60.6%† | 71.1%† | −8.3 pp | 3 |
-| Dyslexify + blur | 66.9 / 72.4 | 40.0 / 57.0† | 73.0 / 77.0† | 37.0 / 62.0† | 54.2%† | 67.1%† | −8.1 pp | 3 |
+| Defense-Prefix | 73.8 / 81.7 | 81.4 / 86.2 | 69.1 / 79.4 | 84.8 / 89.2 | 77.3% | 84.1% | +0.5 pp | 2 |
+| SamplingTAR + blur | 67.3 / 72.5 | 68.9 / 79.3 | 59.0 / 62.9 | 51.5 / 72.1 | 61.7% | 71.7% | −8.3 pp | 3 |
+| Dyslexify + blur | 66.9 / 72.4 | 68.2 / 79.6 | 62.9 / 67.1 | 43.2 / 67.0 | 60.3% | 71.5% | −8.1 pp | 3 |
 | **Ours (EN∩ZH)** | **72.9 / 79.4** | **76.5 / 84.0** | — | — | **74.7%** | **81.7%** | **−0.1 pp** | **4** |
 | **Ours (EN∩KO)** | **65.6 / 75.5** | — | **73.1 / 81.3** | — | **69.4%** | **78.4%** | **−0.6 pp** | **4** |
 | **Ours (EN∩JA)** | **68.9 / 77.4** | — | — | **82.8 / 87.7** | **75.9%** | **82.5%** | **0.0 pp** | **4** |
 
-† = provisional smoke n=100 (see [`paper_tables_final.md`](paper_tables_final.md) schedule). Grid EN/ZH attacked from [`_test_grid/results/comparison_n1000.json`](../lib/notebooks/_test_grid/results/comparison_n1000.json); mixed/CleanΔ/KO/JA from [`grid_occlusion/results/comparison_summary_4lang_smoke_n100.json`](../lib/notebooks/paper_baselines/grid_occlusion/results/comparison_summary_4lang_smoke_n100.json). DP KO/JA: [`defense_prefix/results/comparison_summary_smoke_n100_ko.json`](../lib/notebooks/paper_baselines/defense_prefix/results/comparison_summary_smoke_n100_ko.json), [`..._ja.json`](../lib/notebooks/paper_baselines/defense_prefix/results/comparison_summary_smoke_n100_ja.json). Hybrid KO/JA/ZH: `sampling_tar` / `dyslexify` `*_hybrid_{ko,ja,zh}.json`. Raw CLIP / OCR / Ours / DP EN+ZH unchanged finals.
+All baseline cells are n=1000 finals. Sources: [`grid_occlusion/results/comparison_summary_4lang_final_n1000.json`](../lib/notebooks/paper_baselines/grid_occlusion/results/comparison_summary_4lang_final_n1000.json); DP KO/JA `comparison_summary_final_n1000_{ko,ja}.json`; hybrid ZH/KO/JA `comparison_summary_final_n1000_hybrid_{zh,ko,ja}.json`; MIXED from [`mixed_2000_summary.json`](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json).
 
 ---
 

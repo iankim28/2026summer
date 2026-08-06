@@ -272,12 +272,6 @@ def run_eval(n: int, status: str):
             [0.5 * def_acc[L] + 0.5 * clean_deg[L]["masked_acc"] for L in ALL_LANGS]
         )
     )
-    print(
-        f"Grid 4-lang mean_atk={100*mean_atk:.1f}% mean_mixed={100*mean_mixed:.1f}%  "
-        + " ".join(f"{L.upper()}={100*def_acc[L]:.1f}%" for L in ALL_LANGS)
-        + f"  CleanΔEN={100*clean_deg['en']['delta_acc']:.1f}pp"
-    )
-
     if status == "sanity" and def_acc["en"] <= atk_acc["en"] + 0.05:
         raise RuntimeError("Gate A fail: grid defense did not improve EN attacked acc")
 
@@ -314,6 +308,12 @@ def run_eval(n: int, status: str):
     }
     write_summary(
         RESULTS / f"comparison_summary_4lang_{status}_n{data['n']}.json", payload
+    )
+    print(
+        f"Grid 4-lang mean_atk={100*mean_atk:.1f}% mean_mixed={100*mean_mixed:.1f}%  "
+        + " ".join(f"{L.upper()}={100*def_acc[L]:.1f}%" for L in ALL_LANGS)
+        + f"  Clean_delta_EN={100*clean_deg['en']['delta_acc']:.1f}pp",
+        flush=True,
     )
     write_summary(RESULTS / "comparison_summary_4lang.json", payload)
     return payload

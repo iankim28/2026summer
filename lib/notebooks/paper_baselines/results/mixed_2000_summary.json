@@ -7,44 +7,44 @@
       "method": "grid_occlusion",
       "display": "4x4 grid occlusion",
       "scope": "EN+ZH+KO+JA",
-      "source": "paper_baselines\\grid_occlusion\\results\\comparison_summary_4lang_smoke_n100.json",
+      "source": "paper_baselines\\grid_occlusion\\results\\comparison_summary_4lang_final_n1000.json",
       "policies": {
         "never": {
-          "attacked_mean_acc": 0.05,
-          "clean_policy_mean_acc": 0.865,
-          "mixed_2000_mean_acc": 0.4575,
+          "attacked_mean_acc": 0.07125000000000001,
+          "clean_policy_mean_acc": 0.8985000000000001,
+          "mixed_2000_mean_acc": 0.48487500000000006,
           "clean_delta_mean": 0.0
         },
         "always": {
-          "attacked_mean_acc": 0.4675,
-          "clean_policy_mean_acc": 0.7975,
-          "mixed_2000_mean_acc": 0.6325000000000001,
-          "clean_delta_mean": -0.0675
+          "attacked_mean_acc": 0.51225,
+          "clean_policy_mean_acc": 0.83075,
+          "mixed_2000_mean_acc": 0.6715,
+          "clean_delta_mean": -0.06775000000000003
         }
       },
       "per_lang": {
         "en": {
-          "attacked_acc": 0.44,
-          "clean_policy_acc": 0.8,
-          "mixed_2000": 0.62,
-          "clean_delta": -0.010000000000000009
+          "attacked_acc": 0.478,
+          "clean_policy_acc": 0.827,
+          "mixed_2000": 0.6525,
+          "clean_delta": -0.03200000000000003
         },
         "zh": {
-          "attacked_acc": 0.44,
-          "clean_policy_acc": 0.81,
-          "mixed_2000": 0.625,
-          "clean_delta": -0.04999999999999993
+          "attacked_acc": 0.492,
+          "clean_policy_acc": 0.844,
+          "mixed_2000": 0.6679999999999999,
+          "clean_delta": -0.07000000000000006
         },
         "ko": {
-          "attacked_acc": 0.49,
-          "clean_policy_acc": 0.73,
-          "mixed_2000": 0.61,
-          "clean_delta": -0.15000000000000002
+          "attacked_acc": 0.528,
+          "clean_policy_acc": 0.787,
+          "mixed_2000": 0.6575,
+          "clean_delta": -0.10899999999999999
         },
         "ja": {
-          "attacked_acc": 0.5,
-          "clean_policy_acc": 0.85,
-          "mixed_2000": 0.675,
+          "attacked_acc": 0.551,
+          "clean_policy_acc": 0.865,
+          "mixed_2000": 0.708,
           "clean_delta": -0.06000000000000005
         }
       }
@@ -130,6 +130,62 @@
       }
     },
     {
+      "method": "defense_prefix_ko",
+      "display": "Defense-Prefix KO",
+      "scope": "KO",
+      "source": "paper_baselines\\defense_prefix\\results\\comparison_summary_final_n1000_ko.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.116,
+          "clean_policy_mean_acc": 0.896,
+          "mixed_2000_mean_acc": 0.506,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.691,
+          "clean_policy_mean_acc": 0.897,
+          "mixed_2000_mean_acc": 0.794,
+          "clean_delta_mean": 0.0010000000000000009
+        }
+      },
+      "per_lang": {
+        "ko": {
+          "attacked_acc": 0.691,
+          "clean_policy_acc": 0.897,
+          "mixed_2000": 0.794,
+          "clean_delta": 0.0010000000000000009
+        }
+      }
+    },
+    {
+      "method": "defense_prefix_ja",
+      "display": "Defense-Prefix JA",
+      "scope": "JA",
+      "source": "paper_baselines\\defense_prefix\\results\\comparison_summary_final_n1000_ja.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.06,
+          "clean_policy_mean_acc": 0.925,
+          "mixed_2000_mean_acc": 0.49250000000000005,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.848,
+          "clean_policy_mean_acc": 0.936,
+          "mixed_2000_mean_acc": 0.892,
+          "clean_delta_mean": 0.01100000000000001
+        }
+      },
+      "per_lang": {
+        "ja": {
+          "attacked_acc": 0.848,
+          "clean_policy_acc": 0.936,
+          "mixed_2000": 0.892,
+          "clean_delta": 0.01100000000000001
+        }
+      }
+    },
+    {
       "method": "dyslexify",
       "display": "Dyslexify (heads)",
       "scope": "EN",
@@ -189,27 +245,83 @@
       "method": "dyslexify_hybrid_zh",
       "display": "Dyslexify hybrid ZH",
       "scope": "ZH",
-      "source": "paper_baselines\\dyslexify\\results\\comparison_summary_smoke_n100_hybrid_zh.json",
+      "source": "paper_baselines\\dyslexify\\results\\comparison_summary_final_n1000_hybrid_zh.json",
       "policies": {
         "never": {
-          "attacked_mean_acc": 0.03,
-          "clean_policy_mean_acc": 0.86,
-          "mixed_2000_mean_acc": 0.445,
+          "attacked_mean_acc": 0.064,
+          "clean_policy_mean_acc": 0.914,
+          "mixed_2000_mean_acc": 0.489,
           "clean_delta_mean": 0.0
         },
         "always": {
-          "attacked_mean_acc": 0.4,
-          "clean_policy_mean_acc": 0.74,
-          "mixed_2000_mean_acc": 0.5700000000000001,
-          "clean_delta_mean": -0.12
+          "attacked_mean_acc": 0.682,
+          "clean_policy_mean_acc": 0.91,
+          "mixed_2000_mean_acc": 0.796,
+          "clean_delta_mean": -0.0040000000000000036
         }
       },
       "per_lang": {
         "zh": {
-          "attacked_acc": 0.4,
-          "clean_policy_acc": 0.74,
-          "mixed_2000": 0.5700000000000001,
-          "clean_delta": -0.12
+          "attacked_acc": 0.682,
+          "clean_policy_acc": 0.91,
+          "mixed_2000": 0.796,
+          "clean_delta": -0.0040000000000000036
+        }
+      }
+    },
+    {
+      "method": "dyslexify_hybrid_ko",
+      "display": "Dyslexify hybrid KO",
+      "scope": "KO",
+      "source": "paper_baselines\\dyslexify\\results\\comparison_summary_final_n1000_hybrid_ko.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.116,
+          "clean_policy_mean_acc": 0.896,
+          "mixed_2000_mean_acc": 0.506,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.629,
+          "clean_policy_mean_acc": 0.713,
+          "mixed_2000_mean_acc": 0.671,
+          "clean_delta_mean": -0.18300000000000005
+        }
+      },
+      "per_lang": {
+        "ko": {
+          "attacked_acc": 0.629,
+          "clean_policy_acc": 0.713,
+          "mixed_2000": 0.671,
+          "clean_delta": -0.18300000000000005
+        }
+      }
+    },
+    {
+      "method": "dyslexify_hybrid_ja",
+      "display": "Dyslexify hybrid JA",
+      "scope": "JA",
+      "source": "paper_baselines\\dyslexify\\results\\comparison_summary_final_n1000_hybrid_ja.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.06,
+          "clean_policy_mean_acc": 0.925,
+          "mixed_2000_mean_acc": 0.49250000000000005,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.432,
+          "clean_policy_mean_acc": 0.908,
+          "mixed_2000_mean_acc": 0.67,
+          "clean_delta_mean": -0.017000000000000015
+        }
+      },
+      "per_lang": {
+        "ja": {
+          "attacked_acc": 0.432,
+          "clean_policy_acc": 0.908,
+          "mixed_2000": 0.67,
+          "clean_delta": -0.017000000000000015
         }
       }
     },
@@ -273,27 +385,83 @@
       "method": "sampling_tar_hybrid_zh",
       "display": "SamplingTAR hybrid ZH",
       "scope": "ZH",
-      "source": "paper_baselines\\sampling_tar\\results\\comparison_summary_smoke_n100_hybrid_zh.json",
+      "source": "paper_baselines\\sampling_tar\\results\\comparison_summary_final_n1000_hybrid_zh.json",
       "policies": {
         "never": {
-          "attacked_mean_acc": 0.03,
-          "clean_policy_mean_acc": 0.86,
-          "mixed_2000_mean_acc": 0.445,
+          "attacked_mean_acc": 0.064,
+          "clean_policy_mean_acc": 0.914,
+          "mixed_2000_mean_acc": 0.489,
           "clean_delta_mean": 0.0
         },
         "always": {
-          "attacked_mean_acc": 0.68,
-          "clean_policy_mean_acc": 0.87,
-          "mixed_2000_mean_acc": 0.775,
-          "clean_delta_mean": 0.010000000000000009
+          "attacked_mean_acc": 0.689,
+          "clean_policy_mean_acc": 0.896,
+          "mixed_2000_mean_acc": 0.7925,
+          "clean_delta_mean": -0.018000000000000016
         }
       },
       "per_lang": {
         "zh": {
-          "attacked_acc": 0.68,
-          "clean_policy_acc": 0.87,
-          "mixed_2000": 0.775,
-          "clean_delta": 0.010000000000000009
+          "attacked_acc": 0.689,
+          "clean_policy_acc": 0.896,
+          "mixed_2000": 0.7925,
+          "clean_delta": -0.018000000000000016
+        }
+      }
+    },
+    {
+      "method": "sampling_tar_hybrid_ko",
+      "display": "SamplingTAR hybrid KO",
+      "scope": "KO",
+      "source": "paper_baselines\\sampling_tar\\results\\comparison_summary_final_n1000_hybrid_ko.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.116,
+          "clean_policy_mean_acc": 0.896,
+          "mixed_2000_mean_acc": 0.506,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.59,
+          "clean_policy_mean_acc": 0.667,
+          "mixed_2000_mean_acc": 0.6285000000000001,
+          "clean_delta_mean": -0.22899999999999998
+        }
+      },
+      "per_lang": {
+        "ko": {
+          "attacked_acc": 0.59,
+          "clean_policy_acc": 0.667,
+          "mixed_2000": 0.6285000000000001,
+          "clean_delta": -0.22899999999999998
+        }
+      }
+    },
+    {
+      "method": "sampling_tar_hybrid_ja",
+      "display": "SamplingTAR hybrid JA",
+      "scope": "JA",
+      "source": "paper_baselines\\sampling_tar\\results\\comparison_summary_final_n1000_hybrid_ja.json",
+      "policies": {
+        "never": {
+          "attacked_mean_acc": 0.06,
+          "clean_policy_mean_acc": 0.925,
+          "mixed_2000_mean_acc": 0.49250000000000005,
+          "clean_delta_mean": 0.0
+        },
+        "always": {
+          "attacked_mean_acc": 0.515,
+          "clean_policy_mean_acc": 0.926,
+          "mixed_2000_mean_acc": 0.7205,
+          "clean_delta_mean": 0.0010000000000000009
+        }
+      },
+      "per_lang": {
+        "ja": {
+          "attacked_acc": 0.515,
+          "clean_policy_acc": 0.926,
+          "mixed_2000": 0.7205,
+          "clean_delta": 0.0010000000000000009
         }
       }
     },

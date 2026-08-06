@@ -19,17 +19,17 @@ JHSS layout: **Table #.** heading above; short caption below.
 | Method                | EN acc / mixed acc | ZH acc / mixed acc | KO acc / mixed acc | JA acc / mixed acc | Mean acc (attacked) | Mean mixed acc | Clean Δ EN  | Cost  |
 | --------------------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------------- | -------------- | ----------- | ----- |
 | No defense (Raw CLIP) | 4.5 / 45.2         | 6.4 / 48.9         | 11.6 / 50.6        | 6.0 / 49.3         | **7.1%**            | **48.5%**      | 0.0 pp      | 1     |
-| 4×4 grid occlusion    | 47.8 / 63.9†       | 49.2 / 65.1†       | 49.0 / 61.0†       | 50.0 / 67.5†       | 49.0%†              | 64.4%†         | −1.0 pp†    | 62    |
+| 4×4 grid occlusion    | 47.8 / 65.3        | 49.2 / 66.8        | 52.8 / 65.8        | 55.1 / 70.8        | 51.2%               | 67.2%          | −3.2 pp     | 62    |
 | OCR + blur            | 72.8 / 79.1        | 74.7 / 82.7        | 80.2 / 84.5        | 87.6 / 89.7        | **78.8%**           | **84.0%**      | −0.6 pp     | 3     |
-| Defense-Prefix        | 73.8 / 81.7        | 81.4 / 86.2        | 66.0 / 77.0†       | 88.0 / 89.5†       | 77.3%†              | 83.6%†         | +0.5 pp     | 2     |
-| SamplingTAR + blur    | 67.3 / 72.5        | 68.0 / 77.5†       | 66.0 / 72.5†       | 41.0 / 62.0†       | 60.6%†              | 71.1%†         | −8.3 pp     | 3     |
-| Dyslexify + blur      | 66.9 / 72.4        | 40.0 / 57.0†       | 73.0 / 77.0†       | 37.0 / 62.0†       | 54.2%†              | 67.1%†         | −8.1 pp     | 3     |
+| Defense-Prefix        | 73.8 / 81.7        | 81.4 / 86.2        | 69.1 / 79.4        | 84.8 / 89.2        | 77.3%               | 84.1%          | +0.5 pp     | 2     |
+| SamplingTAR + blur    | 67.3 / 72.5        | 68.9 / 79.3        | 59.0 / 62.9        | 51.5 / 72.1        | 61.7%               | 71.7%          | −8.3 pp     | 3     |
+| Dyslexify + blur      | 66.9 / 72.4        | 68.2 / 79.6        | 62.9 / 67.1        | 43.2 / 67.0        | 60.3%               | 71.5%          | −8.1 pp     | 3     |
 | **Ours (EN∩ZH)**      | **72.9 / 79.4**    | **76.5 / 84.0**    | —                  | —                  | **74.7%**           | **81.7%**      | **−0.1 pp** | **4** |
 | **Ours (EN∩KO)**      | **65.6 / 75.5**    | —                  | **73.1 / 81.3**    | —                  | **69.4%**           | **78.4%**      | **−0.6 pp** | **4** |
 | **Ours (EN∩JA)**      | **68.9 / 77.4**    | —                  | —                  | **82.8 / 87.7**    | **75.9%**           | **82.5%**      | **0.0 pp**  | **4** |
 
 
-Caption: Language cells are attacked acc / mixed acc (%). Δ = change (pp). Mean acc (attacked) and Mean mixed acc average only languages present in the row (4-lang for Raw CLIP, OCR + blur, grid†, Defense-Prefix†, and head hybrids†; 2-lang for each Ours EN∩L pairing). Clean Δ EN is the change in English clean accuracy under that method. Cost is passes per image. Bold marks production Ours rows and the Raw CLIP floor. † = provisional smoke n=100 (grid EN/ZH attacked acc still n=1000 finals; mixed uses smoke clean-policy; KO/JA grid score-only).
+Caption: Language cells are attacked acc / mixed acc (%). Δ = change (pp). Mean acc (attacked) and Mean mixed acc average only languages present in the row (4-lang for Raw CLIP, OCR + blur, grid, Defense-Prefix, and head hybrids; 2-lang for each Ours EN∩L pairing). Clean Δ EN is the change in English clean accuracy under that method. Cost is passes per image. Bold marks production Ours rows and the Raw CLIP floor. All baseline cells are n=1000 finals.
 
 ---
 
@@ -96,9 +96,9 @@ Caption: Ablations of the occlusion recipe (n = 1000). Bold marks production cho
 | -------- | ------------------------------------ | ---------------------------------------- | ---------------------------------------------------------------------------------- |
 | 1        | Defense-Prefix ZH retrain/tune       | ZH attacked acc ≥ 60%                    | **done** — 81.4% (EN+ZH multi train, 20 ep)                                        |
 | 2        | OCR + blur KO/JA                     | Fill KO/JA acc / mixed acc               | **done** — KO 80.2/84.5, JA 87.6/89.7; 4-lang mean acc 78.8%, mean mixed acc 84.0% |
-| 3        | Defense-Prefix KO/JA (after ZH ≥60%) | Fill or document skip                    | **smoke done** — KO 66.0/77.0, JA 88.0/89.5 (n=100); n=1000 finals pending         |
-| 4        | Grid Clean Δ EN (+ KO/JA if cheap)   | Fill grid mixed acc / Clean Δ EN         | **smoke done** — CleanΔEN −1.0pp; KO/JA score-only; n=1000 clean arm pending       |
-| 5        | SamplingTAR / Dyslexify KO/JA/ZH     | Only if head hooks transfer; else keep — | **smoke done** — re-mined per lang (JA/ZH GRID=14; KO/ZH HF hooks); ZH TAR 68.0/77.5, Dys 40.0/57.0 |
+| 3        | Defense-Prefix KO/JA (after ZH ≥60%) | Fill or document skip                    | **done** — KO 69.1/79.4, JA 84.8/89.2 (n=1000); 4-lang mean atk 77.3%, mean mixed 84.1% |
+| 4        | Grid Clean Δ EN (+ KO/JA if cheap)   | Fill grid mixed acc / Clean Δ EN         | **done** — EN/ZH/KO/JA 47.8/49.2/52.8/55.1; mean atk 51.2%, mean mixed 67.2%; CleanΔEN −3.2pp |
+| 5        | SamplingTAR / Dyslexify KO/JA/ZH     | Only if head hooks transfer; else keep — | **done** — TAR ZH/KO/JA 68.9/59.0/51.5; Dys ZH/KO/JA 68.2/62.9/43.2 (n=1000 hybrids) |
 
 
 After each final n=1000 result: recompute `[mixed_2000_summary.json](../lib/notebooks/paper_baselines/results/mixed_2000_summary.json)` and back-fill this file + `[tables_index.md](tables_index.md)`.

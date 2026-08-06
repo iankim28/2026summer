@@ -45,6 +45,24 @@ BASELINES = [
         if (HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000_en_zh.json").is_file()
         else HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000.json",
     ),
+    (
+        "defense_prefix_ko",
+        "Defense-Prefix KO",
+        _prefer(
+            HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000_ko.json",
+            HERE / "defense_prefix" / "results" / "comparison_summary_smoke_n100_ko.json",
+            HERE / "defense_prefix" / "results" / "comparison_summary_ko.json",
+        ),
+    ),
+    (
+        "defense_prefix_ja",
+        "Defense-Prefix JA",
+        _prefer(
+            HERE / "defense_prefix" / "results" / "comparison_summary_final_n1000_ja.json",
+            HERE / "defense_prefix" / "results" / "comparison_summary_smoke_n100_ja.json",
+            HERE / "defense_prefix" / "results" / "comparison_summary_ja.json",
+        ),
+    ),
     ("dyslexify", "Dyslexify (heads)", HERE / "dyslexify" / "results" / "comparison_summary_final_n1000.json"),
     (
         "dyslexify_hybrid",
@@ -55,8 +73,27 @@ BASELINES = [
         "dyslexify_hybrid_zh",
         "Dyslexify hybrid ZH",
         _prefer(
+            HERE / "dyslexify" / "results" / "comparison_summary_final_n1000_hybrid_zh.json",
             HERE / "dyslexify" / "results" / "comparison_summary_smoke_n100_hybrid_zh.json",
             HERE / "dyslexify" / "results" / "comparison_summary_hybrid_zh.json",
+        ),
+    ),
+    (
+        "dyslexify_hybrid_ko",
+        "Dyslexify hybrid KO",
+        _prefer(
+            HERE / "dyslexify" / "results" / "comparison_summary_final_n1000_hybrid_ko.json",
+            HERE / "dyslexify" / "results" / "comparison_summary_smoke_n100_hybrid_ko.json",
+            HERE / "dyslexify" / "results" / "comparison_summary_hybrid_ko.json",
+        ),
+    ),
+    (
+        "dyslexify_hybrid_ja",
+        "Dyslexify hybrid JA",
+        _prefer(
+            HERE / "dyslexify" / "results" / "comparison_summary_final_n1000_hybrid_ja.json",
+            HERE / "dyslexify" / "results" / "comparison_summary_smoke_n100_hybrid_ja.json",
+            HERE / "dyslexify" / "results" / "comparison_summary_hybrid_ja.json",
         ),
     ),
     ("sampling_tar", "SamplingTAR (heads)", HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000.json"),
@@ -69,8 +106,27 @@ BASELINES = [
         "sampling_tar_hybrid_zh",
         "SamplingTAR hybrid ZH",
         _prefer(
+            HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000_hybrid_zh.json",
             HERE / "sampling_tar" / "results" / "comparison_summary_smoke_n100_hybrid_zh.json",
             HERE / "sampling_tar" / "results" / "comparison_summary_hybrid_zh.json",
+        ),
+    ),
+    (
+        "sampling_tar_hybrid_ko",
+        "SamplingTAR hybrid KO",
+        _prefer(
+            HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000_hybrid_ko.json",
+            HERE / "sampling_tar" / "results" / "comparison_summary_smoke_n100_hybrid_ko.json",
+            HERE / "sampling_tar" / "results" / "comparison_summary_hybrid_ko.json",
+        ),
+    ),
+    (
+        "sampling_tar_hybrid_ja",
+        "SamplingTAR hybrid JA",
+        _prefer(
+            HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000_hybrid_ja.json",
+            HERE / "sampling_tar" / "results" / "comparison_summary_smoke_n100_hybrid_ja.json",
+            HERE / "sampling_tar" / "results" / "comparison_summary_hybrid_ja.json",
         ),
     ),
 ]
@@ -137,8 +193,12 @@ def scope_label(g: dict) -> str:
         return "EN+ZH+KO+JA"
     if "en_zh" in scope or len(defense) > 1:
         return "EN+ZH"
-    if scope in ("zh_only", "zh"):
+    if scope in ("zh_only", "zh") or set(defense) == {"zh"}:
         return "ZH"
+    if scope in ("ko_only", "ko") or set(defense) == {"ko"}:
+        return "KO"
+    if scope in ("ja_only", "ja") or set(defense) == {"ja"}:
+        return "JA"
     return "EN"
 
 
