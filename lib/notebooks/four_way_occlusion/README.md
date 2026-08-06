@@ -14,3 +14,12 @@ python run_eval.py --n 1000   # final
 ```
 
 Results: [`results/four_way_n1000.json`](results/four_way_n1000.json).
+
+### Chase (beat OCR / DP means)
+
+Mask aggregation and KO/JA L/14 upgrades — see [`docs/beat_ocr_dp_chase.md`](../../../docs/beat_ocr_dp_chase.md).
+
+```bash
+python run_agg_chase.py --n 1000
+python run_upgrade_chase.py --n 1000 --ko-l14 --ja-l14 --adaptive --arms intersect4,en_cap_mean
+```

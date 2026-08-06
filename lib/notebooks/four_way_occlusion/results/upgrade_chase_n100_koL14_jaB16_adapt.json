@@ -1,0 +1,274 @@
+{
+  "method": "upgrade_adaptive_chase",
+  "n": 100,
+  "ko_model": "Bingsu/clip-vit-large-patch14-ko",
+  "ja_model": "llm-jp/llm-jp-clip-vit-base-patch16",
+  "zh_model": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "en_model": "openai ViT-B-32",
+  "attack": "multi_en_zh",
+  "threshold": 0.95,
+  "dilate": 3,
+  "top_k": 2,
+  "fill": "black",
+  "ocr_target": {
+    "mean_atk": 0.788,
+    "mean_mixed": 0.84
+  },
+  "detector": {
+    "primary": "logistic",
+    "threshold": 0.22190943225871965,
+    "fire_attacked": 0.99,
+    "fire_clean": 0.03,
+    "val_auc": 0.9955555555555555,
+    "test_auc": 0.9955555555555555
+  },
+  "clean_never": {
+    "en": 0.81,
+    "zh": 0.86,
+    "ko": 0.97,
+    "ja": 0.91
+  },
+  "never_atk_mean": 0.1,
+  "ranking_gated_mixed": [
+    {
+      "variant": "intersect4",
+      "mean_mixed_2000": 0.83375,
+      "mean_atk_acc": 0.7825
+    },
+    {
+      "variant": "intersect4+cov_expand",
+      "mean_mixed_2000": 0.83375,
+      "mean_atk_acc": 0.7825
+    },
+    {
+      "variant": "intersect4+second_pass",
+      "mean_mixed_2000": 0.8325,
+      "mean_atk_acc": 0.78
+    },
+    {
+      "variant": "intersect4+cov_expand+second_pass",
+      "mean_mixed_2000": 0.8325,
+      "mean_atk_acc": 0.78
+    },
+    {
+      "variant": "pairwise_en_ko",
+      "mean_mixed_2000": 0.8174999999999999,
+      "mean_atk_acc": 0.75
+    }
+  ],
+  "variants": {
+    "intersect4": {
+      "mask_note": "EN&ZH&KO&JA Attn-last cc_bbox (baseline)",
+      "arms": {
+        "always": {
+          "en_acc": 0.66,
+          "zh_acc": 0.78,
+          "ko_acc": 0.89,
+          "ja_acc": 0.84,
+          "en_asr": 0.05,
+          "zh_asr": 0.02,
+          "ko_asr": 0.01,
+          "ja_asr": 0.01,
+          "mean_atk_acc": 0.7925,
+          "clean_en_acc": 0.5,
+          "clean_zh_acc": 0.59,
+          "clean_ko_acc": 0.8,
+          "clean_ja_acc": 0.66,
+          "mean_clean_acc": 0.6375,
+          "clean_delta_en": -0.31000000000000005,
+          "clean_delta_zh": -0.27,
+          "clean_delta_ko": -0.16999999999999993,
+          "clean_delta_ja": -0.25,
+          "mean_mask_coverage": 0.09229930644132654,
+          "en_mixed_2000": 0.5800000000000001,
+          "zh_mixed_2000": 0.685,
+          "ko_mixed_2000": 0.845,
+          "ja_mixed_2000": 0.75,
+          "mean_mixed_2000": 0.715
+        },
+        "gated": {
+          "en_acc": 0.65,
+          "zh_acc": 0.77,
+          "ko_acc": 0.88,
+          "ja_acc": 0.83,
+          "en_asr": 0.06,
+          "zh_asr": 0.03,
+          "ko_asr": 0.02,
+          "ja_asr": 0.02,
+          "mean_atk_acc": 0.7825,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_ko_acc": 0.97,
+          "clean_ja_acc": 0.9,
+          "mean_clean_acc": 0.8849999999999999,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "clean_delta_ko": 0.0,
+          "clean_delta_ja": -0.010000000000000009,
+          "mean_mask_coverage": 0.09229930644132654,
+          "defended_frac_atk": 0.99,
+          "defended_frac_clean": 0.03,
+          "fire_attacked": 0.99,
+          "fire_clean": 0.03,
+          "en_mixed_2000": 0.73,
+          "zh_mixed_2000": 0.815,
+          "ko_mixed_2000": 0.925,
+          "ja_mixed_2000": 0.865,
+          "mean_mixed_2000": 0.83375
+        }
+      }
+    },
+    "intersect4+cov_expand": {
+      "mask_note": "EN&ZH&KO&JA Attn-last cc_bbox (baseline) + low-cov expand",
+      "n_expanded_atk": 0,
+      "n_expanded_clean": 1,
+      "arms": {
+        "gated": {
+          "en_acc": 0.65,
+          "zh_acc": 0.77,
+          "ko_acc": 0.88,
+          "ja_acc": 0.83,
+          "en_asr": 0.06,
+          "zh_asr": 0.03,
+          "ko_asr": 0.02,
+          "ja_asr": 0.02,
+          "mean_atk_acc": 0.7825,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_ko_acc": 0.97,
+          "clean_ja_acc": 0.9,
+          "mean_clean_acc": 0.8849999999999999,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "clean_delta_ko": 0.0,
+          "clean_delta_ja": -0.010000000000000009,
+          "mean_mask_coverage": 0.09229930644132654,
+          "defended_frac_atk": 0.99,
+          "defended_frac_clean": 0.03,
+          "fire_attacked": 0.99,
+          "fire_clean": 0.03,
+          "second_pass_atk": 0,
+          "second_pass_clean": 0,
+          "en_mixed_2000": 0.73,
+          "zh_mixed_2000": 0.815,
+          "ko_mixed_2000": 0.925,
+          "ja_mixed_2000": 0.865,
+          "mean_mixed_2000": 0.83375
+        }
+      }
+    },
+    "intersect4+second_pass": {
+      "mask_note": "EN&ZH&KO&JA Attn-last cc_bbox (baseline) + target-persist 2nd pass",
+      "arms": {
+        "gated": {
+          "en_acc": 0.65,
+          "zh_acc": 0.77,
+          "ko_acc": 0.87,
+          "ja_acc": 0.83,
+          "en_asr": 0.05,
+          "zh_asr": 0.03,
+          "ko_asr": 0.03,
+          "ja_asr": 0.02,
+          "mean_atk_acc": 0.78,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_ko_acc": 0.97,
+          "clean_ja_acc": 0.9,
+          "mean_clean_acc": 0.8849999999999999,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "clean_delta_ko": 0.0,
+          "clean_delta_ja": -0.010000000000000009,
+          "mean_mask_coverage": 0.09229930644132654,
+          "defended_frac_atk": 0.99,
+          "defended_frac_clean": 0.03,
+          "fire_attacked": 0.99,
+          "fire_clean": 0.03,
+          "second_pass_atk": 5,
+          "second_pass_clean": 0,
+          "en_mixed_2000": 0.73,
+          "zh_mixed_2000": 0.815,
+          "ko_mixed_2000": 0.9199999999999999,
+          "ja_mixed_2000": 0.865,
+          "mean_mixed_2000": 0.8325
+        }
+      }
+    },
+    "intersect4+cov_expand+second_pass": {
+      "mask_note": "EN&ZH&KO&JA Attn-last cc_bbox (baseline) + cov expand + 2nd pass",
+      "arms": {
+        "gated": {
+          "en_acc": 0.65,
+          "zh_acc": 0.77,
+          "ko_acc": 0.87,
+          "ja_acc": 0.83,
+          "en_asr": 0.05,
+          "zh_asr": 0.03,
+          "ko_asr": 0.03,
+          "ja_asr": 0.02,
+          "mean_atk_acc": 0.78,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_ko_acc": 0.97,
+          "clean_ja_acc": 0.9,
+          "mean_clean_acc": 0.8849999999999999,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "clean_delta_ko": 0.0,
+          "clean_delta_ja": -0.010000000000000009,
+          "mean_mask_coverage": 0.09229930644132654,
+          "defended_frac_atk": 0.99,
+          "defended_frac_clean": 0.03,
+          "fire_attacked": 0.99,
+          "fire_clean": 0.03,
+          "second_pass_atk": 5,
+          "second_pass_clean": 0,
+          "en_mixed_2000": 0.73,
+          "zh_mixed_2000": 0.815,
+          "ko_mixed_2000": 0.9199999999999999,
+          "ja_mixed_2000": 0.865,
+          "mean_mixed_2000": 0.8325
+        }
+      }
+    },
+    "pairwise_en_ko": {
+      "mask_note": "EN&KO pairwise cc_bbox, scored on all 4 langs",
+      "arms": {
+        "gated": {
+          "en_acc": 0.61,
+          "zh_acc": 0.71,
+          "ko_acc": 0.88,
+          "ja_acc": 0.8,
+          "en_asr": 0.06,
+          "zh_asr": 0.08,
+          "ko_asr": 0.02,
+          "ja_asr": 0.03,
+          "mean_atk_acc": 0.75,
+          "clean_en_acc": 0.81,
+          "clean_zh_acc": 0.86,
+          "clean_ko_acc": 0.97,
+          "clean_ja_acc": 0.9,
+          "mean_clean_acc": 0.8849999999999999,
+          "clean_delta_en": 0.0,
+          "clean_delta_zh": 0.0,
+          "clean_delta_ko": 0.0,
+          "clean_delta_ja": -0.010000000000000009,
+          "mean_mask_coverage": 0.09043068399234694,
+          "defended_frac_atk": 0.99,
+          "defended_frac_clean": 0.03,
+          "fire_attacked": 0.99,
+          "fire_clean": 0.03,
+          "second_pass_atk": 0,
+          "second_pass_clean": 0,
+          "en_mixed_2000": 0.71,
+          "zh_mixed_2000": 0.7849999999999999,
+          "ko_mixed_2000": 0.925,
+          "ja_mixed_2000": 0.8500000000000001,
+          "mean_mixed_2000": 0.8174999999999999
+        }
+      }
+    }
+  },
+  "device": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.11.0+cu128"
+}
