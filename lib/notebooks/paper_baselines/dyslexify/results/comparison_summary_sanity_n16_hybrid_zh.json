@@ -1,0 +1,56 @@
+{
+  "method": "dyslexify",
+  "status": "sanity",
+  "n": 16,
+  "scope": "zh_only",
+  "lang": "zh",
+  "mode": "hybrid",
+  "variant": "heads+attn_blur",
+  "grid": 14,
+  "inference_cost": 3,
+  "n_heads_ablated": 5,
+  "heads": [
+    [
+      7,
+      11
+    ],
+    [
+      0,
+      9
+    ],
+    [
+      11,
+      11
+    ],
+    [
+      9,
+      10
+    ],
+    [
+      10,
+      9
+    ]
+  ],
+  "top_k_patches": 4,
+  "score_frac": 0.35,
+  "mean_blur_patches": 4.0,
+  "defense": {
+    "zh": {
+      "acc": 0.8125,
+      "asr": 0.0,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0
+    }
+  },
+  "clean_degradation": {
+    "zh": {
+      "baseline_acc": 0.9375,
+      "masked_acc": 0.9375,
+      "delta_acc": 0.0
+    }
+  },
+  "defense_acc_zh": 0.8125,
+  "clean_delta_zh": 0.0,
+  "preds_changed_vs_vanilla": 16,
+  "notes": "Dyslexify hybrid on HF ChineseCLIP; re-mined heads; attn-guided blur."
+}

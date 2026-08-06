@@ -33,30 +33,54 @@ FONT_SIZE = 24
 OUT_DIR = Path(__file__).resolve().parent / "results"
 TOKEN_OUT = OUT_DIR / "dp_cifar10_zh_vit-b16.pt"
 
+# Match PROTOCOL multi eval: EN Latin sticker + ZH sticker (same wrong class).
+EN_CLASSES = [
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
+]
 
-def _cjk_font():
-    if platform.system() == "Windows":
-        fp = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts", "msyh.ttc")
-    else:
-        fp = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
-        if not os.path.isfile(fp):
-            fp = "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf"
+
+def _font(path: str):
     try:
-        return ImageFont.truetype(fp, FONT_SIZE)
+        return ImageFont.truetype(path, FONT_SIZE)
     except Exception:
         return ImageFont.load_default()
 
 
-FONT = _cjk_font()
+def _cjk_font_path():
+    if platform.system() == "Windows":
+        return os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts", "msyh.ttc")
+    fp = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+    if not os.path.isfile(fp):
+        fp = "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf"
+    return fp
 
 
-def draw_typo_zh(img: Image.Image, word: str, rng: random.Random) -> Image.Image:
-    """Dual-box same ZH wrong-class word (mirrors EN train_cifar_dp.draw_typo)."""
+def _lat_font_path():
+    if platform.system() == "Windows":
+        return os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts", "arial.ttf")
+    return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+
+
+FONT_CJK = _font(_cjk_font_path())
+FONT_LAT = _font(_lat_font_path())
+
+
+def draw_typo_zh(img: Image.Image, wrong: int, rng: random.Random) -> Image.Image:
+    """EN+ZH dual-box attack matching PROTOCOL `build_multi_attack` (eval distribution)."""
     img = img.convert("RGB").resize((DISPLAY, DISPLAY), Image.BICUBIC)
     draw = ImageDraw.Draw(img)
     placed = []
-    for _ in range(2):
-        bb = draw.textbbox((0, 0), word, font=FONT)
+    for word, font in ((EN_CLASSES[wrong], FONT_LAT), (ZH_CLASSES[wrong], FONT_CJK)):
+        bb = draw.textbbox((0, 0), word, font=font)
         bw = (bb[2] - bb[0]) + 2 * PAD
         bh = (bb[3] - bb[1]) + PAD + 12
         for _try in range(32):
@@ -70,7 +94,7 @@ def draw_typo_zh(img: Image.Image, word: str, rng: random.Random) -> Image.Image
                 break
         placed.append(rect)
         draw.rectangle(rect, fill="white")
-        draw.text((x + PAD - bb[0], y + PAD - bb[1]), word, fill="black", font=FONT)
+        draw.text((x + PAD - bb[0], y + PAD - bb[1]), word, fill="black", font=font)
     return img
 
 
@@ -92,7 +116,7 @@ class CifarTypoTrainZh(Dataset):
         img, label = row[self.image_key], int(row[self.label_key])
         rng = random.Random(self.seed * 1_000_003 + i)
         wrong = rng.choice([c for c in range(10) if c != label])
-        typo = draw_typo_zh(img, ZH_CLASSES[wrong], rng)
+        typo = draw_typo_zh(img, wrong, rng)
         clean = img.convert("RGB").resize((DISPLAY, DISPLAY), Image.BICUBIC)
         # Return PILs; collate in train loop (processor needs lists)
         return clean, typo, label
@@ -124,7 +148,7 @@ def train(epochs=10, batch_size=128, lr=0.002, max_n=20000, gamma=3.0, seta=1.0)
     )
     print(
         f"ZH DP train samples={len(ds)} batch={batch_size} epochs={epochs} "
-        f"device={device} font={FONT}",
+        f"device={device} attack=EN+ZH_multi",
         flush=True,
     )
 

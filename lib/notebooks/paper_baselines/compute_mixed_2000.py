@@ -12,8 +12,31 @@ HERE = Path(__file__).resolve().parent
 NOTEBOOKS = HERE.parent
 OUT_DIR = HERE / "results"
 
+def _prefer(*paths: Path) -> Path:
+    for p in paths:
+        if p.is_file():
+            return p
+    return paths[-1]
+
+
 BASELINES = [
-    ("ocr_blur", "OCR + blur", HERE / "ocr_blur" / "results" / "comparison_summary_final_n1000.json"),
+    (
+        "grid_occlusion",
+        "4x4 grid occlusion",
+        _prefer(
+            HERE / "grid_occlusion" / "results" / "comparison_summary_4lang_final_n1000.json",
+            HERE / "grid_occlusion" / "results" / "comparison_summary_4lang_smoke_n100.json",
+            HERE / "grid_occlusion" / "results" / "comparison_summary_4lang.json",
+        ),
+    ),
+    # Prefer 4-lang OCR summary when available; else EN+ZH.
+    (
+        "ocr_blur",
+        "OCR + blur",
+        HERE / "ocr_blur" / "results" / "comparison_summary_4lang_final_n1000.json"
+        if (HERE / "ocr_blur" / "results" / "comparison_summary_4lang_final_n1000.json").is_file()
+        else HERE / "ocr_blur" / "results" / "comparison_summary_final_n1000.json",
+    ),
     # Prefer EN+ZH merged summary when ZH CIFAR DP token exists; else EN-only.
     (
         "defense_prefix",
@@ -28,11 +51,27 @@ BASELINES = [
         "Dyslexify hybrid",
         HERE / "dyslexify" / "results" / "comparison_summary_final_n1000_hybrid.json",
     ),
+    (
+        "dyslexify_hybrid_zh",
+        "Dyslexify hybrid ZH",
+        _prefer(
+            HERE / "dyslexify" / "results" / "comparison_summary_smoke_n100_hybrid_zh.json",
+            HERE / "dyslexify" / "results" / "comparison_summary_hybrid_zh.json",
+        ),
+    ),
     ("sampling_tar", "SamplingTAR (heads)", HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000.json"),
     (
         "sampling_tar_hybrid",
         "SamplingTAR hybrid",
         HERE / "sampling_tar" / "results" / "comparison_summary_final_n1000_hybrid.json",
+    ),
+    (
+        "sampling_tar_hybrid_zh",
+        "SamplingTAR hybrid ZH",
+        _prefer(
+            HERE / "sampling_tar" / "results" / "comparison_summary_smoke_n100_hybrid_zh.json",
+            HERE / "sampling_tar" / "results" / "comparison_summary_hybrid_zh.json",
+        ),
     ),
 ]
 
@@ -93,7 +132,10 @@ def policies_from_summary(g: dict) -> dict:
 
 def scope_label(g: dict) -> str:
     scope = g.get("scope", "")
-    if "en_zh" in scope or len(g.get("defense", {})) > 1:
+    defense = g.get("defense", {})
+    if "en_zh_ko_ja" in scope or set(defense) >= {"en", "zh", "ko", "ja"}:
+        return "EN+ZH+KO+JA"
+    if "en_zh" in scope or len(defense) > 1:
         return "EN+ZH"
     if scope in ("zh_only", "zh"):
         return "ZH"

@@ -1,0 +1,76 @@
+{
+  "method": "grid_occlusion_C_2p_confdrop_blur",
+  "status": "sanity",
+  "n": 16,
+  "scope": "en_zh_ko_ja_multi",
+  "search_langs": [
+    "en",
+    "zh"
+  ],
+  "score_langs": [
+    "en",
+    "zh",
+    "ko",
+    "ja"
+  ],
+  "agree_bonus": 0.05,
+  "blur_radius": 12,
+  "inference_cost": 62,
+  "measured_cost_per_img": 62.0,
+  "defense": {
+    "en": {
+      "acc": 0.6875,
+      "asr": 0.3125,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0,
+      "mixed_2000": 0.75
+    },
+    "zh": {
+      "acc": 0.6875,
+      "asr": 0.3125,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0,
+      "mixed_2000": 0.78125
+    },
+    "ko": {
+      "acc": 0.75,
+      "asr": 0.25,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0,
+      "mixed_2000": 0.84375
+    },
+    "ja": {
+      "acc": 0.75,
+      "asr": 0.1875,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0,
+      "mixed_2000": 0.8125
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.75,
+      "masked_acc": 0.8125,
+      "delta_acc": 0.0625
+    },
+    "zh": {
+      "baseline_acc": 0.9375,
+      "masked_acc": 0.875,
+      "delta_acc": -0.0625
+    },
+    "ko": {
+      "baseline_acc": 0.9375,
+      "masked_acc": 0.9375,
+      "delta_acc": 0.0
+    },
+    "ja": {
+      "baseline_acc": 0.9375,
+      "masked_acc": 0.875,
+      "delta_acc": -0.0625
+    }
+  },
+  "defense_acc_mean": 0.71875,
+  "mixed_2000_mean": 0.796875,
+  "clean_delta_en": 0.0625,
+  "notes": "4x4 greedy 2-patch conf-drop + blur; search on EN+ZH; KO/JA score-only on chosen occlusions; clean arm same search."
+}

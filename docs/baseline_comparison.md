@@ -4,7 +4,7 @@
 **Sample:** frozen dual-box CIFAR-10 n=1000 (`CIFAR10_BALANCED_1000_SAMPLE.json`), 224×224  
 **Production (ours):** gated **`cc_bbox_black`** — EN MIXED2000 **79.35%** (atk **72.9%** / clean **85.8%**); partner bilingual black ZH/KO/JA **81.65% / 78.35% / 82.53%**  
 **Design-history ref:** always-on `cc_bbox_blur` (EN∩ZH multi) — mean **74.9%**, Clean Δ **−1.5pp**, cost **4**  
-**Scope:** EN OpenAI ViT-B/32; ZH for spatial methods + Defense-Prefix (separate CIFAR-trained ZH token). Dyslexify / SamplingTAR remain EN-only.  
+**Scope:** EN OpenAI ViT-B/32; ZH for spatial methods + Defense-Prefix (separate CIFAR-trained ZH token). Dyslexify / SamplingTAR: EN finals + ZH/KO/JA hybrid smoke† (ZH/JA GRID=14 HF/open_clip; KO HF).  
 **Last updated:** 2026-07-25 (black fill frozen for all langs)
 
 Code: [`lib/notebooks/paper_baselines/`](../lib/notebooks/paper_baselines/)
@@ -17,10 +17,10 @@ Code: [`lib/notebooks/paper_baselines/`](../lib/notebooks/paper_baselines/)
 |--------|--------|------------------|---------|------|-------|
 | **Gated `cc_bbox_black` (ours)** | final (n=1000) | **72.9%** EN atk / **79.35%** MIXED | **−0.1pp** | 4 | Production; bilingual ZH black MIXED **81.65%** |
 | Always-on `cc_bbox_blur` (ref) | final (n=1000) | **74.9%** mean | **−1.5pp** | 4 | Design history / localization ablation |
-| OCR + blur | final (n=1000) | **73.8%** mean | **−0.7pp** | 3 | Closest spatial peer; sticker hit 90.3% |
+| OCR + blur | final (n=1000) | **78.8%** 4-lang mean | **−0.6pp** EN | 3 | Closest spatial peer; sticker hit 90.3%; KO/JA filled |
 | SamplingTAR hybrid | final (n=1000) | **67.3%** EN | **−8.3pp** | 3 | Heads + attn-guided blur; MIXED2000 **72.45%** |
 | Dyslexify hybrid | final (n=1000) | **66.9%** EN | **−8.1pp** | 3 | Heads + attn-guided blur; MIXED2000 **72.35%** |
-| Defense-Prefix | final (n=1000) | **59.2%** mean (EN 73.8 / ZH 44.5) | **+0.5pp** | 2 | CIFAR-trained EN+ZH tokens; ZH ASR 52.5%; EN MIXED **81.65%** |
+| Defense-Prefix | final (n=1000) | **77.6%** mean (EN 73.8 / ZH 81.4) | **+0.5pp** | 2 | CIFAR-trained EN+ZH tokens; ZH retuned EN+ZH multi (20 ep); EN MIXED **81.65%**, ZH MIXED **86.20%** |
 | Dyslexify (heads) | final (n=1000) | **20.0%** EN | **0.0pp** | 2 | Head-only negative; dual-box weak |
 | SamplingTAR (heads) | final (n=1000) | **11.6%** EN | **+0.2pp** | 2 | Circuit-only negative; weakest peer |
 
@@ -45,16 +45,16 @@ Statuses: `pending` → `smoke (n=100)` → `final (n=1000)` (or `failed` / `ski
 **What:** Learned text-prefix token prepended to class prompts. CLIP weights frozen; one DP vector per language/model.  
 **Setup:**
 - **EN:** Published ImageNet `dp_vit-b32.pt` failed Gate A. Retrained 10 ep on CIFAR-10 **train** (n=20k, EN dual-box typos) → `dp_cifar10_vit-b32.pt` (OpenAI ViT-B/32). Prompt `a photo of a * {class}.`
-- **ZH (2026-07-25):** Same recipe on ChineseCLIP ViT-B/16 — `train_cifar_dp_zh.py` / `zh_dp_encode.py`; ZH dual-box typos; prompt `一张*{class}的照片。` → `dp_cifar10_zh_vit-b16.pt`. Eval sample unused in both trains.
+- **ZH (retuned 2026-08-03):** Same recipe on ChineseCLIP ViT-B/16 with **EN+ZH multi** train stickers (matched to eval) — `train_cifar_dp_zh.py` / `zh_dp_encode.py`; 20 ep, lr=0.003 → `dp_cifar10_zh_vit-b16.pt`. Eval sample unused in both trains.
 **Status:** final (n=1000) EN + ZH
 
 | Split | EN acc / ASR / Clean Δ | ZH acc / ASR / Clean Δ | Cost | Notes |
 |-------|------------------------|------------------------|------|-------|
 | sanity n=16 | 56.2% / 18.8% / −6.2pp | 56.2% / 43.8% / 0.0pp | 2 | EN 13/16 changed; ZH 9/16 |
 | smoke n=100 | 68.0% / 16.0% / 0.0pp | 42.0% / 54.0% / +3.0pp | 2 | |
-| **final n=1000** | **73.8%** / 16.4% / **+0.5pp** | **44.5%** / 52.5% / **+0.4pp** | 2 | mean acc **59.2%** |
+| **final n=1000** | **73.8%** / 16.4% / **+0.5pp** | **81.4%** / 5.5% / **−0.4pp** | 2 | mean acc **77.6%**; ZH retuned EN+ZH multi train |
 
-**vs `cc_bbox_blur`:** EN DP still beats our EN (**73.8% > 71.6%**) with better Clean Δ. ZH DP is much weaker (**44.5%** vs our ZH **78.2%** / Phase-C mean **74.0%**) and leaves ASR **52.5%**. Mean EN+ZH **59.2% ≪ 74.9%** — prompt DP is not a drop-in for EN∩ZH spatial defense. Cost 2 vs 4. Dyslexify / SamplingTAR remain EN-only (not worth ZH ports).
+**vs gated black:** EN DP still beats our EN MIXED (**81.65% > 79.35%**). ZH DP (retuned) reaches **81.4%** atk / **86.2%** MIXED. Mean EN+ZH **77.6%** vs our EN∩ZH mean atk **74.7%**. Cost 2 vs 4. Dyslexify / SamplingTAR ZH smoke†: TAR **68.0/77.5**, Dys **40.0/57.0** (ChineseCLIP HF hooks).
 
 ---
 
@@ -77,7 +77,7 @@ Statuses: `pending` → `smoke (n=100)` → `final (n=1000)` (or `failed` / `ski
 ## Dyslexify (Hufe et al. 2026)
 
 **What:** Training-free ablation of typographic attention heads in the vision tower.  
-**Setup:** open_clip ViT-B/32 openai (paper uses LAION ViT-B/16); mine heads by CLS→sticker-patch attn fraction; greedy + ranked-prefix select under Clean Δ ≤5pp; CLS←spatial redirect (`alpha=1`). EN-only. Fixed MHA tuple-return bug in hook.  
+**Setup:** open_clip ViT-B/32 openai (paper uses LAION ViT-B/16); mine heads by CLS→sticker-patch attn fraction; greedy + ranked-prefix select under Clean Δ ≤5pp; CLS←spatial redirect (`alpha=1`). EN final + ZH/KO/JA hybrid smoke†. Fixed MHA tuple-return bug in hook.  
 **Hybrid (2026-07-25):** same selected heads → aggregate CLS→patch attn → blur patches with score ≥ `0.35·max` (cap `top_k=4`, r=12) → classify with ablation still on. Code: `--mode hybrid` + [`_common/hybrid_spatial.py`](../lib/notebooks/paper_baselines/_common/hybrid_spatial.py).  
 **Status:** final (n=1000) heads + hybrid
 
@@ -96,8 +96,8 @@ Statuses: `pending` → `smoke (n=100)` → `final (n=1000)` (or `failed` / `ski
 ## SamplingTAR (Liu et al., ECCV 2026)
 
 **What:** Training-free circuit intervention — mine text-reading heads, redirect CLS attention at inference.  
-**Setup:** EN ViT-B/32; head mining = CLS attn mass on sticker patches (no SAE; direct attribution proxy); z-threshold select; `fix_attn` alpha=1. EN-only.  
-**Hybrid (2026-07-25):** same recipe as Dyslexify hybrid (attn-guided blur of selected-head patches + ablation). `--mode hybrid`.  
+**Setup:** EN ViT-B/32; head mining = CLS attn mass on sticker patches (no SAE; direct attribution proxy); z-threshold select; `fix_attn` alpha=1. EN final + ZH/KO/JA hybrid smoke†.  
+**Hybrid (2026-07-25):** same recipe as Dyslexify hybrid (attn-guided blur of selected-head patches + ablation). `--mode hybrid`. ZH port: `run_eval_zh.py` (ChineseCLIP HF, GRID=14).  
 **Status:** final (n=1000) heads + hybrid
 
 | Split | Mode | EN acc | Clean Δ | Cost | #heads | Notes |

@@ -1,0 +1,102 @@
+{
+  "method": "sampling_tar",
+  "status": "sanity",
+  "n": 16,
+  "scope": "ja_only",
+  "lang": "ja",
+  "mode": "hybrid",
+  "variant": "heads+attn_blur",
+  "grid": 14,
+  "inference_cost": 3,
+  "n_heads_ablated": 16,
+  "heads": [
+    [
+      4,
+      5
+    ],
+    [
+      3,
+      11
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      4,
+      7
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      5,
+      9
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      8,
+      0
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      2,
+      8
+    ],
+    [
+      3,
+      7
+    ],
+    [
+      11,
+      3
+    ],
+    [
+      4,
+      1
+    ],
+    [
+      10,
+      10
+    ],
+    [
+      4,
+      2
+    ]
+  ],
+  "z": 1.0,
+  "score_threshold": 0.30805084416695283,
+  "top_k_patches": 4,
+  "score_frac": 0.35,
+  "mean_blur_patches": 3.375,
+  "defense": {
+    "ja": {
+      "acc": 0.5,
+      "asr": 0.4375,
+      "baseline_acc": 0.0,
+      "baseline_asr": 1.0
+    }
+  },
+  "clean_degradation": {
+    "ja": {
+      "baseline_acc": 0.9375,
+      "masked_acc": 0.75,
+      "delta_acc": -0.1875
+    }
+  },
+  "defense_acc_ja": 0.5,
+  "clean_delta_ja": -0.1875,
+  "preds_changed_vs_vanilla": 9,
+  "notes": "SamplingTAR hybrid (ja): sticker-attn heads + attn-guided blur (top_k=4, score_frac=0.35, grid=14) + fix_attn alpha=1. No SAE."
+}

@@ -9,8 +9,8 @@
   "inference_cost": 2,
   "defense": {
     "zh": {
-      "acc": 0.42,
-      "asr": 0.54,
+      "acc": 0.84,
+      "asr": 0.08,
       "baseline_acc": 0.03,
       "baseline_asr": 0.97
     }
@@ -18,13 +18,13 @@
   "clean_degradation": {
     "zh": {
       "baseline_acc": 0.86,
-      "masked_acc": 0.89,
-      "delta_acc": 0.030000000000000027
+      "masked_acc": 0.88,
+      "delta_acc": 0.020000000000000018
     }
   },
-  "defense_acc_zh": 0.42,
-  "clean_delta_zh": 0.030000000000000027,
-  "preds_changed_vs_vanilla": 43,
-  "mean_cosine_vanilla_dp_text": 0.777823269367218,
+  "defense_acc_zh": 0.84,
+  "clean_delta_zh": 0.020000000000000018,
+  "preds_changed_vs_vanilla": 89,
+  "mean_cosine_vanilla_dp_text": 0.6836967468261719,
   "notes": "CIFAR-trained ChineseCLIP DP token; ZH prompts (\u4e00\u5f20*{}\u7684\u7167\u7247\u3002); multi EN+ZH stickers; eval sample unused in train."
 }

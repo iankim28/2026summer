@@ -59,20 +59,22 @@ def attn_patch_mask(
     top_k_patches=DEFAULT_TOP_K,
     score_frac=DEFAULT_SCORE_FRAC,
     pp=None,
+    grid=GRID,
 ):
     """Bool mask over patches from mean CLS→patch attn of heads.
 
     Keeps patches with score >= score_frac * max(score), capped at top_k.
     Peakier sticker maps → more patches; flat clean maps → fewer.
     """
+    n_patches = int(grid) * int(grid)
     if not heads:
-        return np.zeros(GRID * GRID, dtype=bool)
+        return np.zeros(n_patches, dtype=bool)
     if pp is None:
         raise ValueError("pp (open_clip preprocess) required")
     x = pp(pil_img).unsqueeze(0).to(DEVICE)
     layer_spec = heads_to_layer_spec(heads)
     attn_by_layer = cls_to_patch_attn_multi(visual, x, layer_spec.keys())
-    scores = np.zeros(GRID * GRID, dtype=np.float64)
+    scores = np.zeros(n_patches, dtype=np.float64)
     n = 0
     for layer, hlist in layer_spec.items():
         a = attn_by_layer[int(layer)][0].float().cpu().numpy()  # (H, P)
@@ -80,18 +82,18 @@ def attn_patch_mask(
             scores += a[int(h)]
             n += 1
     if n == 0:
-        return np.zeros(GRID * GRID, dtype=bool)
+        return np.zeros(n_patches, dtype=bool)
     scores /= n
     mx = float(scores.max())
     if mx <= 0:
-        return np.zeros(GRID * GRID, dtype=bool)
+        return np.zeros(n_patches, dtype=bool)
     cand = np.where(scores >= float(score_frac) * mx)[0]
     if cand.size == 0:
         cand = np.array([int(scores.argmax())])
     k = min(int(top_k_patches), cand.size)
     # among candidates, keep the top-k by score
     order = cand[np.argsort(-scores[cand])[:k]]
-    mask = np.zeros(GRID * GRID, dtype=bool)
+    mask = np.zeros(n_patches, dtype=bool)
     mask[order] = True
     return mask
 
@@ -118,6 +120,7 @@ def blur_by_attn_heads(
     score_frac=DEFAULT_SCORE_FRAC,
     pp=None,
     radius=BLUR_RADIUS,
+    grid=GRID,
 ):
     """Blur patches with highest mean CLS attn under selected heads."""
     mask = attn_patch_mask(
@@ -127,8 +130,9 @@ def blur_by_attn_heads(
         top_k_patches=top_k_patches,
         score_frac=score_frac,
         pp=pp,
+        grid=grid,
     )
-    rects = patch_mask_to_rects(mask)
+    rects = patch_mask_to_rects(mask, grid=grid)
     return blur_regions(pil_img, rects, radius=radius), mask
 
 
@@ -142,9 +146,11 @@ def classify_hybrid(
     score_frac=DEFAULT_SCORE_FRAC,
     batch_size=32,
     ablate=True,
+    grid=None,
 ):
     """Attn-guided blur (+ optional head ablation) classify. Returns preds, mean_patches."""
     visual = en.m.visual
+    g = int(grid if grid is not None else getattr(en, "grid", GRID))
     blurred = []
     n_patches = []
     for im in imgs:
@@ -155,6 +161,7 @@ def classify_hybrid(
             top_k_patches=top_k_patches,
             score_frac=score_frac,
             pp=en.pp,
+            grid=g,
         )
         blurred.append(bim)
         n_patches.append(int(mask.sum()))

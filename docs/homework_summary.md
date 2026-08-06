@@ -4,7 +4,7 @@
 **Audience:** Quick briefing for professor meeting — what was done since the Jul 27 briefing (Jul 29–30 table lock + paper prep).
 
 > Older briefings: [`archive/homework_summary_archive.md`](archive/homework_summary_archive.md) (Jul 27 + earlier).  
-> **Paper tables (locked):** [`tables_index.md`](tables_index.md).  
+> **Paper tables (locked):** [`paper_tables_final.md`](paper_tables_final.md); index [`tables_index.md`](tables_index.md).  
 > Main / ablation detail: [`4_lang_table.md`](4_lang_table.md), [`ablation_study.md`](ablation_study.md).  
 > Paper draft: [`paper_draft.md`](paper_draft.md).  
 > Figures: [`paper_figures_and_notes.md`](paper_figures_and_notes.md).  

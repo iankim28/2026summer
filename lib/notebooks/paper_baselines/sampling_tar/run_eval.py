@@ -2,7 +2,7 @@
 
 Port of SamplingTAR (Liu et al.): mine heads by CLS→text-patch attribution
 overlap, select via z-threshold on score distribution, ablate with
-fix_attn_head_list (alpha=1). EN ViT-B/32 openai. No SAE (direct attn score).
+fix_attn_head_list (alpha=1). open_clip ViT (EN B/32 or JA B/16). No SAE.
 
 Modes:
   heads  — original circuit ablation only
@@ -32,6 +32,8 @@ from _common.hybrid_spatial import (  # noqa: E402
     DEFAULT_TOP_K,
     classify_hybrid,
 )
+from _common.partner_models import CLASSES as PARTNER_CLASSES  # noqa: E402
+from _common.partner_models import JaCLIP  # noqa: E402
 from _common.protocol import (  # noqa: E402
     CLASSES,
     DEVICE,
@@ -47,22 +49,33 @@ from _common.protocol import (  # noqa: E402
 RESULTS = Path(__file__).resolve().parent / "results"
 COST_HEADS = 2
 COST_HYBRID = 3
-N_LAYERS, N_HEADS, GRID = 12, 12, 7
+LANG_CFG = {
+    "en": {"n_layers": 12, "n_heads": 12, "grid": 7},
+    "ja": {"n_layers": 12, "n_heads": 12, "grid": 14},
+}
+
+
+def _load_model(lang: str):
+    if lang == "en":
+        return EnCLIP(), CLASSES["en"]
+    if lang == "ja":
+        return JaCLIP(), PARTNER_CLASSES["ja"]
+    raise ValueError(f"Unsupported lang={lang} for open_clip MHA hybrid (use ko port)")
 
 
 @torch.no_grad()
-def mine_head_scores(en: EnCLIP, attacked, rects, max_images=50):
+def mine_head_scores(en, attacked, rects, max_images=50, n_layers=12, n_heads=12, grid=7):
     """Attribution-like score: mean CLS attention mass on sticker patches."""
-    scores = {(L, H): [] for L in range(N_LAYERS) for H in range(N_HEADS)}
+    scores = {(L, H): [] for L in range(n_layers) for H in range(n_heads)}
     n = min(max_images, len(attacked))
     for i in range(n):
         x = en.pp(attacked[i]).unsqueeze(0).to(DEVICE)
-        mask = patch_mask_from_rects(rects[i], grid=GRID)
+        mask = patch_mask_from_rects(rects[i], grid=grid)
         if not mask.any():
             continue
-        for layer in range(N_LAYERS):
+        for layer in range(n_layers):
             attn = cls_to_patch_attn(en.m.visual, x, layer)[0].float().cpu().numpy()
-            for h in range(N_HEADS):
+            for h in range(n_heads):
                 scores[(layer, h)].append(float(attn[h, mask].sum()))
     means = {k: float(np.mean(v)) if v else 0.0 for k, v in scores.items()}
     vals = np.array(list(means.values()))
@@ -125,22 +138,41 @@ def run_eval(
     mode: str = "hybrid",
     top_k_patches: int = DEFAULT_TOP_K,
     score_frac: float = DEFAULT_SCORE_FRAC,
+    lang: str = "en",
 ):
     assert torch.cuda.is_available()
+    if lang not in LANG_CFG:
+        raise ValueError(f"lang={lang} not in {list(LANG_CFG)}")
+    cfg = LANG_CFG[lang]
     data = load_protocol_data(n=n)
     attacked, rects = build_multi_attack(data)
     true, target = data["true"], data["target"]
 
-    en = EnCLIP()
-    text_emb = en.embed_texts(CLASSES["en"])
+    model, class_names = _load_model(lang)
+    text_emb = model.embed_texts(class_names)
 
     mine_n = min(50, data["n"])
-    means, mu, sigma = mine_head_scores(en, attacked, rects, max_images=mine_n)
+    means, mu, sigma = mine_head_scores(
+        model,
+        attacked,
+        rects,
+        max_images=mine_n,
+        n_layers=cfg["n_layers"],
+        n_heads=cfg["n_heads"],
+        grid=cfg["grid"],
+    )
     if status == "sanity" and max(means.values()) <= 0:
         raise RuntimeError("Gate A fail: head mining produced zero scores")
 
     heads, z_used, thr = tune_z(
-        en, text_emb, data["clean_224"], attacked, true, means, mu, sigma,
+        model,
+        text_emb,
+        data["clean_224"],
+        attacked,
+        true,
+        means,
+        mu,
+        sigma,
         probe_n=min(40, data["n"]),
     )
     if not heads:
@@ -148,49 +180,67 @@ def run_eval(
         print("Fallback top-5 heads", heads)
 
     RESULTS.mkdir(parents=True, exist_ok=True)
-    with open(RESULTS / "selected_heads.json", "w", encoding="utf-8") as f:
+    heads_name = "selected_heads.json" if lang == "en" else f"selected_heads_{lang}.json"
+    with open(RESULTS / heads_name, "w", encoding="utf-8") as f:
         json.dump(
-            {"heads": heads, "z": z_used, "thr": thr, "n_mine": mine_n, "mode": mode},
+            {
+                "lang": lang,
+                "heads": heads,
+                "z": z_used,
+                "thr": thr,
+                "n_mine": mine_n,
+                "mode": mode,
+                "grid": cfg["grid"],
+            },
             f,
             indent=2,
         )
 
-    clean_p = classify_batch(en, data["clean_224"], text_emb)
-    atk_p = classify_batch(en, attacked, text_emb)
+    clean_p = classify_batch(model, data["clean_224"], text_emb)
+    atk_p = classify_batch(model, attacked, text_emb)
     clean_acc = float((clean_p == true).mean())
     atk_acc, atk_asr = acc_asr(atk_p, true, target)
-    print(f"Vanilla clean={100*clean_acc:.1f}% atk={100*atk_acc:.1f}% ASR={100*atk_asr:.1f}%")
+    print(
+        f"Vanilla {lang.upper()} clean={100*clean_acc:.1f}% atk={100*atk_acc:.1f}% "
+        f"ASR={100*atk_asr:.1f}%"
+    )
 
     t0 = time.time()
     mean_patches = None
     if mode == "hybrid":
         def_preds, mean_patches = classify_hybrid(
-            en,
+            model,
             attacked,
             text_emb,
             heads,
             top_k_patches=top_k_patches,
             score_frac=score_frac,
+            grid=cfg["grid"],
         )
         clean_def, _ = classify_hybrid(
-            en,
+            model,
             data["clean_224"],
             text_emb,
             heads,
             top_k_patches=top_k_patches,
             score_frac=score_frac,
+            grid=cfg["grid"],
         )
         cost = COST_HYBRID
         notes = (
-            f"SamplingTAR hybrid: sticker-attn heads + attn-guided blur "
-            f"(top_k={top_k_patches}, score_frac={score_frac}) + fix_attn alpha=1. No SAE."
+            f"SamplingTAR hybrid ({lang}): sticker-attn heads + attn-guided blur "
+            f"(top_k={top_k_patches}, score_frac={score_frac}, grid={cfg['grid']}) "
+            f"+ fix_attn alpha=1. No SAE."
         )
         variant = "heads+attn_blur"
     else:
-        def_preds = classify_with_heads(en, attacked, text_emb, heads)
-        clean_def = classify_with_heads(en, data["clean_224"], text_emb, heads)
+        def_preds = classify_with_heads(model, attacked, text_emb, heads)
+        clean_def = classify_with_heads(model, data["clean_224"], text_emb, heads)
         cost = COST_HEADS
-        notes = "SamplingTAR-style: attn-to-sticker mining + z-threshold; fix_attn alpha=1. No SAE."
+        notes = (
+            f"SamplingTAR-style ({lang}): attn-to-sticker mining + z-threshold; "
+            "fix_attn alpha=1. No SAE."
+        )
         variant = "heads"
 
     progress_log(len(def_preds) - 1, len(def_preds), int((def_preds == true).sum()), t0)
@@ -203,8 +253,8 @@ def run_eval(
     clean_def_acc = float((clean_def == true).mean())
     clean_delta = clean_def_acc - clean_acc
     print(
-        f"SamplingTAR [{mode}] EN acc={100*def_acc:.1f}% Clean_delta={100*clean_delta:.1f}pp "
-        f"heads={len(heads)} z={z_used}"
+        f"SamplingTAR [{mode}] {lang.upper()} acc={100*def_acc:.1f}% "
+        f"Clean_delta={100*clean_delta:.1f}pp heads={len(heads)} z={z_used}"
         + (f" mean_blur_patches={mean_patches:.1f}" if mean_patches is not None else "")
     )
 
@@ -212,9 +262,11 @@ def run_eval(
         "method": "sampling_tar",
         "status": status,
         "n": int(data["n"]),
-        "scope": "en_only",
+        "scope": f"{lang}_only",
+        "lang": lang,
         "mode": mode,
         "variant": variant,
+        "grid": cfg["grid"],
         "inference_cost": cost,
         "n_heads_ablated": len(heads),
         "heads": heads,
@@ -224,7 +276,7 @@ def run_eval(
         "score_frac": float(score_frac) if mode == "hybrid" else None,
         "mean_blur_patches": mean_patches,
         "defense": {
-            "en": {
+            lang: {
                 "acc": def_acc,
                 "asr": def_asr,
                 "baseline_acc": atk_acc,
@@ -232,23 +284,27 @@ def run_eval(
             }
         },
         "clean_degradation": {
-            "en": {
+            lang: {
                 "baseline_acc": clean_acc,
                 "masked_acc": clean_def_acc,
                 "delta_acc": clean_delta,
             }
         },
-        "defense_acc_en": def_acc,
-        "clean_delta_en": clean_delta,
+        f"defense_acc_{lang}": def_acc,
+        f"clean_delta_{lang}": clean_delta,
         "preds_changed_vs_vanilla": changed,
         "notes": notes,
     }
-    suffix = f"_{mode}" if mode == "hybrid" else ""
-    write_summary(RESULTS / f"comparison_summary_{status}_n{data['n']}{suffix}.json", payload)
+    lang_suf = "" if lang == "en" else f"_{lang}"
+    mode_suf = f"_{mode}" if mode == "hybrid" else ""
+    write_summary(
+        RESULTS / f"comparison_summary_{status}_n{data['n']}{mode_suf}{lang_suf}.json",
+        payload,
+    )
     if mode == "hybrid":
-        write_summary(RESULTS / "comparison_summary_hybrid.json", payload)
+        write_summary(RESULTS / f"comparison_summary_hybrid{lang_suf}.json", payload)
     else:
-        write_summary(RESULTS / "comparison_summary.json", payload)
+        write_summary(RESULTS / f"comparison_summary{lang_suf}.json", payload)
     return payload
 
 
@@ -257,6 +313,7 @@ def main():
     ap.add_argument("--n", type=int, required=True)
     ap.add_argument("--status", choices=["sanity", "smoke", "final"], required=True)
     ap.add_argument("--mode", choices=["heads", "hybrid"], default="hybrid")
+    ap.add_argument("--lang", choices=["en", "ja"], default="en")
     ap.add_argument("--top-k-patches", type=int, default=DEFAULT_TOP_K)
     ap.add_argument("--score-frac", type=float, default=DEFAULT_SCORE_FRAC)
     args = ap.parse_args()
@@ -266,6 +323,7 @@ def main():
         mode=args.mode,
         top_k_patches=args.top_k_patches,
         score_frac=args.score_frac,
+        lang=args.lang,
     )
 
 

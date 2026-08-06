@@ -1,0 +1,76 @@
+{
+  "method": "grid_occlusion_C_2p_confdrop_blur",
+  "status": "smoke",
+  "n": 100,
+  "scope": "en_zh_ko_ja_multi",
+  "search_langs": [
+    "en",
+    "zh"
+  ],
+  "score_langs": [
+    "en",
+    "zh",
+    "ko",
+    "ja"
+  ],
+  "agree_bonus": 0.05,
+  "blur_radius": 12,
+  "inference_cost": 62,
+  "measured_cost_per_img": 62.0,
+  "defense": {
+    "en": {
+      "acc": 0.44,
+      "asr": 0.53,
+      "baseline_acc": 0.07,
+      "baseline_asr": 0.93,
+      "mixed_2000": 0.62
+    },
+    "zh": {
+      "acc": 0.44,
+      "asr": 0.54,
+      "baseline_acc": 0.03,
+      "baseline_asr": 0.97,
+      "mixed_2000": 0.625
+    },
+    "ko": {
+      "acc": 0.49,
+      "asr": 0.4,
+      "baseline_acc": 0.07,
+      "baseline_asr": 0.93,
+      "mixed_2000": 0.61
+    },
+    "ja": {
+      "acc": 0.5,
+      "asr": 0.4,
+      "baseline_acc": 0.03,
+      "baseline_asr": 0.97,
+      "mixed_2000": 0.675
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.81,
+      "masked_acc": 0.8,
+      "delta_acc": -0.010000000000000009
+    },
+    "zh": {
+      "baseline_acc": 0.86,
+      "masked_acc": 0.81,
+      "delta_acc": -0.04999999999999993
+    },
+    "ko": {
+      "baseline_acc": 0.88,
+      "masked_acc": 0.73,
+      "delta_acc": -0.15000000000000002
+    },
+    "ja": {
+      "baseline_acc": 0.91,
+      "masked_acc": 0.85,
+      "delta_acc": -0.06000000000000005
+    }
+  },
+  "defense_acc_mean": 0.4675,
+  "mixed_2000_mean": 0.6325000000000001,
+  "clean_delta_en": -0.010000000000000009,
+  "notes": "4x4 greedy 2-patch conf-drop + blur; search on EN+ZH; KO/JA score-only on chosen occlusions; clean arm same search."
+}

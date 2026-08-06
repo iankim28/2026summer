@@ -1,0 +1,66 @@
+{
+  "method": "sampling_tar",
+  "status": "smoke",
+  "n": 100,
+  "scope": "ko_only",
+  "lang": "ko",
+  "mode": "hybrid",
+  "variant": "heads+attn_blur",
+  "grid": 7,
+  "inference_cost": 3,
+  "n_heads_ablated": 7,
+  "heads": [
+    [
+      5,
+      11
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      7,
+      4
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      9,
+      8
+    ],
+    [
+      9,
+      6
+    ],
+    [
+      11,
+      1
+    ]
+  ],
+  "z": 2.0,
+  "score_threshold": 0.4491518741825604,
+  "top_k_patches": 4,
+  "score_frac": 0.35,
+  "mean_blur_patches": 3.51,
+  "defense": {
+    "ko": {
+      "acc": 0.66,
+      "asr": 0.06,
+      "baseline_acc": 0.07,
+      "baseline_asr": 0.93
+    }
+  },
+  "clean_degradation": {
+    "ko": {
+      "baseline_acc": 0.88,
+      "masked_acc": 0.79,
+      "delta_acc": -0.08999999999999997
+    }
+  },
+  "defense_acc_ko": 0.66,
+  "clean_delta_ko": -0.08999999999999997,
+  "preds_changed_vs_vanilla": 88,
+  "notes": "SamplingTAR hybrid on HF KO CLIP; re-mined heads; attn-guided blur."
+}

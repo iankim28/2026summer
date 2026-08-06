@@ -1,0 +1,70 @@
+{
+  "method": "ocr_blur_4lang",
+  "status": "final",
+  "n": 1000,
+  "scope": "en_zh_ko_ja_multi",
+  "ocr": "easyocr_en_ch_sim_ko_ja",
+  "blur_radius": 12,
+  "inference_cost": 3,
+  "detect_img_rate": 1.0,
+  "sticker_hit_rate": 0.903,
+  "sticker_hits": 1806,
+  "sticker_total": 2000,
+  "defense": {
+    "en": {
+      "acc": 0.728,
+      "asr": 0.032,
+      "baseline_acc": 0.045,
+      "baseline_asr": 0.953,
+      "mixed_2000": 0.7905
+    },
+    "zh": {
+      "acc": 0.747,
+      "asr": 0.091,
+      "baseline_acc": 0.064,
+      "baseline_asr": 0.936,
+      "mixed_2000": 0.827
+    },
+    "ko": {
+      "acc": 0.802,
+      "asr": 0.021,
+      "baseline_acc": 0.116,
+      "baseline_asr": 0.88,
+      "mixed_2000": 0.845
+    },
+    "ja": {
+      "acc": 0.876,
+      "asr": 0.011,
+      "baseline_acc": 0.06,
+      "baseline_asr": 0.939,
+      "mixed_2000": 0.8965000000000001
+    }
+  },
+  "clean_degradation": {
+    "en": {
+      "baseline_acc": 0.859,
+      "masked_acc": 0.853,
+      "delta_acc": -0.006000000000000005
+    },
+    "zh": {
+      "baseline_acc": 0.914,
+      "masked_acc": 0.907,
+      "delta_acc": -0.007000000000000006
+    },
+    "ko": {
+      "baseline_acc": 0.896,
+      "masked_acc": 0.888,
+      "delta_acc": -0.008000000000000007
+    },
+    "ja": {
+      "baseline_acc": 0.925,
+      "masked_acc": 0.917,
+      "delta_acc": -0.008000000000000007
+    }
+  },
+  "defense_acc_mean": 0.78825,
+  "mixed_2000_mean": 0.83975,
+  "clean_delta_mean": -0.0072500000000000064,
+  "clean_delta_en": -0.006000000000000005,
+  "notes": "EasyOCR detect \u2192 Gaussian blur; scored EN+ZH+KO+JA on EN+ZH multi attack."
+}

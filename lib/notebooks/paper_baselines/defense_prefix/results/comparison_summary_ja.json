@@ -1,0 +1,30 @@
+{
+  "method": "defense_prefix",
+  "status": "smoke",
+  "n": 100,
+  "scope": "ja_only",
+  "lang": "ja",
+  "model": "hf-hub:llm-jp/llm-jp-clip-vit-base-patch16",
+  "token": "D:\\ian\\2026summer\\lib\\notebooks\\paper_baselines\\defense_prefix\\results\\dp_cifar10_ja_vit-b16.pt",
+  "inference_cost": 2,
+  "defense": {
+    "ja": {
+      "acc": 0.88,
+      "asr": 0.04,
+      "baseline_acc": 0.03,
+      "baseline_asr": 0.97
+    }
+  },
+  "clean_degradation": {
+    "ja": {
+      "baseline_acc": 0.91,
+      "masked_acc": 0.91,
+      "delta_acc": 0.0
+    }
+  },
+  "defense_acc_ja": 0.88,
+  "clean_delta_ja": 0.0,
+  "preds_changed_vs_vanilla": 93,
+  "mean_cosine_vanilla_dp_text": 0.366930216550827,
+  "notes": "CIFAR-trained llm-jp CLIP DP token; JA prompts (*{}\u306e\u5199\u771f\u3002); multi EN+ZH stickers at eval; EN+JA multi train."
+}
